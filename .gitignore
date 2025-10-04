@@ -1,0 +1,15 @@
+# Ignore compiled class files
+*.class
+
+# Ignore the bin folder (compiled output)
+bin/
+
+# Eclipse project files
+.classpath
+.project
+.settings/
+
+# System files
+.DS_Store
+Thumbs.db
+
