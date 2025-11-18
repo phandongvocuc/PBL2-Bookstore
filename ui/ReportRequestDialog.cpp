@@ -1,6 +1,5 @@
 #include "ReportRequestDialog.h"
 
-#include <QDate>
 #include <QDateEdit>
 #include <QDateTime>
 #include <QDialogButtonBox>
@@ -12,7 +11,6 @@
 #include <QSpinBox>
 #include <QVBoxLayout>
 
-#include "DialogTheme.h"
 #include "QtBridge.h"
 
 using namespace std;  // project-wide request
@@ -27,15 +25,14 @@ QString generateRequestId(const QString &staff) {
 
 }
 
-namespace pbl2 {
-namespace ui {
+namespace pbl2::ui {
 
-ReportRequestDialog::ReportRequestDialog(const QString &staffUsername, QWidget *parent)
-    : QDialog(parent), staffUsername(staffUsername) {
-    setWindowTitle(tr("Lap bao cao tong hop"));
-    setModal(true);
-    setWindowIcon(QIcon(":/ui/resources/icons/report.png"));
-    setStyleSheet(R"(
+    ReportRequestDialog::ReportRequestDialog(const QString &staffUsername, QWidget *parent)
+        : QDialog(parent), staffUsername(staffUsername) {
+        setWindowTitle(tr("Lap bao cao tong hop"));
+        setModal(true);
+        setWindowIcon(QIcon(":/ui/resources/icons/report.png"));
+        setStyleSheet(R"(
          QFont font("Segoe UI", 11);
          setFont(font);
          setStyleSheet(R"(
@@ -62,104 +59,103 @@ QDialogButtonBox QPushButton:disabled, QPushButton:disabled {
 QLabel { font-size: 11pt; }
 QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
 )");
-    // Modern font and light background
-    setStyleSheet("QDialog { background: #f8fafc; border-radius: 12px; } QGroupBox { font-weight: bold; } QLineEdit, QComboBox, QSpinBox, QDateEdit, QPlainTextEdit { min-height: 32px; font-size: 11pt; } QDialogButtonBox QPushButton { min-width: 90px; min-height: 32px; font-size: 11pt; } QLabel { font-size: 11pt; } ");
+        // Modern font and light background
+        setStyleSheet("QDialog { background: #f8fafc; border-radius: 12px; } QGroupBox { font-weight: bold; } QLineEdit, QComboBox, QSpinBox, QDateEdit, QPlainTextEdit { min-height: 32px; font-size: 11pt; } QDialogButtonBox QPushButton { min-width: 90px; min-height: 32px; font-size: 11pt; } QLabel { font-size: 11pt; } ");
 
-    requestIdEdit = new QLineEdit(this);
-    requestIdEdit->setText(generateRequestId(staffUsername));
+        requestIdEdit = new QLineEdit(this);
+        requestIdEdit->setText(generateRequestId(staffUsername));
 
-    fromDateEdit = new QDateEdit(this);
-    fromDateEdit->setCalendarPopup(true);
-    fromDateEdit->setDisplayFormat(QStringLiteral("dd/MM/yyyy"));
-    fromDateEdit->setDate(QDate::currentDate().addDays(-7));
+        fromDateEdit = new QDateEdit(this);
+        fromDateEdit->setCalendarPopup(true);
+        fromDateEdit->setDisplayFormat(QStringLiteral("dd/MM/yyyy"));
+        fromDateEdit->setDate(QDate::currentDate().addDays(-7));
 
-    toDateEdit = new QDateEdit(this);
-    toDateEdit->setCalendarPopup(true);
-    toDateEdit->setDisplayFormat(QStringLiteral("dd/MM/yyyy"));
-    toDateEdit->setDate(QDate::currentDate());
+        toDateEdit = new QDateEdit(this);
+        toDateEdit->setCalendarPopup(true);
+        toDateEdit->setDisplayFormat(QStringLiteral("dd/MM/yyyy"));
+        toDateEdit->setDate(QDate::currentDate());
 
-    handledSpin = new QSpinBox(this);
-    handledSpin->setRange(0, 100000);
+        handledSpin = new QSpinBox(this);
+        handledSpin->setRange(0, 100000);
 
-    lostSpin = new QSpinBox(this);
-    lostSpin->setRange(0, 100000);
+        lostSpin = new QSpinBox(this);
+        lostSpin->setRange(0, 100000);
 
-    overdueSpin = new QSpinBox(this);
-    overdueSpin->setRange(0, 100000);
+        overdueSpin = new QSpinBox(this);
+        overdueSpin->setRange(0, 100000);
 
-    notesEdit = new QPlainTextEdit(this);
-    notesEdit->setPlaceholderText(tr("Mo ta cac vu viec mat, hong, yeu cau xoa sach..."));
+        notesEdit = new QPlainTextEdit(this);
+        notesEdit->setPlaceholderText(tr("Mo ta cac vu viec mat, hong, yeu cau xoa sach..."));
 
-    errorLabel = new QLabel(this);
-    errorLabel->setAlignment(Qt::AlignCenter);
-    errorLabel->setVisible(false);
+        errorLabel = new QLabel(this);
+        errorLabel->setAlignment(Qt::AlignCenter);
+        errorLabel->setVisible(false);
 
-    auto *formGroup = new QGroupBox(tr("Thong tin bao cao"), this);
-    auto *form = new QFormLayout;
-    form->setContentsMargins(12, 12, 12, 12);
-    form->setHorizontalSpacing(12);
-    form->setVerticalSpacing(10);
-    form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
-    form->setLabelAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    form->addRow(tr("Ma yeu cau"), requestIdEdit);
-    form->addRow(tr("Tu ngay"), fromDateEdit);
-    form->addRow(tr("Den ngay"), toDateEdit);
-    form->addRow(tr("So phieu xu ly"), handledSpin);
-    form->addRow(tr("So sach mat/hong"), lostSpin);
-    form->addRow(tr("Doc gia qua han"), overdueSpin);
-    form->addRow(tr("Ghi chu"), notesEdit);
-    formGroup->setLayout(form);
+        auto *formGroup = new QGroupBox(tr("Thong tin bao cao"), this);
+        auto *form = new QFormLayout;
+        form->setContentsMargins(12, 12, 12, 12);
+        form->setHorizontalSpacing(12);
+        form->setVerticalSpacing(10);
+        form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+        form->setLabelAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        form->addRow(tr("Ma yeu cau"), requestIdEdit);
+        form->addRow(tr("Tu ngay"), fromDateEdit);
+        form->addRow(tr("Den ngay"), toDateEdit);
+        form->addRow(tr("So phieu xu ly"), handledSpin);
+        form->addRow(tr("So sach mat/hong"), lostSpin);
+        form->addRow(tr("Doc gia qua han"), overdueSpin);
+        form->addRow(tr("Ghi chu"), notesEdit);
+        formGroup->setLayout(form);
 
-    buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
-    connect(buttonBox, &QDialogButtonBox::accepted, this, &ReportRequestDialog::accept);
-    connect(buttonBox, &QDialogButtonBox::rejected, this, &ReportRequestDialog::reject);
+        buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+        connect(buttonBox, &QDialogButtonBox::accepted, this, &ReportRequestDialog::accept);
+        connect(buttonBox, &QDialogButtonBox::rejected, this, &ReportRequestDialog::reject);
 
-    auto *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(16, 16, 16, 16);
-    layout->setSpacing(12);
-    layout->addWidget(formGroup);
-    layout->addWidget(errorLabel);
-    layout->addWidget(buttonBox);
-    setMinimumSize(640, 560);
-}
-
-bool ReportRequestDialog::validateInputs() {
-    if (requestIdEdit->text().trimmed().isEmpty()) {
-        showError(tr("Ma yeu cau khong duoc de trong."));
-        return false;
+        auto *layout = new QVBoxLayout(this);
+        layout->setContentsMargins(16, 16, 16, 16);
+        layout->setSpacing(12);
+        layout->addWidget(formGroup);
+        layout->addWidget(errorLabel);
+        layout->addWidget(buttonBox);
+        setMinimumSize(640, 560);
     }
-    if (toDateEdit->date() < fromDateEdit->date()) {
-        showError(tr("Ngay ket thuc phai lon hon ngay bat dau."));
-        return false;
+
+    bool ReportRequestDialog::validateInputs() const {
+        if (requestIdEdit->text().trimmed().isEmpty()) {
+            showError(tr("Ma yeu cau khong duoc de trong."));
+            return false;
+        }
+        if (toDateEdit->date() < fromDateEdit->date()) {
+            showError(tr("Ngay ket thuc phai lon hon ngay bat dau."));
+            return false;
+        }
+        return true;
     }
-    return true;
-}
 
-void ReportRequestDialog::showError(const QString &message) {
-    errorLabel->setText(message);
-    errorLabel->setVisible(true);
-}
+    void ReportRequestDialog::showError(const QString &message) const {
+        errorLabel->setText(message);
+        errorLabel->setVisible(true);
+    }
 
-model::ReportRequest ReportRequestDialog::reportRequest() const {
-    model::ReportRequest req;
-    req.setRequestId(bridge::toCustomString(requestIdEdit->text().trimmed()));
-    req.setStaffUsername(bridge::toCustomString(staffUsername));
-    req.setFromDate(bridge::toCoreDate(fromDateEdit->date()));
-    req.setToDate(bridge::toCoreDate(toDateEdit->date()));
-    req.setHandledLoans(handledSpin->value());
-    req.setLostOrDamaged(lostSpin->value());
-    req.setOverdueReaders(overdueSpin->value());
-    req.setNotes(bridge::toCustomString(notesEdit->toPlainText().trimmed()));
-    req.setStatus(custom::CustomStringLiteral("PENDING"));
-    req.setCreatedAt(core::DateTime::nowUtc());
-    return req;
-}
+    model::ReportRequest ReportRequestDialog::reportRequest() const {
+        model::ReportRequest req;
+        req.setRequestId(bridge::toCustomString(requestIdEdit->text().trimmed()));
+        req.setStaffUsername(bridge::toCustomString(staffUsername));
+        req.setFromDate(bridge::toCoreDate(fromDateEdit->date()));
+        req.setToDate(bridge::toCoreDate(toDateEdit->date()));
+        req.setHandledLoans(handledSpin->value());
+        req.setLostOrDamaged(lostSpin->value());
+        req.setOverdueReaders(overdueSpin->value());
+        req.setNotes(bridge::toCustomString(notesEdit->toPlainText().trimmed()));
+        req.setStatus(custom::CustomStringLiteral("PENDING"));
+        req.setCreatedAt(core::DateTime::nowUtc());
+        return req;
+    }
 
-void ReportRequestDialog::accept() {
-    errorLabel->setVisible(false);
-    if (!validateInputs()) return;
-    QDialog::accept();
-}
+    void ReportRequestDialog::accept() {
+        errorLabel->setVisible(false);
+        if (!validateInputs()) return;
+        QDialog::accept();
+    }
 
-}  // namespace ui
-}  // namespace pbl2
+}

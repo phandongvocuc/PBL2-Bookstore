@@ -13,7 +13,7 @@ namespace pbl2::service {
 
 class ReaderService {
 public:
-    explicit ReaderService(custom::CustomString dataDir);
+    explicit ReaderService(const custom::CustomString &dataDir);
 
     custom::DynamicArray<model::Reader> fetchAll() const;
     custom::Optional<model::Reader> findById(const custom::CustomString &readerId) const;
@@ -25,7 +25,7 @@ public:
 private:
     repository::ReadersRepository repository;
 
-    [[nodiscard]] custom::DynamicArray<model::Reader> ensureLoaded() const;
+    custom::DynamicArray<model::Reader> ensureLoaded() const;
     void persist(const custom::DynamicArray<model::Reader> &readers) const;
 };
 

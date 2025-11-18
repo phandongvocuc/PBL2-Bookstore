@@ -14,7 +14,7 @@ class QLineEdit;
 
 namespace pbl2 :: ui {
 
-class AccountDialog : public QDialog {
+class AccountDialog final : public QDialog {
     Q_OBJECT
 
 public:
@@ -24,19 +24,16 @@ public:
     custom::CustomString password() const;
     custom::CustomString role() const;
     bool isActive() const;
-    void setAccount(const custom::CustomString &username, const custom::CustomString &role, bool active);
-    void setAccountWithStaff(const custom::CustomString &username, const custom::CustomString &role, bool active, const custom::CustomString &staffId);
-
     // Staff linkage accessors
-    void setStaffList(const QVector<model::Staff> &staffs);
+    void setStaffList(const QVector<model::Staff> &staffs) const;
     custom::CustomString staffId() const;
 
 protected:
     void accept() override;
 
 private:
-    bool validateInputs();
-    void showError(const custom::CustomString &message);
+    bool validateInputs() const;
+    void showError(const custom::CustomString &message) const;
 
     QLineEdit *usernameEdit{nullptr};
     QLineEdit *passwordEdit{nullptr};

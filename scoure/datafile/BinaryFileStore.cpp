@@ -2,7 +2,7 @@
 
 #include <cstdio>
 #include <cstring>
-
+using namespace std;
 using custom::CustomString;
 using custom::DynamicArray;
 
@@ -16,7 +16,7 @@ struct FileHeader {
 
 template <typename R>
 bool writefile(const CustomString& path, const DynamicArray<R>& records) {
-    FILE* file = std::fopen(path.cStr(), "wb");
+    FILE* file = fopen(path.cStr(), "wb");
     if (!file) {
         return false;
     }
@@ -26,52 +26,52 @@ bool writefile(const CustomString& path, const DynamicArray<R>& records) {
         static_cast<uint32_t>(records.size())
     };
 
-    if (std::fwrite(&header, sizeof(header), 1, file) != 1) {
-        std::fclose(file);
+    if (fwrite(&header, sizeof(header), 1, file) != 1) {
+        fclose(file);
         return false;
     }
 
     if (header.count > 0) {
-        if (std::fwrite(records.data(), sizeof(R), records.size(), file) != records.size()) {
-            std::fclose(file);
+        if (fwrite(records.data(), sizeof(R), records.size(), file) != records.size()) {
+            fclose(file);
             return false;
         }
     }
 
-    std::fclose(file);
+    fclose(file);
     return true;
 }
 
 template <typename R>
 bool readfile(const CustomString& path, DynamicArray<R>& out) {
-    FILE* file = std::fopen(path.cStr(), "rb");
+    FILE* file = fopen(path.cStr(), "rb");
     if (!file) {
         out.clear();
         return false;
     }
 
     FileHeader header{};
-    if (std::fread(&header, sizeof(header), 1, file) != 1) {
-        std::fclose(file);
+    if (fread(&header, sizeof(header), 1, file) != 1) {
+        fclose(file);
         out.clear();
         return false;
     }
 
     if (header.recordSize != sizeof(R)) {
-        std::fclose(file);
+        fclose(file);
         out.clear();
         return false;
     }
 
     if (header.count == 0) {
         out.clear();
-        std::fclose(file);
+        fclose(file);
         return true;
     }
 
     out.resize(header.count);
-    const size_t read = std::fread(out.data(), sizeof(R), header.count, file);
-    std::fclose(file);
+    const size_t read = fread(out.data(), sizeof(R), header.count, file);
+    fclose(file);
     if (read != header.count) {
         out.clear();
         return false;
@@ -142,10 +142,10 @@ core::DateTime BinaryFileStore::unpackDateTime(const DateTimeRecord &record) {
 
 void BinaryFileStore::assignText(char *destination, size_t capacity, const CustomString &value) {
     if (!destination || capacity == 0U) return;
-    std::memset(destination, 0, capacity);
+    memset(destination, 0, capacity);
     const size_t copyCount = value.length() >= capacity ? capacity - 1U : value.length();
     if (copyCount > 0U) {
-        std::memcpy(destination, value.cStr(), copyCount);
+        memcpy(destination, value.cStr(), copyCount);
     }
 }
 
@@ -407,7 +407,7 @@ bool BinaryFileStore::writeConfig(const model::SystemConfig &item, const CustomS
 
 model::SystemConfig BinaryFileStore::readConfig(const CustomString &path) {
     DynamicArray<ConfigRecord> records;
-    if (!readfile(path, records) || records.isEmpty()) {
+    if (!readfile(path, records)) {
         return model::SystemConfig{};
     }
     return unpackConfig(records[0]);

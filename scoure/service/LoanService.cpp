@@ -1,10 +1,10 @@
 #include "service/LoanService.h"
 
-using namespace std;  // project-wide request
+using namespace std;
 
 namespace pbl2::service {
 
-LoanService::LoanService(custom::CustomString dataDir) : repository(dataDir) {}
+LoanService::LoanService(const custom::CustomString &dataDir) : repository(dataDir) {}
 
 custom::DynamicArray<model::Loan> LoanService::fetchAll() const { return ensureLoaded(); }
 
@@ -15,7 +15,7 @@ custom::Optional<model::Loan> LoanService::findById(const custom::CustomString &
     if (loans.isEmpty()) return custom::Optional<model::Loan>();
     for (custom::DynamicArray<model::Loan>::ConstIterator it = loans.cbegin(); it != loans.cend(); ++it) {
         if (it->getLoanId().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
-            return custom::Optional<model::Loan>(*it);
+            return custom::Optional(*it);
         }
     }
     return custom::Optional<model::Loan>();
@@ -25,7 +25,7 @@ bool LoanService::createLoan(const model::Loan &loan) const {
     if (!loan.getBorrowDate().isValid() || !loan.getDueDate().isValid()) return false;
     auto loans = ensureLoaded();
 
-    model::Loan copy = loan;
+    const model::Loan copy = loan;
     bool exists = false;
     for (custom::DynamicArray<model::Loan>::ConstIterator it = loans.cbegin(); it != loans.cend(); ++it) {
         if (it->getLoanId().compare(copy.getLoanId(), custom::CaseSensitivity::Insensitive) == 0) {
@@ -60,8 +60,7 @@ bool LoanService::updateStatus(const custom::CustomString &loanId, const custom:
     bool changed = false;
     for (custom::DynamicArray<model::Loan>::Iterator it = loans.begin(); it != loans.end(); ++it) {
         if (it->getLoanId().compare(loanId, custom::CaseSensitivity::Insensitive) == 0) {
-            const auto normalizedStatus = status.trimmed();
-            if (!normalizedStatus.isEmpty()) {
+            if (const auto normalizedStatus = status.trimmed(); !normalizedStatus.isEmpty()) {
                 it->setStatus(normalizedStatus.toUpper());
             }
             if (returnDate.isValid()) it->setReturnDate(returnDate);
@@ -74,7 +73,7 @@ bool LoanService::updateStatus(const custom::CustomString &loanId, const custom:
     return true;
 }
 
-bool LoanService::applyFine(const custom::CustomString &loanId, int fine) const {
+bool LoanService::applyFine(const custom::CustomString &loanId, const int fine) const {
     if (fine < 0) return false;
     auto loans = ensureLoaded();
     bool updated = false;

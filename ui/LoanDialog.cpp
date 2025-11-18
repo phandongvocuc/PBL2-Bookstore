@@ -1,6 +1,5 @@
 #include "LoanDialog.h"
 
-#include "DialogTheme.h"
 #include "QtBridge.h"
 
 #include <QComboBox>
@@ -34,20 +33,6 @@ QString displayBook(const Book &book) {
     return QStringLiteral("%1 - %2").arg(bookId, title);
 }
 
-int findReaderIndex(const QVector<Reader> &readers, const QString &id) {
-    for (int i = 0; i < readers.size(); ++i) {
-        if (pbl2::bridge::toQString(readers[i].getId()) == id) return i;
-    }
-    return -1;
-}
-
-int findBookIndex(const QVector<Book> &books, const QString &id) {
-    for (int i = 0; i < books.size(); ++i) {
-        const QString bookId = pbl2::bridge::toQString(books[i].getId());
-        if (bookId == id) return i;
-    }
-    return -1;
-}
 }
 
 namespace pbl2 {
@@ -141,22 +126,6 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; font-wei
     setMinimumSize(600, 500);
 }
 
-void LoanDialog::setLoan(const model::Loan &loan, bool editing) {
-    editingMode = editing;
-    loanIdEdit->setText(pbl2::bridge::toQString(loan.getLoanId()));
-    loanIdEdit->setReadOnly(editing || forceIdReadOnly);
-    const int readerIndex = findReaderIndex(readers, pbl2::bridge::toQString(loan.getReaderId()));
-    if (readerIndex >= 0) readerCombo->setCurrentIndex(readerIndex);
-    const int bookIndex = findBookIndex(books, pbl2::bridge::toQString(loan.getBookId()));
-    if (bookIndex >= 0) bookCombo->setCurrentIndex(bookIndex);
-    borrowDateEdit->setDate(loan.getBorrowDate().isValid()
-                                ? pbl2::bridge::toQDate(loan.getBorrowDate())
-                                : QDate::currentDate());
-    dueDateEdit->setDate(loan.getDueDate().isValid()
-                             ? pbl2::bridge::toQDate(loan.getDueDate())
-                             : QDate::currentDate().addDays(7));
-}
-
 void LoanDialog::presetLoanId(const QString &loanId, bool lockField) {
     forceIdReadOnly = lockField;
     loanIdEdit->setText(loanId.trimmed());
@@ -200,21 +169,6 @@ void LoanDialog::accept() {
         return;
     }
     QDialog::accept();
-}
-
-void LoanDialog::prefillFields(const QString &loanIdHint,
-                               const QString &readerIdHint,
-                               const QString &bookIdHint) {
-    if (!loanIdHint.isEmpty()) loanIdEdit->setText(loanIdHint);
-    if (!readerIdHint.isEmpty()) {
-        const int readerIndex = findReaderIndex(readers, readerIdHint);
-        if (readerIndex >= 0) readerCombo->setCurrentIndex(readerIndex);
-    }
-    if (!bookIdHint.isEmpty()) {
-        const int bookIndex = findBookIndex(books, bookIdHint);
-        if (bookIndex >= 0) bookCombo->setCurrentIndex(bookIndex);
-    }
-    loanIdEdit->setReadOnly(editingMode || forceIdReadOnly);
 }
 
 }  // namespace ui

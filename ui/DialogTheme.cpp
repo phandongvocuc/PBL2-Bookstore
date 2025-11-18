@@ -1,7 +1,5 @@
 #include "DialogTheme.h"
 
-#include <QColor>
-#include <QPalette>
 #include <QWidget>
 
 namespace pbl2::ui {

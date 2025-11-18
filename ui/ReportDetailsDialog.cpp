@@ -1,17 +1,14 @@
 #include "ReportDetailsDialog.h"
 
-#include <QDate>
-#include <QDateTime>
 #include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QLabel>
 #include <QPlainTextEdit>
 #include <QVBoxLayout>
 
-#include "DialogTheme.h"
 #include "QtBridge.h"
 
-using namespace std;  // project-wide request
+using namespace std;
 
 namespace {
 

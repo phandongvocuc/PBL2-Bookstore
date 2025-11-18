@@ -14,7 +14,7 @@ namespace pbl2::service {
 
 class LoanService {
 public:
-    explicit LoanService(custom::CustomString dataDir);
+    explicit LoanService(const custom::CustomString &dataDir);
 
     custom::DynamicArray<model::Loan> fetchAll() const;
     custom::Optional<model::Loan> findById(const custom::CustomString &loanId) const;
@@ -28,7 +28,7 @@ public:
 private:
     repository::LoansRepository repository;
 
-    [[nodiscard]] custom::DynamicArray<model::Loan> ensureLoaded() const;
+    custom::DynamicArray<model::Loan> ensureLoaded() const;
     void persist(const custom::DynamicArray<model::Loan> &loans) const;
 };
 

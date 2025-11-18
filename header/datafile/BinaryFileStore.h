@@ -139,7 +139,7 @@ public:
     static custom::DynamicArray<model::ReportRequest> readReports(const custom::CustomString &path);
     static model::SystemConfig readConfig(const custom::CustomString &path);
 
-private:
+protected:
     static DateRecord packDate(const core::Date &value);
     static core::Date unpackDate(const DateRecord &record);
 

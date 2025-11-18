@@ -3,11 +3,11 @@
 #include "datafile/BinaryFileStore.h"
 #include "core/PathUtils.h"
 
-using namespace std;  // project-wide request
+using namespace std;
 
 namespace pbl2::repository {
 
-ConfigRepository::ConfigRepository(custom::CustomString dataDir)
+ConfigRepository::ConfigRepository(const custom::CustomString &dataDir)
 	: dataPath(core::path::join(dataDir, custom::CustomStringLiteral("config.bin"))) {}
 
 model::SystemConfig ConfigRepository::load() const {

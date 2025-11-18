@@ -2,8 +2,7 @@
 
 #include <QMainWindow>
 #include <QString>
-#include <QVector>
-#include <QEvent>
+
 #include <memory>
 #include <QDate>
 
@@ -24,7 +23,6 @@
 #include "model/Reader.h"
 #include "model/Staff.h"
 #include "SystemConfig.h"
-#include "PieChart.h"
 #include "StatsWidget.h"
 
 namespace Ui {
@@ -44,7 +42,7 @@ class QCheckBox;
 
 namespace pbl2::ui {
 
-class MainWindow : public QMainWindow {
+class MainWindow final : public QMainWindow {
     Q_OBJECT
 
 public:
@@ -67,7 +65,7 @@ private:
     void configureSettingsTab();
 
     void setupNavigationMenu();
-    void handleNavigationSelection(int index);
+    void handleNavigationSelection(int index) const;
 
     void reloadData();
     void populateBooks();
@@ -75,19 +73,19 @@ private:
     void populateStaffs();
     void populateLoans();
     void populateReports();
-    void fillReportsList(const QVector<model::ReportRequest> &reports);
+    void fillReportsList(const QVector<model::ReportRequest> &reports) const;
     void applyReportFilter();
     void clearReportFilter();
     void updateStatisticsSummary();
     void refreshAccounts();
-    void refreshConfigInputs();
+    void refreshConfigInputs() const;
 
     void applyBookFilter();
-    void fillBooksList(const QVector<model::Book> &books);
+    void fillBooksList(const QVector<model::Book> &books) const;
     void applyReaderFilter();
-    void fillReadersList(const QVector<model::Reader> &readers);
+    void fillReadersList(const QVector<model::Reader> &readers) const;
     void applyStaffFilter();
-    void fillStaffsList(const QVector<model::Staff> &staffs);
+    void fillStaffsList(const QVector<model::Staff> &staffs) const;
     void applyLoanFilter();
     void fillLoansList(const QVector<model::Loan> &loans);
     void fillAccountsList(const QVector<model::Account> &accounts);
@@ -125,7 +123,7 @@ private:
     void handleSaveConfig();
     void handleLogout();
 
-    custom::Optional<int> currentRow(QListWidget *list) const;
+    static custom::Optional<int> currentRow(const QListWidget *list);
     QString nextBookId() const;
     QString nextReaderId() const;
     QString nextStaffId() const;
@@ -183,7 +181,7 @@ private:
     bool eventFilter(QObject *watched, QEvent *event) override;
     // Toggle or set collapsed state for the navigation pane
     void setNavigationCollapsed(bool collapsed, bool pinned = false);
-    void repositionNavRailButton();
+    void repositionNavRailButton() const;
     void showNavigationPopupMenu();
     void resizeEvent(QResizeEvent *event) override;
 

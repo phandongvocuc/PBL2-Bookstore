@@ -13,7 +13,7 @@ class QLabel;
 class QLineEdit;
 namespace pbl2::ui {
 
-class StaffDialog : public QDialog {
+class StaffDialog final : public QDialog {
     Q_OBJECT
 
 public:
@@ -27,8 +27,8 @@ protected:
     void accept() override;
 
 private:
-    bool validateInputs();
-    void showError(const QString &message);
+    bool validateInputs() const;
+    void showError(const QString &message) const;
 
     QLineEdit *idEdit{nullptr};
     QLineEdit *fullNameEdit{nullptr};

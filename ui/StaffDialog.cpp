@@ -1,6 +1,5 @@
 #include "StaffDialog.h"
 
-#include "DialogTheme.h"
 #include "QtBridge.h"
 
 #include <QCheckBox>
@@ -22,7 +21,7 @@ StaffDialog::StaffDialog(QWidget *parent) : QDialog(parent) {
     setWindowTitle(tr("Thong tin nhan vien"));
     setModal(true);
     setWindowIcon(QIcon(":/ui/resources/icons/staff.png"));
-    QFont font("Segoe UI", 11);
+    const QFont font("Segoe UI", 11);
     setFont(font);
     setStyleSheet(R"(
 QDialog { background: #f8fafc; border-radius: 12px; }
@@ -182,7 +181,7 @@ model::Staff StaffDialog::staff() const {
     return s;
 }
 
-bool StaffDialog::validateInputs() {
+bool StaffDialog::validateInputs() const {
     if (idEdit->text().trimmed().isEmpty()) {
         showError(tr("Ma nhan vien khong duoc de trong."));
         return false;
@@ -194,7 +193,7 @@ bool StaffDialog::validateInputs() {
     return true;
 }
 
-void StaffDialog::showError(const QString &message) {
+void StaffDialog::showError(const QString &message) const {
     errorLabel->setText(message);
     errorLabel->setVisible(true);
 }

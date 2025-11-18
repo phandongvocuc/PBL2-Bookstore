@@ -14,7 +14,7 @@ class QPlainTextEdit;
 class QSpinBox;
 
 namespace pbl2::ui{
-class BookDialog : public QDialog {
+class BookDialog final : public QDialog {
     Q_OBJECT
 
 public:
@@ -28,8 +28,8 @@ protected:
     void accept() override;
 
 private:
-    bool validateInputs();
-    void showError(const QString &message);
+    bool validateInputs() const;
+    void showError(const QString &message) const;
 
     QLineEdit *idEdit{nullptr};
     QLineEdit *titleEdit{nullptr};

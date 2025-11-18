@@ -10,9 +10,9 @@ namespace pbl2::repository {
 
 class BooksRepository {
 public:
-    explicit BooksRepository(custom::CustomString dataDir);
+    explicit BooksRepository(const custom::CustomString &dataDir);
 
-    [[nodiscard]] custom::DynamicArray<model::Book> loadAll() const;
+    custom::DynamicArray<model::Book> loadAll() const;
     void saveAll(const custom::DynamicArray<model::Book> &books) const;
 
 private:

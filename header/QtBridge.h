@@ -3,7 +3,6 @@
 #include "core/Date.h"
 #include "core/DateTime.h"
 
-#include <QDate>
 #include <QDateTime>
 #include <QString>
 

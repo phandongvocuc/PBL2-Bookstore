@@ -1,6 +1,5 @@
 #include "ReaderDialog.h"
 
-#include "DialogTheme.h"
 #include "QtBridge.h"
 
 #include <QCheckBox>
@@ -23,7 +22,7 @@ ReaderDialog::ReaderDialog(QWidget *parent) : QDialog(parent) {
     setWindowTitle(tr("Thong tin ban doc"));
     setModal(true);
     setWindowIcon(QIcon(":/ui/resources/icons/reader.png"));
-    QFont font("Segoe UI", 11);
+    const QFont font("Segoe UI", 11);
     setFont(font);
     setStyleSheet(R"(
 QDialog { background: #f8fafc; border-radius: 12px; }
@@ -185,7 +184,7 @@ model::Reader ReaderDialog::reader() const {
     return r;
 }
 
-bool ReaderDialog::validateInputs() {
+bool ReaderDialog::validateInputs() const {
     if (idEdit->text().trimmed().isEmpty()) {
         showError(tr("Ma ban doc khong duoc de trong."));
         return false;
@@ -197,7 +196,7 @@ bool ReaderDialog::validateInputs() {
     return true;
 }
 
-void ReaderDialog::showError(const QString &message) {
+void ReaderDialog::showError(const QString &message) const {
     errorLabel->setText(message);
     errorLabel->setVisible(true);
 }

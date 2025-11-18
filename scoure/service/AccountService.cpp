@@ -3,11 +3,11 @@
 #include "core/DateTime.h"
 #include "core/IdGenerator.h"
 
-using namespace std;  // project-wide request
+using namespace std;
 
 namespace pbl2::service {
 
-AccountService::AccountService(custom::CustomString dataDir)
+AccountService::AccountService(const custom::CustomString &dataDir)
     : repository(dataDir), staffService(dataDir) {}
 
 custom::DynamicArray<model::Account> AccountService::fetchAll() const { return ensureLoaded(); }
@@ -19,7 +19,7 @@ custom::Optional<model::Account> AccountService::findByUsername(const custom::Cu
     if (accounts.isEmpty()) return custom::Optional<model::Account>();
     for (custom::DynamicArray<model::Account>::ConstIterator it = accounts.cbegin(); it != accounts.cend(); ++it) {
         if (it->getUsername().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
-            return custom::Optional<model::Account>(*it);
+            return custom::Optional(*it);
         }
     }
     return custom::Optional<model::Account>();
@@ -34,7 +34,7 @@ custom::Optional<model::Account> AccountService::authenticate(const custom::Cust
     model::Account *candidate = nullptr;
     for (custom::DynamicArray<model::Account>::Iterator it = accounts.begin(); it != accounts.end(); ++it) {
         if (it->getUsername().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
-            candidate = &(*it);
+            candidate = it;
             break;
         }
     }
@@ -44,15 +44,15 @@ custom::Optional<model::Account> AccountService::authenticate(const custom::Cust
 
     candidate->setLastLogin(core::DateTime::nowUtc());
     persist(accounts);
-    return custom::Optional<model::Account>(*candidate);
+    return custom::Optional(*candidate);
 }
 
-bool AccountService::createAccount(const custom::CustomString &username, const custom::CustomString &password, custom::CustomString role, bool active) const {
+bool AccountService::createAccount(const custom::CustomString &username, const custom::CustomString &password, const custom::CustomString &role, bool active) const {
     const custom::Optional<custom::CustomString> none;
     return createAccountInternal(username, password, role, active, none);
 }
 
-bool AccountService::createAccount(const custom::CustomString &username, const custom::CustomString &password, custom::CustomString role, bool active,
+bool AccountService::createAccount(const custom::CustomString &username, const custom::CustomString &password, const custom::CustomString &role, bool active,
                                    const custom::CustomString &staffId) const {
     const custom::CustomString cleanStaffId = staffId.trimmed();
     if (!cleanStaffId.isEmpty()) {
@@ -60,13 +60,12 @@ bool AccountService::createAccount(const custom::CustomString &username, const c
         if (isEmployeeIdInUse(cleanStaffId)) return false;
     }
     const custom::Optional<custom::CustomString> staffOpt =
-        cleanStaffId.isEmpty() ? custom::Optional<custom::CustomString>() : custom::Optional<custom::CustomString>(cleanStaffId);
+        cleanStaffId.isEmpty() ? custom::Optional<custom::CustomString>() : custom::Optional(cleanStaffId);
     return createAccountInternal(username, password, role, active, staffOpt);
 }
 
 bool AccountService::updateAccount(const model::Account &account) const {
-    const custom::CustomString newStaffId = account.getEmployeeId().trimmed();
-    if (!newStaffId.isEmpty()) {
+    if (const custom::CustomString newStaffId = account.getEmployeeId().trimmed(); !newStaffId.isEmpty()) {
         if (!staffService.findById(newStaffId).has_value()) return false;
         if (isEmployeeIdInUse(newStaffId, account.getUsername())) return false;
     }
@@ -163,7 +162,7 @@ bool AccountService::isEmployeeIdInUse(const custom::CustomString &staffId, cons
     return false;
 }
 
-bool AccountService::createAccountInternal(const custom::CustomString &username, const custom::CustomString &password, custom::CustomString role, bool active,
+bool AccountService::createAccountInternal(const custom::CustomString &username, const custom::CustomString &password, const custom::CustomString &role, const bool active,
                                            const custom::Optional<custom::CustomString> &staffId) const {
     const custom::CustomString cleanUsername = username.trimmed();
     const custom::CustomString cleanRole = role.trimmed();
@@ -197,8 +196,7 @@ bool AccountService::createAccountInternal(const custom::CustomString &username,
     custom::DynamicArray<custom::CustomString> ids;
     ids.reserve(accounts.size());
     for (custom::DynamicArray<model::Account>::ConstIterator it = accounts.cbegin(); it != accounts.cend(); ++it) {
-        const custom::CustomString existingId = it->getAccountId().trimmed();
-        if (!existingId.isEmpty()) ids.pushBack(existingId);
+        if (const custom::CustomString existingId = it->getAccountId().trimmed(); !existingId.isEmpty()) ids.pushBack(existingId);
     }
 
     model::Account account;

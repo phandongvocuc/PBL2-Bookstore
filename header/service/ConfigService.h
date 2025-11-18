@@ -9,11 +9,10 @@ namespace pbl2::service {
 
 class ConfigService {
 public:
-    explicit ConfigService(custom::CustomString dataDir);
+    explicit ConfigService(const custom::CustomString &dataDir);
 
     model::SystemConfig load() const;
     bool save(const model::SystemConfig &config) const;
-    bool updateLimits(int maxBorrowDays, int finePerDay, int maxBooksPerReader) const;
 
 private:
     repository::ConfigRepository repository;

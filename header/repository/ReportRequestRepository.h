@@ -10,9 +10,9 @@ namespace pbl2::repository {
 
 class ReportRequestRepository {
 public:
-    explicit ReportRequestRepository(custom::CustomString dataDir);
+    explicit ReportRequestRepository(const custom::CustomString &dataDir);
 
-    [[nodiscard]] custom::DynamicArray<model::ReportRequest> loadAll() const;
+    custom::DynamicArray<model::ReportRequest> loadAll() const;
     void saveAll(const custom::DynamicArray<model::ReportRequest> &requests) const;
 
 private:

@@ -1,9 +1,6 @@
 #include "BookDialog.h"
-
 #include "BookStatus.h"
-#include "DialogTheme.h"
 #include "QtBridge.h"
-
 #include <QComboBox>
 #include <QDateEdit>
 #include <QDate>
@@ -190,7 +187,7 @@ model::Book BookDialog::book() const {
     return b;
 }
 
-bool BookDialog::validateInputs() {
+bool BookDialog::validateInputs() const {
     if (idEdit->text().trimmed().isEmpty()) {
         showError(tr("Ma sach khong duoc de trong."));
         return false;
@@ -206,7 +203,7 @@ bool BookDialog::validateInputs() {
     return true;
 }
 
-void BookDialog::showError(const QString &message) {
+void BookDialog::showError(const QString &message) const{
     errorLabel->setText(message);
     errorLabel->setVisible(true);
 }

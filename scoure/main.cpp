@@ -49,9 +49,8 @@ int main(int argc, char *argv[]) {
         ui::LoginDialog loginDialog(accountService);
         // Ensure the dialog theme overrides any UI-generated stylesheet
         pbl2::ui::applyDialogTheme(&loginDialog);
-        int result = loginDialog.exec();
 
-        if (result != QDialog::Accepted) {
+        if (int result = loginDialog.exec(); result != QDialog::Accepted) {
             if (loginDialog.exitRequested()) {
                 if (allowExit) {
                     QTimer::singleShot(0, [&app]() { app.quit(); });

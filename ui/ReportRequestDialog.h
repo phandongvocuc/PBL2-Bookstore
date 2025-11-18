@@ -14,7 +14,7 @@ class QSpinBox;
 
 namespace pbl2::ui {
 
-class ReportRequestDialog : public QDialog {
+class ReportRequestDialog final : public QDialog {
     Q_OBJECT
 
 public:
@@ -26,8 +26,8 @@ protected:
     void accept() override;
 
 private:
-    bool validateInputs();
-    void showError(const QString &message);
+    bool validateInputs() const;
+    void showError(const QString &message) const;
 
     QString staffUsername;
     QLineEdit *requestIdEdit{nullptr};

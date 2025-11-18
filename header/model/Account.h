@@ -8,7 +8,7 @@ using namespace std;
 
 namespace pbl2::model {
 
-class Account : public Person {
+class Account final : public Person {
 public:
     ~Account() override = default;
 

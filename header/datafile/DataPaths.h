@@ -5,7 +5,6 @@
 namespace pbl2::util {
 
 custom::CustomString locateDataDir();
-custom::CustomString ensureReportsDir();
 
 }  // namespace util
 

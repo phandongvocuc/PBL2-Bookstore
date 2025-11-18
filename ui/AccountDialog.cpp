@@ -1,6 +1,5 @@
 #include "AccountDialog.h"
 
-#include "DialogTheme.h"
 #include "QtBridge.h"
 #include "core/custom/CaseSensitivity.h"
 #include "core/custom/CustomString.h"
@@ -21,7 +20,7 @@ AccountDialog::AccountDialog(QWidget *parent) : QDialog(parent) {
     setWindowTitle(tr("Thong tin tai khoan"));
     setModal(true);
     setWindowIcon(QIcon(":/ui/resources/icons/account.png"));
-    QFont font("Segoe UI", 11);
+    const QFont font("Segoe UI", 11);
     setFont(font);
     setStyleSheet(R"(
 QDialog { background: #f8fafc; border-radius: 12px; }
@@ -69,7 +68,7 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
     errorLabel->setVisible(false);
 
     auto *formGroup = new QGroupBox(tr("Thong tin tai khoan"), this);
-    auto *form = new QFormLayout;
+    auto *form = new QFormLayout();
     form->setContentsMargins(12, 12, 12, 12);
     form->setHorizontalSpacing(12);
     form->setVerticalSpacing(10);
@@ -96,32 +95,6 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
     setMinimumSize(640, 520);
 }
 
-void AccountDialog::setAccount(const custom::CustomString &username, const custom::CustomString &role, bool active) {
-    editingMode = true;
-    setWindowTitle(tr("Chinh sua tai khoan"));
-    usernameEdit->setText(pbl2::bridge::toQString(username));
-    usernameEdit->setReadOnly(true);
-    passwordEdit->setPlaceholderText(tr("De trong neu giu nguyen mat khau"));
-    confirmEdit->setPlaceholderText(tr("De trong neu giu nguyen mat khau"));
-    const int index = roleCombo->findText(pbl2::bridge::toQString(role), Qt::MatchFixedString);
-    if (index >= 0) roleCombo->setCurrentIndex(index);
-    activeCheck->setChecked(active);
-}
-
-void AccountDialog::setAccountWithStaff(const custom::CustomString &username, const custom::CustomString &role, bool active, const custom::CustomString &staffId) {
-    setAccount(username, role, active);
-    // preselect staff if exists in combo
-    const custom::CustomString target = staffId.trimmed();
-    if (!target.isEmpty()) {
-        for (int i = 0; i < staffCombo->count(); ++i) {
-            if (pbl2::bridge::toCustomString(staffCombo->itemData(i).toString()).compare(target, custom::CaseSensitivity::Insensitive) == 0) {
-                staffCombo->setCurrentIndex(i);
-                break;
-            }
-        }
-    }
-}
-
 custom::CustomString AccountDialog::username() const { return pbl2::bridge::toCustomString(usernameEdit->text().trimmed()); }
 
 custom::CustomString AccountDialog::password() const { return pbl2::bridge::toCustomString(passwordEdit->text()); }
@@ -130,7 +103,7 @@ custom::CustomString AccountDialog::role() const { return pbl2::bridge::toCustom
 
 bool AccountDialog::isActive() const { return activeCheck->isChecked(); }
 
-bool AccountDialog::validateInputs() {
+bool AccountDialog::validateInputs() const {
     if (usernameEdit->text().trimmed().isEmpty()) {
     showError(pbl2::bridge::toCustomString(tr("Ten dang nhap khong duoc de trong.")));
         return false;
@@ -148,7 +121,7 @@ bool AccountDialog::validateInputs() {
     return true;
 }
 
-void AccountDialog::showError(const custom::CustomString &message) {
+void AccountDialog::showError(const custom::CustomString &message) const {
     errorLabel->setText(pbl2::bridge::toQString(message));
     errorLabel->setVisible(true);
 }
@@ -159,7 +132,7 @@ void AccountDialog::accept() {
     QDialog::accept();
 }
 
-void AccountDialog::setStaffList(const QVector<model::Staff> &staffs) {
+void AccountDialog::setStaffList(const QVector<model::Staff> &staffs) const {
     // Clear except first placeholder
     const custom::CustomString currentSel = pbl2::bridge::toCustomString(staffCombo->currentData().toString());
     staffCombo->clear();

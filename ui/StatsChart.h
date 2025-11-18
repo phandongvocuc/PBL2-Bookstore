@@ -7,7 +7,7 @@
 
 namespace pbl2::ui {
 
-class StatsChart : public QWidget {
+class StatsChart final : public QWidget {
     Q_OBJECT
     
 public:
@@ -26,7 +26,6 @@ public:
     void setCategories(const QStringList &categories);
     void setSeries(const QVector<Series> &series);
     void setValueSuffix(const QString &suffix);
-    void clear();
 
 protected:
     void paintEvent(QPaintEvent *event) override;

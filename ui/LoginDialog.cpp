@@ -1,26 +1,13 @@
 #include "LoginDialog.h"
 
-#include <QApplication>
-#include <QColor>
-#include <QDebug>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPalette>
-#include <QPushButton>
 #include <QVBoxLayout>
 
-#include "DialogTheme.h"
 #include "QtBridge.h"
 #include "ui_LoginDialog.h"
 
 using namespace std;  // project-wide request
 
 namespace {
-
-bool isPrivilegedRole(const QString &role) {
-    const QString upper = role.trimmed().toUpper();
-    return upper == QStringLiteral("ADMIN") || upper == QStringLiteral("STAFF");
-}
 
 }
 
@@ -122,7 +109,7 @@ void LoginDialog::attemptLogin() {
     accept();
 }
 
-void LoginDialog::showError(const QString &message) {
+void LoginDialog::showError (const QString &message) const {
     if (!errorLabel) return;
     errorLabel->setText(message);
     errorLabel->setVisible(true);

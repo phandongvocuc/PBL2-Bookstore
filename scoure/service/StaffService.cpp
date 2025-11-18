@@ -1,10 +1,10 @@
 #include "service/StaffService.h"
 
-using namespace std;  // project-wide request
+using namespace std;
 
 namespace pbl2::service {
 
-StaffService::StaffService(custom::CustomString dataDir) : repository(dataDir) {}
+StaffService::StaffService(const custom::CustomString &dataDir) : repository(dataDir) {}
 
 custom::DynamicArray<model::Staff> StaffService::fetchAll() const { return ensureLoaded(); }
 
@@ -15,7 +15,7 @@ custom::Optional<model::Staff> StaffService::findById(const custom::CustomString
     if (staffs.isEmpty()) return custom::Optional<model::Staff>();
     for (custom::DynamicArray<model::Staff>::ConstIterator it = staffs.cbegin(); it != staffs.cend(); ++it) {
         if (it->getId().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
-            return custom::Optional<model::Staff>(*it);
+            return custom::Optional(*it);
         }
     }
     return custom::Optional<model::Staff>();
@@ -24,7 +24,7 @@ custom::Optional<model::Staff> StaffService::findById(const custom::CustomString
 bool StaffService::addStaff(const model::Staff &staff) const {
     auto staffs = ensureLoaded();
 
-    model::Staff copy = staff;
+    const model::Staff copy = staff;
     bool exists = false;
     for (custom::DynamicArray<model::Staff>::ConstIterator it = staffs.cbegin(); it != staffs.cend(); ++it) {
         if (it->getId().compare(copy.getId(), custom::CaseSensitivity::Insensitive) == 0) {
@@ -54,7 +54,7 @@ bool StaffService::updateStaff(const model::Staff &staff) const {
     return true;
 }
 
-bool StaffService::setStaffActive(const custom::CustomString &staffId, bool active) const {
+bool StaffService::setStaffActive(const custom::CustomString &staffId, const bool active) const {
     auto staffs = ensureLoaded();
     bool changed = false;
     for (custom::DynamicArray<model::Staff>::Iterator it = staffs.begin(); it != staffs.end(); ++it) {

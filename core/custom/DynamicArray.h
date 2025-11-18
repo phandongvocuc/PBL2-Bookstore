@@ -1,7 +1,7 @@
 #pragma once
 
 #include <initializer_list>
-
+using namespace std;
 namespace custom {
 
 // Manual dynamic array supporting automatic growth without relying on STL containers.
@@ -13,9 +13,9 @@ public:
     typedef T *Iterator;
     typedef const T *ConstIterator;
 
-    DynamicArray() : _data(0), _size(0), _capacity(0) {}
+    DynamicArray() : _data(nullptr), _size(0), _capacity(0) {}
 
-    explicit DynamicArray(SizeType initialSize, const T &value = T()) : _data(0), _size(0), _capacity(0) {
+    explicit DynamicArray(const SizeType initialSize, const T &value = T()) : _data(nullptr), _size(0), _capacity(0) {
         if (initialSize > 0U) {
             reserve(initialSize);
             for (SizeType i = 0; i < initialSize; ++i) {
@@ -25,42 +25,15 @@ public:
         }
     }
 
-    DynamicArray(std::initializer_list<T> init) : _data(0), _size(0), _capacity(0) {
+    DynamicArray(initializer_list<T> init) : _data(nullptr), _size(0), _capacity(0) {
         reserve(static_cast<SizeType>(init.size()));
         for (const auto &value : init) {
             pushBack(value);
         }
     }
 
-    DynamicArray(const DynamicArray &other) : _data(0), _size(0), _capacity(0) {
+    DynamicArray(const DynamicArray &other) : _data(nullptr), _size(0), _capacity(0) {
         copyFrom(other);
-    }
-
-    DynamicArray &operator=(const DynamicArray &other) {
-        if (this != &other) {
-            clear();
-            copyFrom(other);
-        }
-        return *this;
-    }
-
-    DynamicArray(DynamicArray &&other) noexcept : _data(other._data), _size(other._size), _capacity(other._capacity) {
-        other._data = 0;
-        other._size = 0U;
-        other._capacity = 0U;
-    }
-
-    DynamicArray &operator=(DynamicArray &&other) noexcept {
-        if (this != &other) {
-            destroy();
-            _data = other._data;
-            _size = other._size;
-            _capacity = other._capacity;
-            other._data = 0;
-            other._size = 0U;
-            other._capacity = 0U;
-        }
-        return *this;
     }
 
     ~DynamicArray() {
@@ -81,39 +54,7 @@ public:
         ++_size;
     }
 
-    void pushBack(T &&value) {
-        ensureCapacity(_size + 1U);
-        _data[_size] = static_cast<T &&>(value);
-        ++_size;
-    }
-
-    void push_back(const T &value) {
-        pushBack(value);
-    }
-
-    void push_back(T &&value) {
-        pushBack(static_cast<T &&>(value));
-    }
-
-    void append(const T &value) {
-        pushBack(value);
-    }
-
-    void append(T &&value) {
-        pushBack(static_cast<T &&>(value));
-    }
-
-    void popBack() {
-        if (_size > 0U) {
-            --_size;
-        }
-    }
-
-    void pop_back() {
-        popBack();
-    }
-
-    void removeAt(SizeType index) {
+    void removeAt(const SizeType index) {
         if (index >= _size) {
             return;
         }
@@ -123,47 +64,18 @@ public:
         --_size;
     }
 
-    Iterator erase(Iterator position) {
-        if (!position || position < _data || position >= _data + _size) {
-            return end();
-        }
-        SizeType index = static_cast<SizeType>(position - _data);
-        removeAt(index);
-        return _data + index;
-    }
-
-    Iterator erase(Iterator first, Iterator last) {
-        if (!first || !last || first >= last) {
-            return end();
-        }
-        if (first < _data) {
-            first = _data;
-        }
-        if (last > _data + _size) {
-            last = _data + _size;
-        }
-        SizeType startIndex = static_cast<SizeType>(first - _data);
-        SizeType endIndex = static_cast<SizeType>(last - _data);
-        SizeType count = endIndex - startIndex;
-        for (SizeType i = startIndex; i + count < _size; ++i) {
-            _data[i] = _data[i + count];
-        }
-        _size -= count;
-        return _data + startIndex;
-    }
-
     void clear() {
         _size = 0U;
     }
 
-    void reserve(SizeType newCapacity) {
+    void reserve(const SizeType newCapacity) {
         if (newCapacity <= _capacity) {
             return;
         }
         reallocate(newCapacity);
     }
 
-    void resize(SizeType newSize, const T &value = T()) {
+    void resize(const SizeType newSize, const T &value = T()) {
         if (newSize > _capacity) {
             reallocate(newSize);
         }
@@ -177,14 +89,6 @@ public:
 
     SizeType size() const {
         return _size;
-    }
-
-    SizeType capacity() const {
-        return _capacity;
-    }
-
-    bool empty() const {
-        return _size == 0U;
     }
 
     bool isEmpty() const {
@@ -203,10 +107,6 @@ public:
         return _data;
     }
 
-    ConstIterator begin() const {
-        return _data;
-    }
-
     ConstIterator cbegin() const {
         return _data;
     }
@@ -215,36 +115,12 @@ public:
         return _data ? _data + _size : 0;
     }
 
-    ConstIterator end() const {
-        return _data ? _data + _size : 0;
-    }
-
     ConstIterator cend() const {
         return _data ? _data + _size : 0;
     }
 
-    T &front() {
-        return _data[0];
-    }
-
-    const T &front() const {
-        return _data[0];
-    }
-
-    T &back() {
-        return _data[_size - 1U];
-    }
-
-    const T &back() const {
-        return _data[_size - 1U];
-    }
-
-    const T &value(SizeType index, const T &defaultValue) const {
-        return index < _size ? _data[index] : defaultValue;
-    }
-
 private:
-    void ensureCapacity(SizeType needed) {
+    void ensureCapacity(const SizeType needed) {
         if (needed <= _capacity) {
             return;
         }
@@ -267,7 +143,7 @@ private:
         _size = other._size;
     }
 
-    void reallocate(SizeType newCapacity) {
+    void reallocate(const SizeType newCapacity) {
         T *newData = new T[newCapacity];
         for (SizeType i = 0; i < _size; ++i) {
             newData[i] = _data[i];

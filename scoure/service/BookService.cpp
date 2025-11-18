@@ -6,7 +6,7 @@ using namespace std;  // project-wide request
 
 namespace pbl2::service {
 
-BookService::BookService(custom::CustomString dataDir) : repository(dataDir) {}
+BookService::BookService(const custom::CustomString &dataDir) : repository(dataDir) {}
 
 custom::DynamicArray<model::Book> BookService::fetchAll() const { return ensureLoaded(); }
 
@@ -17,7 +17,7 @@ custom::Optional<model::Book> BookService::findById(const custom::CustomString &
     if (books.isEmpty()) return custom::Optional<model::Book>();
     for (custom::DynamicArray<model::Book>::ConstIterator it = books.cbegin(); it != books.cend(); ++it) {
         if (it->getId().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
-            return custom::Optional<model::Book>(*it);
+            return custom::Optional(*it);
         }
     }
     return custom::Optional<model::Book>();
@@ -48,8 +48,7 @@ bool BookService::updateBook(const model::Book &book) const {
     auto books = ensureLoaded();
     bool updated = false;
     for (custom::DynamicArray<model::Book>::Iterator it = books.begin(); it != books.end(); ++it) {
-        auto &existing = *it;
-        if (existing.getId() == book.getId()) {
+        if (auto &existing = *it; existing.getId() == book.getId()) {
             existing = book;
             normalizeAvailability(existing);
             updated = true;
@@ -79,25 +78,6 @@ bool BookService::removeBook(const custom::CustomString &bookId) const {
     if (!removed) return false;
     persist(books);
     return true;
-}
-
-bool BookService::adjustQuantity(const custom::CustomString &bookId, int delta) const {
-    if (delta == 0) return true;
-    const custom::CustomString trimmed = bookId.trimmed();
-    if (trimmed.isEmpty()) return false;
-    auto books = ensureLoaded();
-    const auto target = trimmed;
-    for (custom::DynamicArray<model::Book>::Iterator it = books.begin(); it != books.end(); ++it) {
-        model::Book &book = *it;
-        if (book.getId().compare(target, custom::CaseSensitivity::Insensitive) != 0) continue;
-        const int updatedQuantity = book.getQuantity() + delta;
-        if (updatedQuantity < 0) return false;
-        book.setQuantity(updatedQuantity);
-        normalizeAvailability(book);
-        persist(books);
-        return true;
-    }
-    return false;
 }
 
 custom::DynamicArray<model::Book> BookService::ensureLoaded() const {

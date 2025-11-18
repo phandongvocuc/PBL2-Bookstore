@@ -8,9 +8,9 @@ namespace pbl2::repository {
 
 class ConfigRepository {
 public:
-    explicit ConfigRepository(custom::CustomString dataDir);
+    explicit ConfigRepository(const custom::CustomString &dataDir);
 
-    [[nodiscard]] model::SystemConfig load() const;
+    model::SystemConfig load() const;
     void save(const model::SystemConfig &config) const;
 
 private:

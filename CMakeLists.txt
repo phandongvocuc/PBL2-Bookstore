@@ -35,4 +35,3 @@ target_link_libraries(pbl2_book Qt6::Widgets Qt6::Core Qt6::Gui)
 
 install(TARGETS pbl2_book)
 
-add_executable(convert_legacy_bin tools/convert_legacy_bin.cpp)

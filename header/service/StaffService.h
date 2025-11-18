@@ -13,7 +13,7 @@ namespace pbl2::service {
 
 class StaffService {
 public:
-    explicit StaffService(custom::CustomString dataDir);
+    explicit StaffService(const custom::CustomString &dataDir);
 
     custom::DynamicArray<model::Staff> fetchAll() const;
     custom::Optional<model::Staff> findById(const custom::CustomString &staffId) const;
@@ -25,7 +25,7 @@ public:
 private:
     repository::StaffRepository repository;
 
-    [[nodiscard]] custom::DynamicArray<model::Staff> ensureLoaded() const;
+    custom::DynamicArray<model::Staff> ensureLoaded() const;
     void persist(const custom::DynamicArray<model::Staff> &staffs) const;
 };
 

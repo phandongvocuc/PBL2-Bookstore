@@ -1,7 +1,5 @@
 #include "BookStatus.h"
 
-using namespace std;  // project-wide request
-
 namespace pbl2::model {
 
 namespace {
@@ -36,7 +34,7 @@ custom::CustomString canonicalBookStatus(const custom::CustomString &status) {
     return upper;
 }
 
-custom::CustomString availabilityStatusForQuantity(int quantity) {
+custom::CustomString availabilityStatusForQuantity(const int quantity) {
     return quantity > 0 ? custom::CustomStringLiteral("CON") : custom::CustomStringLiteral("HET");
 }
 

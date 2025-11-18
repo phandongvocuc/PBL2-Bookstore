@@ -3,11 +3,11 @@
 #include "datafile/BinaryFileStore.h"
 #include "core/PathUtils.h"
 
-using namespace std;  // project-wide request
+using namespace std;
 
 namespace pbl2::repository {
 
-BooksRepository::BooksRepository(custom::CustomString dataDir)
+BooksRepository::BooksRepository(const custom::CustomString &dataDir)
 	: dataPath(core::path::join(dataDir, custom::CustomStringLiteral("books.bin"))) {}
 
 void BooksRepository::saveAll(const custom::DynamicArray<model::Book> &books) const {

@@ -16,7 +16,7 @@ class QLineEdit;
 
 namespace pbl2::ui{
 
-class LoanDialog : public QDialog {
+class LoanDialog final : public QDialog {
     Q_OBJECT
 
 public:
@@ -25,18 +25,14 @@ public:
                int maxBorrowDays,
                QWidget *parent = nullptr);
 
-    void setLoan(const model::Loan &loan, bool editing);
     void presetLoanId(const QString &loanId, bool lockField = true);
-    model::Loan loan() const;
-    void prefillFields(const QString &loanIdHint,
-                       const QString &readerIdHint = QString(),
-                       const QString &bookIdHint = QString());
+    [[nodiscard]] model::Loan loan() const;
 
 protected:
     void accept() override;
 
 private:
-    bool validateInputs() const;
+    [[nodiscard]] bool validateInputs() const;
     void showError(const QString &message) const;
 
     QVector<model::Reader> readers;

@@ -10,9 +10,9 @@ namespace pbl2::repository {
 
 class LoansRepository {
 public:
-    explicit LoansRepository(custom::CustomString dataDir);
+    explicit LoansRepository(const custom::CustomString &dataDir);
 
-    [[nodiscard]] custom::DynamicArray<model::Loan> loadAll() const;
+    custom::DynamicArray<model::Loan> loadAll() const;
     void saveAll(const custom::DynamicArray<model::Loan> &loans) const;
 
 private:

@@ -10,9 +10,9 @@ namespace pbl2::repository {
 
 class StaffRepository {
 public:
-    explicit StaffRepository(custom::CustomString dataDir);
+    explicit StaffRepository(const custom::CustomString &dataDir);
 
-    [[nodiscard]] custom::DynamicArray<model::Staff> loadAll() const;
+    custom::DynamicArray<model::Staff> loadAll() const;
     void saveAll(const custom::DynamicArray<model::Staff> &staffs) const;
 
 private:

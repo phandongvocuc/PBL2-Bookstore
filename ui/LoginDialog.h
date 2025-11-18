@@ -27,8 +27,8 @@ public:
     explicit LoginDialog(service::AccountService &accountService, QWidget *parent = nullptr);
     ~LoginDialog() override;
 
-    model::Account account() const { return authenticatedAccount; }
-    bool exitRequested() const { return exitRequestedFlag; }
+    [[nodiscard]] model::Account account() const { return authenticatedAccount; }
+    [[nodiscard]] bool exitRequested() const { return exitRequestedFlag; }
 
 private slots:
     void attemptLogin();
@@ -38,7 +38,7 @@ protected:
     void reject() override; // override default reject to avoid treating window-close as explicit Exit
 
 private:
-    void showError(const QString &message);
+    void showError(const QString &message) const;
 
     service::AccountService &accountService;
     std::unique_ptr<Ui::LoginDialog> ui;

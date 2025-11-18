@@ -3,38 +3,21 @@
 #include <QPainter>
 #include <QStyleOptionViewItem>
 #include <QStyle>
-#include <QListWidget>
-#include <QListWidgetItem>
-#include <QApplication>
-#include <QAbstractItemView>
 #include <QMessageBox>
 #include <QInputDialog>
-#include <QDateEdit>
 #include <QTabWidget>
-#include <QPushButton>
-#include <QComboBox>
 #include <QLineEdit>
-#include <QSpinBox>
-#include <QLabel>
 #include <QIcon>
-#include <QFile>
 #include <QFrame>
 #include <QSize>
 #include <QTabBar>
 #include <QSignalBlocker>
-#include <QStringList>
 #include <QTimer>
 #include <QLocale>
-#include <QDateTime>
-#include <QDate>
 #include <QFileDialog>
-#include <QPdfWriter>
 #include <QTextDocument>
 #include <QDir>
-#include <QMenu>
 #include <QResizeEvent>
-#include <QSet>
-#include <QTableWidget>
 #include <QTableWidgetItem>
 #include "core/IdGenerator.h"
 #include "core/custom/DynamicArray.h"
@@ -52,7 +35,7 @@
 #include "ReportDetailsDialog.h"
 #include "StatsWidget.h"
 
-using namespace std;  // project-wide request
+using namespace std;
 using namespace pbl2;
 using namespace pbl2::bridge;
 
@@ -160,7 +143,7 @@ public:
     const int badgeHeight = badgeMetrics.height() + 6;
         QRect badgeRect(inner.right() - badgeWidth, inner.top(), badgeWidth, badgeHeight);
 
-    const QColor primaryText = QColor(0x0F, 0x17, 0x2A);
+        constexpr auto primaryText = QColor(0x0F, 0x17, 0x2A);
     QColor secondaryText = QColor(0x4B, 0x55, 0x6B);
     if (selected) {
         secondaryText = QColor(0x1E, 0x40, 0x8A);
@@ -187,7 +170,7 @@ public:
     painter->setFont(bodyFont);
     painter->setPen(secondaryText);
     // Reserve space for up to 4 wrapped body lines
-    const int bodyLines = 4;
+    constexpr int bodyLines = 4;
     const int bodyAreaHeight = bodyMetrics.height() * bodyLines;
 
     const int pillWidthReserve = pillText.isEmpty() ? 0 : secondaryMetrics.horizontalAdvance(pillText) + 16;
@@ -247,7 +230,7 @@ public:
         QFontMetrics titleMetrics(titleFont);
         QFontMetrics bodyMetrics(secondary);
         // Make room for header (1 line) + up to 3 body lines (meta/detail/extra)
-        const int bodyLines = 3;
+        constexpr int bodyLines = 3;
         const int height = 12 + titleMetrics.height() + 6 + bodyMetrics.height() * bodyLines + 12;
 
         // If the view is in IconMode (grid), return a reasonable fixed width so
@@ -260,7 +243,7 @@ public:
                     // Target exactly 2 columns: compute per-item width as
                     // (viewport_width - total_spacing) / columns.
                     const int vw = view->viewport() ? view->viewport()->width() : view->width();
-                    const int columns = 2;
+                    constexpr int columns = 2;
                     // Estimate total horizontal spacing between items (use
                     // list spacing and a small margin). Use view->spacing()
                     // if available via cast to QListWidget; otherwise assume 8.
@@ -307,8 +290,7 @@ public:
                                               : QApplication::style()->subElementRect(QStyle::SE_ItemViewItemText, &opt, nullptr);
 
         // If the navigation list is in collapsed mode, render icon-only.
-        const bool collapsedMode = opt.widget ? opt.widget->property("navCollapsed").toBool() : false;
-        if (collapsedMode) {
+        if (const bool collapsedMode = opt.widget ? opt.widget->property("navCollapsed").toBool() : false) {
             // Draw only the icon centered inside the item rect.
             painter->save();
             painter->setRenderHint(QPainter::Antialiasing, true);
@@ -415,8 +397,7 @@ public:
         if (measuredWidth <= 0) {
             measuredWidth = 280;
         }
-        const bool collapsedMode = opt.widget ? opt.widget->property("navCollapsed").toBool() : false;
-        if (collapsedMode) {
+        if (const bool collapsedMode = opt.widget ? opt.widget->property("navCollapsed").toBool() : false) {
             // In collapsed mode, prefer a narrow, icon-only width that fits the
             // decoration size plus a small padding so the list becomes a slim
             // vertical strip of icons.
@@ -840,7 +821,7 @@ void MainWindow::setupUi() {
 void MainWindow::configureBooksTab() {
     configureCardListWidget(booksList);
     // Allow books to display as a grid of cards (IconMode) so items appear
-    // in multiple columns. configureCardListWidget already sets IconMode but
+    // in multiple columns. configureCardListWidget already sets IconMode
     // we explicitly ensure wrapping/flow here for clarity.
     if (booksList) {
         booksList->setFlow(QListView::LeftToRight);
@@ -1079,9 +1060,8 @@ void MainWindow::configureAccountsTab() {
 
 void MainWindow::configureStatsTab() {
     // Find widgets - try both direct and through scroll content
-    QWidget *searchWidget = ui->statsTab;
-    QWidget *scrollContent = ui->statsTab->findChild<QWidget *>(QStringLiteral("statsScrollContent"));
-    if (scrollContent) {
+    const QWidget *searchWidget = ui->statsTab;
+    if (const auto scrollContent = ui->statsTab->findChild<QWidget *>(QStringLiteral("statsScrollContent"))) {
         searchWidget = scrollContent;
     }
     
@@ -1269,7 +1249,7 @@ void MainWindow::populateBooks() {
     applyBookFilter();
 }
 
-void MainWindow::fillBooksList(const QVector<model::Book> &books) {
+void MainWindow::fillBooksList(const QVector<model::Book> &books) const {
     if (!booksList) return;
 
     const QListWidgetItem *currentItem = booksList->currentItem();
@@ -1376,7 +1356,7 @@ void MainWindow::populateReaders() {
     applyReaderFilter();
 }
 
-void MainWindow::fillReadersList(const QVector<model::Reader> &readers) {
+void MainWindow::fillReadersList(const QVector<model::Reader> &readers) const {
     if (!readersList) return;
 
     const QListWidgetItem *currentItem = readersList->currentItem();
@@ -1626,7 +1606,7 @@ void MainWindow::populateReports() {
     applyReportFilter();
 }
 
-void MainWindow::fillReportsList(const QVector<model::ReportRequest> &reports) {
+void MainWindow::fillReportsList(const QVector<model::ReportRequest> &reports) const {
     if (!reportsList) return;
 
     const QListWidgetItem *currentItem = reportsList->currentItem();
@@ -2141,14 +2121,14 @@ void MainWindow::refreshAccounts() {
     fillAccountsList(accountsCache);
 }
 
-void MainWindow::refreshConfigInputs() {
+void MainWindow::refreshConfigInputs() const {
     if (!maxBorrowDaysSpin || !finePerDaySpin || !maxBooksPerReaderSpin) return;
     maxBorrowDaysSpin->setValue(std::max(1, currentConfig.getMaxBorrowDays()));
     finePerDaySpin->setValue(std::max(0, currentConfig.getFinePerDay()));
     maxBooksPerReaderSpin->setValue(std::max(1, currentConfig.getMaxBooksPerReader()));
 }
 
-custom::Optional<int> MainWindow::currentRow(QListWidget *list) const {
+custom::Optional<int> MainWindow::currentRow(const QListWidget *list) {
     if (!list) return custom::nullopt;
     const int row = list->currentRow();
     if (row < 0) return custom::nullopt;
@@ -2197,8 +2177,7 @@ void MainWindow::handleAddBook() {
     dialog.presetId(nextBookId(), true);
     if (dialog.exec() != QDialog::Accepted) return;
     const auto newBook = dialog.book();
-    const auto exists = std::any_of(booksCache.cbegin(), booksCache.cend(), [&](const model::Book &b) { return b.getId() == newBook.getId(); });
-    if (exists) {
+    if (const auto exists = std::any_of(booksCache.cbegin(), booksCache.cend(), [&](const model::Book &b) { return b.getId() == newBook.getId(); })) {
         QMessageBox::warning(this, tr("Trung lap"), tr("Ma sach nay da ton tai."));
         return;
     }
@@ -2259,7 +2238,7 @@ void MainWindow::populateStaffs() {
     applyStaffFilter();
 }
 
-void MainWindow::fillStaffsList(const QVector<model::Staff> &staffs) {
+void MainWindow::fillStaffsList(const QVector<model::Staff> &staffs) const {
     if (!staffsList) return;
 
     const QListWidgetItem *currentItem = staffsList->currentItem();
@@ -2374,8 +2353,7 @@ void MainWindow::handleAddStaff() {
     dialog.presetId(nextStaffId(), true);
     if (dialog.exec() != QDialog::Accepted) return;
     const auto staff = dialog.staff();
-    const auto exists = std::any_of(staffsCache.cbegin(), staffsCache.cend(), [&](const model::Staff &s) { return s.getId() == staff.getId(); });
-    if (exists) {
+    if (const auto exists = std::any_of(staffsCache.cbegin(), staffsCache.cend(), [&](const model::Staff &s) { return s.getId() == staff.getId(); })) {
         QMessageBox::warning(this, tr("Trung lap"), tr("Ma nhan vien da ton tai."));
         return;
     }
@@ -2576,8 +2554,7 @@ void MainWindow::handleAddReader() {
     dialog.presetId(nextReaderId(), true);
     if (dialog.exec() != QDialog::Accepted) return;
     const auto reader = dialog.reader();
-    const auto exists = std::any_of(readersCache.cbegin(), readersCache.cend(), [&](const model::Reader &r) { return r.getId() == reader.getId(); });
-    if (exists) {
+    if (const auto exists = std::any_of(readersCache.cbegin(), readersCache.cend(), [&](const model::Reader &r) { return r.getId() == reader.getId(); })) {
         QMessageBox::warning(this, tr("Trung lap"), tr("Ma ban doc nay da ton tai."));
         return;
     }
@@ -3198,8 +3175,7 @@ void MainWindow::setupNavigationMenu() {
             if (QWidget *w = li->widget()) { w->deleteLater(); }
             delete li;
         }
-        QVBoxLayout *railLayout = qobject_cast<QVBoxLayout *>(navRail->layout());
-        if (railLayout) {
+        if (QVBoxLayout *railLayout = qobject_cast<QVBoxLayout *>(navRail->layout())) {
             // Top spacer
             railLayout->addSpacing(6);
             // create buttons for each nav entry
@@ -3270,7 +3246,7 @@ void MainWindow::setNavigationCollapsed(bool collapsed, bool pinned) {
     repositionNavRailButton();
 }
 
-void MainWindow::repositionNavRailButton() {
+void MainWindow::repositionNavRailButton() const {
     if (!navigationList) return;
 
     const QPoint topLeft = navigationList->mapTo(this, QPoint(0, 0));
@@ -3331,7 +3307,7 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
     repositionNavRailButton();
 }
 
-void MainWindow::handleNavigationSelection(int index) {
+void MainWindow::handleNavigationSelection(const int index) const {
     if (!tabs || index < 0 || index >= tabs->count()) return;
     if (tabs->currentIndex() != index) {
         tabs->setCurrentIndex(index);

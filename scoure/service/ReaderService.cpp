@@ -1,10 +1,10 @@
 #include "service/ReaderService.h"
 
-using namespace std;  // project-wide request
+using namespace std;
 
 namespace pbl2::service {
 
-ReaderService::ReaderService(custom::CustomString dataDir) : repository(dataDir) {}
+ReaderService::ReaderService(const custom::CustomString &dataDir) : repository(dataDir) {}
 
 custom::DynamicArray<model::Reader> ReaderService::fetchAll() const { return ensureLoaded(); }
 
@@ -15,7 +15,7 @@ custom::Optional<model::Reader> ReaderService::findById(const custom::CustomStri
     if (readers.isEmpty()) return custom::Optional<model::Reader>();
     for (custom::DynamicArray<model::Reader>::ConstIterator it = readers.cbegin(); it != readers.cend(); ++it) {
         if (it->getId().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
-            return custom::Optional<model::Reader>(*it);
+            return custom::Optional(*it);
         }
     }
     return custom::Optional<model::Reader>();
@@ -24,7 +24,7 @@ custom::Optional<model::Reader> ReaderService::findById(const custom::CustomStri
 bool ReaderService::addReader(const model::Reader &reader) const {
     auto readers = ensureLoaded();
 
-    model::Reader copy = reader;
+    const model::Reader copy = reader;
     bool exists = false;
     for (custom::DynamicArray<model::Reader>::ConstIterator it = readers.cbegin(); it != readers.cend(); ++it) {
         if (it->getId().compare(copy.getId(), custom::CaseSensitivity::Insensitive) == 0) {
@@ -54,7 +54,7 @@ bool ReaderService::updateReader(const model::Reader &reader) const {
     return true;
 }
 
-bool ReaderService::setReaderActive(const custom::CustomString &readerId, bool active) const {
+bool ReaderService::setReaderActive(const custom::CustomString &readerId, const bool active) const {
     auto readers = ensureLoaded();
     bool changed = false;
     for (custom::DynamicArray<model::Reader>::Iterator it = readers.begin(); it != readers.end(); ++it) {
