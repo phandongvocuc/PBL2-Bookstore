@@ -28,7 +28,7 @@ void StatsChart::setCategories(const QStringList &categories) {
     update();
 }
 
-void StatsChart::setSeries(const QVector<Series> &series) {
+void StatsChart::setSeries(const custom::Vector<Series> &series) {
     series_ = series;
     update();
 }
@@ -36,6 +36,19 @@ void StatsChart::setSeries(const QVector<Series> &series) {
 void StatsChart::setValueSuffix(const QString &suffix) {
     valueSuffix_ = suffix;
     update();
+}
+
+void StatsChart::setAxisLabels(const QString &xLabel, const QString &yLabel) {
+    bool changed = false;
+    if (xAxisLabel_ != xLabel) {
+        xAxisLabel_ = xLabel;
+        changed = true;
+    }
+    if (yAxisLabel_ != yLabel) {
+        yAxisLabel_ = yLabel;
+        changed = true;
+    }
+    if (changed) update();
 }
 
 void StatsChart::paintEvent(QPaintEvent *event) {
@@ -96,6 +109,7 @@ void StatsChart::drawTitle(QPainter &painter, const QRect &area) const {
 }
 
 void StatsChart::drawAxes(QPainter &painter, const QRect &plotArea) const {
+
     // Draw main axes
     painter.setPen(QPen(QColor(0x9C, 0xA3, 0xAF), 2));
     painter.drawLine(plotArea.bottomLeft(), plotArea.bottomRight());
@@ -123,6 +137,19 @@ void StatsChart::drawAxes(QPainter &painter, const QRect &plotArea) const {
         painter.drawText(QRectF(plotArea.left() - 50, y - 10, 45, 20),
                         Qt::AlignRight | Qt::AlignVCenter, valueText);
     }
+
+    // Draw Y axis label if provided
+    QFont yLabelFont = painter.font();
+    yLabelFont.setPointSize(13);
+    yLabelFont.setBold(true);
+    painter.setFont(yLabelFont);
+    painter.save();
+    painter.translate(plotArea.left() - 60, plotArea.top() + plotArea.height() / 2);
+    painter.rotate(-90);
+    if (!yAxisLabel_.isEmpty()) {
+        painter.drawText(QRect(-60, -40, 120, 80), Qt::AlignCenter, yAxisLabel_);
+    }
+    painter.restore();
 }
 
 double StatsChart::findMaxValue() const {
@@ -153,42 +180,92 @@ void StatsChart::drawBarChart(QPainter &painter, const QRect &plotArea) const {
     }
 
     // Draw bars with gradient and shadow effect
+    // Nếu chỉ có 1 series và nhiều thể loại, tô mỗi cột 1 màu để phân biệt
+    static custom::Vector<QColor> defaultColors = {
+        QColor(0xEF5350), QColor(0xAB47BC), QColor(0x42A5F5), QColor(0x26A69A),
+        QColor(0xFFB300), QColor(0x8D6E63), QColor(0x5C6BC0), QColor(0x00897B),
+        QColor(0x8BC34A), QColor(0xFF7043), QColor(0x5E35B1), QColor(0x00838F)
+    };
+    // Vẽ từng cột cho từng ngày, mỗi màu là 1 thể loại
     for (int cat = 0; cat < categoryCount; ++cat) {
-        const double baseX = plotArea.left() + cat * groupWidth;
+        double baseX = plotArea.left() + cat * groupWidth;
         for (int si = 0; si < seriesCount; ++si) {
             if (cat >= series_[si].values.size()) continue;
-            const double value = series_[si].values[cat];
-            const double ratio = value / maxVal;
-            const double barHeight = ratio * plotArea.height();
-            const double x = baseX + si * barWidth + (groupWidth - seriesCount * barWidth) / 2.0;
-
+            double value = series_[si].values[cat];
+            double ratio = value / maxVal;
+            double barHeight = ratio * plotArea.height();
+            double x = baseX + si * barWidth + (groupWidth - seriesCount * barWidth) / 2.0;
             QRectF bar(x, plotArea.bottom() - barHeight, barWidth - 2.0, barHeight);
 
-            // Create gradient for the bar
             QLinearGradient gradient(bar.topLeft(), bar.bottomLeft());
             QColor baseColor = series_[si].color.isValid() ? series_[si].color : QColor(0x25, 0x63, 0xEB);
+            if (seriesCount == 1) {
+                baseColor = defaultColors[cat % defaultColors.size()];
+            }
             gradient.setColorAt(0, baseColor.lighter(120));
             gradient.setColorAt(1, baseColor.darker(110));
 
-            // Draw shadow first
             QRectF shadow = bar.translated(2, 2);
             painter.fillRect(shadow, QColor(0, 0, 0, 30));
-
-            // Draw the main bar with gradient
             painter.fillRect(bar, QBrush(gradient));
-
-            // Add border
             painter.setPen(QPen(baseColor.darker(120), 1));
             painter.drawRect(bar);
         }
-
-        // Draw category label with better styling
+        // Nhãn dưới cột là ngày/tháng
         painter.setPen(QColor(0x37, 0x41, 0x51));
         QFont labelFont = painter.font();
         labelFont.setPointSize(qMax(8, labelFont.pointSize() - 1));
         painter.setFont(labelFont);
-        painter.drawText(QRectF(baseX, plotArea.bottom() + 5, groupWidth, 25.0),
-                        Qt::AlignCenter, categories_[cat]);
+        painter.drawText(QRectF(baseX, plotArea.bottom() + 5, groupWidth, 25.0), Qt::AlignCenter, categories_[cat]);
+    }
+
+    // Vẽ legend cho từng thể loại ở góc phải
+    int legendX = plotArea.right() + 40;
+    int legendY = plotArea.top() + 10;
+    int legendBox = 18;
+    int legendSpacing = 8;
+    QFont legendFont = painter.font();
+    legendFont.setPointSize(11);
+    painter.setFont(legendFont);
+    painter.setPen(QColor(0x37, 0x41, 0x51));
+
+    if (seriesCount == 1) {
+        painter.drawText(legendX, legendY - legendBox - 8, QStringLiteral("Chú thích màu theo thể loại"));
+        for (int cat = 0; cat < categoryCount; ++cat) {
+            QColor color = defaultColors[cat % defaultColors.size()];
+            QRect colorRect(legendX, legendY + cat * (legendBox + legendSpacing), legendBox, legendBox);
+            painter.fillRect(colorRect, color);
+            painter.setPen(QPen(color.darker(120), 1));
+            painter.drawRect(colorRect);
+            painter.setPen(QColor(0x37, 0x41, 0x51));
+            painter.drawText(legendX + legendBox + 8,
+                             legendY + cat * (legendBox + legendSpacing) + legendBox - 3,
+                             categories_[cat]);
+        }
+    } else {
+        painter.drawText(legendX, legendY - legendBox - 8, QStringLiteral("Chú thích màu theo series"));
+        for (int si = 0; si < seriesCount; ++si) {
+            QColor color = series_[si].color.isValid() ? series_[si].color : QColor(0x25, 0x63, 0xEB);
+            QRect colorRect(legendX, legendY + si * (legendBox + legendSpacing), legendBox, legendBox);
+            painter.fillRect(colorRect, color);
+            painter.setPen(Qt::white);
+            painter.drawRect(colorRect);
+            painter.setPen(QColor(0x37, 0x41, 0x51));
+            painter.drawText(legendX + legendBox + 8,
+                             legendY + si * (legendBox + legendSpacing) + legendBox - 3,
+                             series_[si].name);
+        }
+    }
+
+    // Vẽ chú thích "Ngày/Tháng" bên ngoài trục X
+    painter.setPen(QColor(0x1F, 0x29, 0x37));
+    QFont dateFont = painter.font();
+    dateFont.setPointSize(13);
+    dateFont.setBold(true);
+    painter.setFont(dateFont);
+    if (!xAxisLabel_.isEmpty()) {
+        painter.drawText(QRectF(plotArea.left(), plotArea.bottom() + 35, plotArea.width(), 30),
+                         Qt::AlignCenter, xAxisLabel_);
     }
 
     // Draw value labels on top of bars if there's enough space
@@ -313,7 +390,7 @@ void StatsChart::drawLineChart(QPainter &painter, const QRect &plotArea) const {
 }
 
 void StatsChart::drawLegend(QPainter &painter, const QRect &plotArea) const {
-    if (series_.size() <= 1) return;
+    // Luôn vẽ legend, kể cả khi chỉ có 1 series
 
     const int legendHeight = 18;
     const int legendSpacing = 4;

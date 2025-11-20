@@ -132,7 +132,7 @@ void AccountDialog::accept() {
     QDialog::accept();
 }
 
-void AccountDialog::setStaffList(const QVector<model::Staff> &staffs) const {
+void AccountDialog::setStaffList(const custom::Vector<model::Staff> &staffs) const {
     // Clear except first placeholder
     const custom::CustomString currentSel = pbl2::bridge::toCustomString(staffCombo->currentData().toString());
     staffCombo->clear();

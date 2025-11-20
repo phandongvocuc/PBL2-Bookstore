@@ -38,7 +38,7 @@ QString displayBook(const Book &book) {
 namespace pbl2 {
 namespace ui {
 
-LoanDialog::LoanDialog(const QVector<model::Reader> &readers, const QVector<model::Book> &books, int maxBorrowDays, QWidget *parent)
+LoanDialog::LoanDialog(const custom::Vector<model::Reader> &readers, const custom::Vector<model::Book> &books, int maxBorrowDays, QWidget *parent)
         : QDialog(parent),
             readers(readers),
             books(books) {

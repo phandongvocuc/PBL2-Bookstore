@@ -9,6 +9,9 @@
 #include <QLineEdit>
 #include <QIcon>
 #include <QFrame>
+#include <QListWidget>
+#include <QVBoxLayout>
+#include <QDateTime>
 #include <QSize>
 #include <QTabBar>
 #include <QSignalBlocker>
@@ -505,8 +508,8 @@ QString reportStatusText(const QString &status) {
 }
 
 template <typename T>
-QVector<T> toQVector(const custom::DynamicArray<T> &values) {
-    QVector<T> result;
+custom::Vector<T> toQVector(const custom::DynamicArray<T> &values) {
+    custom::Vector<T> result;
     result.reserve(static_cast<int>(values.size()));
     for (typename custom::DynamicArray<T>::SizeType i = 0U; i < values.size(); ++i) {
         result.append(values[i]);
@@ -546,6 +549,10 @@ void MainWindow::setupUi() {
     if (ui->centralLayout) {
         ui->centralLayout->setStretch(0, 0);
         ui->centralLayout->setStretch(1, 1);
+    }
+    if (ui->chartsRowLayout) {
+        ui->chartsRowLayout->setStretch(0, 3);
+        ui->chartsRowLayout->setStretch(1, 2);
     }
 
     tabs = ui->tabs;
@@ -696,9 +703,9 @@ void MainWindow::setupUi() {
     if (ui->refreshButton) {
         ui->refreshButton->setText(tr("Tai lai"));
         connect(ui->refreshButton, &QPushButton::clicked, [this]() {
-            this->statusBar()->showMessage(tr("Dang tai lai..."));
+            notifyEvent(tr("Dang tai lai..."), EventSeverity::Info, 0);
             this->reloadData();
-            this->statusBar()->showMessage(tr("Da tai lai du lieu."), 2000);
+            notifyEvent(tr("Da tai lai du lieu."), EventSeverity::Success, 2000);
         });
     }
     if (ui->logoutButton) {
@@ -714,23 +721,7 @@ void MainWindow::setupUi() {
     userInfoLabel->setFont(accentFont);
     statusBar()->addPermanentWidget(userInfoLabel);
 
-    // Navigation toggle/pin button: when clicked, toggles pinned state of the
-    // navigation pane. When the pane is collapsed it becomes an icon-only
-    // vertical strip; hovering expands it temporarily unless pinned.
-    navToggleButton = new QPushButton(this);
-    navToggleButton->setText(tr("Ẩn"));
-    navToggleButton->setToolTip(tr("Ẩn/Hiện thanh điều hướng"));
-    navToggleButton->setFixedHeight(24);
-    navToggleButton->setCursor(Qt::PointingHandCursor);
-    connect(navToggleButton, &QPushButton::clicked, [this]() {
-        if (!navigationList) return;
-        if (navCollapsed) {
-            setNavigationCollapsed(false, true);
-        } else {
-            setNavigationCollapsed(true, false);
-        }
-    });
-    statusBar()->addPermanentWidget(navToggleButton);
+
 
     // Install hover event filter on the navigation list so we can expand on
     // hover when in collapsed (unpinned) mode.
@@ -818,6 +809,30 @@ void MainWindow::setupUi() {
 
     repositionNavRailButton();
 }
+
+void MainWindow::notifyEvent(const QString &message, EventSeverity severity, int durationMs) {
+    Q_UNUSED(severity);
+    const int duration = durationMs > 0 ? durationMs : 2000;
+    if (statusBar()) {
+        statusBar()->showMessage(message, duration);
+    }
+}
+
+void MainWindow::showInfoDialog(const QString &title, const QString &message) {
+    QMessageBox::information(this, title, message);
+}
+
+void MainWindow::showWarningDialog(const QString &title, const QString &message) {
+    QMessageBox::warning(this, title, message);
+}
+
+void MainWindow::showErrorDialog(const QString &title, const QString &message) {
+    QMessageBox::critical(this, title, message);
+}
+
+QMessageBox::StandardButton MainWindow::askEventQuestion(const QString &title, const QString &message, QMessageBox::StandardButtons buttons, QMessageBox::StandardButton defaultButton) {
+    return QMessageBox::question(this, title, message, buttons, defaultButton);
+}
 void MainWindow::configureBooksTab() {
     configureCardListWidget(booksList);
     // Allow books to display as a grid of cards (IconMode) so items appear
@@ -837,6 +852,7 @@ void MainWindow::configureBooksTab() {
     }
 
     if (bookSearchEdit) {
+        bookSearchEdit->setPlaceholderText(tr("Tim kiem sach (ma, ten, tac gia, the loai, nxb, trang thai... )"));
         connect(bookSearchEdit, &QLineEdit::textChanged, this, &MainWindow::applyBookFilter);
     }
     if (bookStatusFilter) {
@@ -858,6 +874,10 @@ void MainWindow::configureBooksTab() {
         ui->deleteBookButton->setVisible(adminRole);
         connect(ui->deleteBookButton, &QPushButton::clicked, [this]() { handleDeleteBook(); });
     }
+    if (ui->restockBookButton) {
+        ui->restockBookButton->setVisible(adminRole);
+        connect(ui->restockBookButton, &QPushButton::clicked, [this]() { handleRestockBook(); });
+    }
     if (ui->booksActionsGroup) {
         ui->booksActionsGroup->setVisible(adminRole);
     }
@@ -874,6 +894,7 @@ void MainWindow::configureReadersTab() {
     }
 
     if (readerSearchEdit) {
+        readerSearchEdit->setPlaceholderText(tr("Tim kiem ban doc (ma, ten, cccd, sdt, email, trang thai... )"));
         connect(readerSearchEdit, &QLineEdit::textChanged, this, &MainWindow::applyReaderFilter);
     }
     if (readerStatusFilter) {
@@ -922,6 +943,7 @@ void MainWindow::configureLoansTab() {
         connect(loanStatusFilter, &QComboBox::currentTextChanged, this, &MainWindow::applyLoanFilter);
     }
     if (loanSearchEdit) {
+        loanSearchEdit->setPlaceholderText(tr("Tim kiem tat ca phieu muon (ma, sach, ban doc, trang thai, ... )"));
         connect(loanSearchEdit, &QLineEdit::textChanged, this, &MainWindow::applyLoanFilter);
     }
     if (ui->loanFilterButton) {
@@ -988,20 +1010,19 @@ void MainWindow::configureReportsTab() {
         reportFromFilter->setCalendarPopup(true);
         reportFromFilter->setDisplayFormat(QStringLiteral("dd/MM/yyyy"));
         reportFromFilter->setDateRange(QDate(2000, 1, 1), QDate(7999, 12, 31));
-        reportFromFilter->setSpecialValueText(tr("Bat ky"));
-        reportFromFilter->setDate(reportFromFilter->minimumDate());
+        reportFromFilter->setDate(QDate::currentDate());
         connect(reportFromFilter, &QDateEdit::dateChanged, this, &MainWindow::applyReportFilter);
     }
     if (reportToFilter) {
         reportToFilter->setCalendarPopup(true);
         reportToFilter->setDisplayFormat(QStringLiteral("dd/MM/yyyy"));
         reportToFilter->setDateRange(QDate(2000, 1, 1), QDate(7999, 12, 31));
-        reportToFilter->setSpecialValueText(tr("Bat ky"));
-        reportToFilter->setDate(reportToFilter->minimumDate());
+        reportToFilter->setDate(QDate::currentDate());
         connect(reportToFilter, &QDateEdit::dateChanged, this, &MainWindow::applyReportFilter);
     }
 
     if (reportStaffFilter) {
+        reportStaffFilter->setPlaceholderText(tr("Tim kiem nhan vien lap bao cao"));
         connect(reportStaffFilter, &QLineEdit::textChanged, this, &MainWindow::applyReportFilter);
     }
     if (ui->reportApplyButton) {
@@ -1066,6 +1087,27 @@ void MainWindow::configureStatsTab() {
     }
     
     timePeriodCombo = searchWidget->findChild<QComboBox *>(QStringLiteral("timePeriodCombo"));
+    QDateEdit *customStartDateEdit = searchWidget->findChild<QDateEdit *>(QStringLiteral("customStartDateEdit"));
+    QDateEdit *customEndDateEdit = searchWidget->findChild<QDateEdit *>(QStringLiteral("customEndDateEdit"));
+    if (customStartDateEdit && customEndDateEdit) {
+        customStartDateEdit->setVisible(false);
+        customEndDateEdit->setVisible(false);
+    }
+    if (timePeriodCombo) {
+        timePeriodCombo->clear();
+        timePeriodCombo->addItem(tr("Hom nay"));
+        timePeriodCombo->addItem(tr("7 ngay gan day"));
+        timePeriodCombo->addItem(tr("Thang nay"));
+        timePeriodCombo->addItem(tr("Thang truoc"));
+        timePeriodCombo->addItem(tr("Tuy chon..."));
+        if (customStartDateEdit && customEndDateEdit) {
+            connect(timePeriodCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=](int idx) {
+                bool custom = (idx == 4);
+                customStartDateEdit->setVisible(custom);
+                customEndDateEdit->setVisible(custom);
+            });
+        }
+    }
     loanStatsTable = searchWidget->findChild<QTableWidget *>(QStringLiteral("loanStatsTable"));
     applyFilterButton = searchWidget->findChild<QPushButton *>(QStringLiteral("applyFilterButton"));
     
@@ -1085,6 +1127,7 @@ void MainWindow::configureStatsTab() {
     // Get charts
     topBooksChart = searchWidget->findChild<StatsChart *>(QStringLiteral("topBooksChart"));
     revenueChart = searchWidget->findChild<StatsChart *>(QStringLiteral("revenueChart"));
+    genreChart = searchWidget->findChild<StatsChart *>(QStringLiteral("genreChart"));
     activeReadersList = searchWidget->findChild<QListWidget *>(QStringLiteral("activeReadersList"));
     topBooksList = searchWidget->findChild<QListWidget *>(QStringLiteral("topBooksList"));
     
@@ -1249,7 +1292,7 @@ void MainWindow::populateBooks() {
     applyBookFilter();
 }
 
-void MainWindow::fillBooksList(const QVector<model::Book> &books) const {
+void MainWindow::fillBooksList(const custom::Vector<model::Book> &books) const {
     if (!booksList) return;
 
     const QListWidgetItem *currentItem = booksList->currentItem();
@@ -1274,7 +1317,7 @@ void MainWindow::fillBooksList(const QVector<model::Book> &books) const {
         const QString title = bridge::toQString(book.getTitle());
         const QString author = bridge::toQString(book.getAuthor());
         const QString genre = bridge::toQString(book.getGenre());
-        const QString isbn = bridge::toQString(book.getIsbn());
+        const QString publisher = bridge::toQString(book.getPublisher());
         const QDate publishDate = bridge::toQDate(book.getPublishDate());
         const QString dateText = publishDate.isValid() ? publishDate.toString(Qt::ISODate) : tr("Khong ro");
         const QString status = bookStatusText(book.getStatus());
@@ -1282,8 +1325,8 @@ void MainWindow::fillBooksList(const QVector<model::Book> &books) const {
 
         const QString headerLine = tr("%1 - %2").arg(id, title);
         const QString metaLine = tr("Tac gia: %1 | The loai: %2").arg(author, genre);
-        const QString detailLine = tr("ISBN: %1 | Phat hanh: %2 | Nam: %3")
-                                     .arg(isbn.isEmpty() ? tr("Khong ro") : isbn)
+        const QString detailLine = tr("Nha XB: %1 | Phat hanh: %2 | Nam: %3")
+                                     .arg(publisher.isEmpty() ? tr("Khong ro") : publisher)
                                      .arg(dateText)
                                      .arg(book.getPublishYear());
 
@@ -1323,25 +1366,21 @@ void MainWindow::fillBooksList(const QVector<model::Book> &books) const {
 }
 
 void MainWindow::applyBookFilter() {
-    QVector<model::Book> filtered;
-    filtered.reserve(booksCache.size());
+    custom::Vector<model::Book> filtered;
     const QString term = bookSearchEdit ? bookSearchEdit->text().trimmed().toLower() : QString();
     const QString statusFilter = bookStatusFilter ? bookStatusFilter->currentData().toString() : QStringLiteral("ALL");
     for (const auto &book : booksCache) {
+        const QString bookStatus = bridge::toQString(model::canonicalBookStatus(book.getStatus()));
         if (!term.isEmpty()) {
             const QString haystack = QStringList{
-                                             bridge::toQString(book.getId()),
-                                             bridge::toQString(book.getTitle()),
-                                             bridge::toQString(book.getAuthor()),
-                                             bridge::toQString(book.getGenre()),
-                                             bridge::toQString(book.getIsbn())}
-                                         .join(' ')
-                                         .toLower();
+                bridge::toQString(book.getId()),
+                bridge::toQString(book.getTitle()),
+                bridge::toQString(book.getAuthor()),
+                bridge::toQString(book.getGenre()),
+                bridge::toQString(book.getPublisher()),
+                bookStatus
+            }.join(' ').toLower();
             if (!haystack.contains(term)) continue;
-        }
-        const QString bookStatus = bridge::toQString(model::canonicalBookStatus(book.getStatus()));
-        if (bookStatus == QStringLiteral("MAT") || bookStatus == QStringLiteral("HONG")) {
-            continue;
         }
         if (statusFilter != QStringLiteral("ALL") && bookStatus != statusFilter) {
             continue;
@@ -1356,7 +1395,7 @@ void MainWindow::populateReaders() {
     applyReaderFilter();
 }
 
-void MainWindow::fillReadersList(const QVector<model::Reader> &readers) const {
+void MainWindow::fillReadersList(const custom::Vector<model::Reader> &readers) const {
     if (!readersList) return;
 
     const QListWidgetItem *currentItem = readersList->currentItem();
@@ -1436,26 +1475,30 @@ void MainWindow::fillReadersList(const QVector<model::Reader> &readers) const {
 }
 
 void MainWindow::applyReaderFilter() {
-    QVector<model::Reader> filtered;
+    custom::Vector<model::Reader> filtered;
     filtered.reserve(readersCache.size());
     const QString term = readerSearchEdit ? readerSearchEdit->text().trimmed().toLower() : QString();
     const QString statusSelection = readerStatusFilter ? readerStatusFilter->currentData().toString() : QStringLiteral("ALL");
     const QString statusFilter = statusSelection.isEmpty() ? QStringLiteral("ALL") : statusSelection;
     for (const auto &reader : readersCache) {
+        const QString statusText = reader.isActive() ? tr("Dang hoat dong") : tr("Tam khoa");
+        const QString statusCode = reader.isActive() ? QStringLiteral("ACTIVE") : QStringLiteral("INACTIVE");
         if (!term.isEmpty()) {
-        const QString haystack = QStringList{bridge::toQString(reader.getId()),
-                         bridge::toQString(reader.getFullName()),
-                         bridge::toQString(reader.getGender()),
-                         bridge::toQString(reader.getPhone()),
-                         bridge::toQString(reader.getEmail()),
-                         bridge::toQString(reader.getAddress()),
-                         bridge::toQString(reader.getIdentityCard()),
-                         bridge::toQString(reader.getNotes()),
-                         reader.getCreatedDate().isValid() ? bridge::toQDate(reader.getCreatedDate()).toString(Qt::ISODate) : QString(),
-                         reader.getExpiryDate().isValid() ? bridge::toQDate(reader.getExpiryDate()).toString(Qt::ISODate) : QString(),
-                         QString::number(reader.getTotalBorrowed())}
-                     .join(' ')
-                     .toLower();
+            const QString haystack = QStringList{
+                bridge::toQString(reader.getId()),
+                bridge::toQString(reader.getFullName()),
+                bridge::toQString(reader.getGender()),
+                bridge::toQString(reader.getPhone()),
+                bridge::toQString(reader.getEmail()),
+                bridge::toQString(reader.getAddress()),
+                bridge::toQString(reader.getIdentityCard()),
+                bridge::toQString(reader.getNotes()),
+                reader.getCreatedDate().isValid() ? bridge::toQDate(reader.getCreatedDate()).toString(Qt::ISODate) : QString(),
+                reader.getExpiryDate().isValid() ? bridge::toQDate(reader.getExpiryDate()).toString(Qt::ISODate) : QString(),
+                QString::number(reader.getTotalBorrowed()),
+                statusText,
+                statusCode
+            }.join(' ').toLower();
             if (!haystack.contains(term)) continue;
         }
         if (statusFilter == QStringLiteral("ACTIVE") && !reader.isActive()) {
@@ -1474,7 +1517,7 @@ void MainWindow::populateLoans() {
     applyLoanFilter();
 }
 
-void MainWindow::fillLoansList(const QVector<model::Loan> &loans) {
+void MainWindow::fillLoansList(const custom::Vector<model::Loan> &loans) {
     if (!loansList) return;
 
     const QListWidgetItem *currentItem = loansList->currentItem();
@@ -1577,7 +1620,7 @@ void MainWindow::fillLoansList(const QVector<model::Loan> &loans) {
 }
 
 void MainWindow::applyLoanFilter() {
-    QVector<model::Loan> filtered;
+    custom::Vector<model::Loan> filtered;
     filtered.reserve(loansCache.size());
     const QString term = loanSearchEdit ? loanSearchEdit->text().trimmed().toLower() : QString();
     const QString statusFilter = loanStatusFilter ? loanStatusFilter->currentData().toString() : QStringLiteral("ALL");
@@ -1586,9 +1629,10 @@ void MainWindow::applyLoanFilter() {
         const QString readerId = bridge::toQString(loan.getReaderId());
         const QString bookId = bridge::toQString(loan.getBookId());
         const QString statusCode = normalizedStatus(bridge::toQString(loan.getStatus()));
+        const QString statusText = loanStatusText(bridge::toQString(loan.getStatus()));
 
         if (!term.isEmpty()) {
-            const QString haystack = QStringList{loanId, readerId, bookId}
+            const QString haystack = QStringList{loanId, readerId, bookId, statusCode, statusText}
                                          .join(' ')
                                          .toLower();
             if (!haystack.contains(term)) continue;
@@ -1606,7 +1650,7 @@ void MainWindow::populateReports() {
     applyReportFilter();
 }
 
-void MainWindow::fillReportsList(const QVector<model::ReportRequest> &reports) const {
+void MainWindow::fillReportsList(const custom::Vector<model::ReportRequest> &reports) const {
     if (!reportsList) return;
 
     const QListWidgetItem *currentItem = reportsList->currentItem();
@@ -1676,7 +1720,7 @@ void MainWindow::fillReportsList(const QVector<model::ReportRequest> &reports) c
     }
 }
 
-void MainWindow::fillAccountsList(const QVector<model::Account> &accounts) {
+void MainWindow::fillAccountsList(const custom::Vector<model::Account> &accounts) {
     if (!accountsList) return;
 
     const QListWidgetItem *currentItem = accountsList->currentItem();
@@ -1770,7 +1814,7 @@ void MainWindow::fillAccountsList(const QVector<model::Account> &accounts) {
 }
 
 void MainWindow::applyReportFilter() {
-    QVector<model::ReportRequest> filtered;
+    custom::Vector<model::ReportRequest> filtered;
     filtered.reserve(reportsCache.size());
     const QString staffTerm = reportStaffFilter ? reportStaffFilter->text().trimmed().toLower() : QString();
     const bool hasFrom = reportFromFilter && reportFromFilter->date() != reportFromFilter->minimumDate();
@@ -1804,12 +1848,12 @@ void MainWindow::handleViewReportDetails() {
     if (!reportsList) return;
     const auto rowOpt = currentRow(reportsList);
     if (!rowOpt.has_value()) {
-        QMessageBox::information(this, tr("Canh bao"), tr("Vui long chon mot bao cao."));
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot bao cao."));
         return;
     }
     const QListWidgetItem *item = reportsList->item(rowOpt.value());
     if (!item) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh bao cao da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh bao cao da chon."));
         return;
     }
     QString requestId = item->data(kCardRoleId).toString();
@@ -1817,7 +1861,7 @@ void MainWindow::handleViewReportDetails() {
         requestId = item->data(Qt::UserRole).toString();
     }
     if (requestId.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh bao cao da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh bao cao da chon."));
         return;
     }
 
@@ -1830,7 +1874,7 @@ void MainWindow::handleViewReportDetails() {
         }
     }
     if (!selectedReport) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong tim thay bao cao da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong tim thay bao cao da chon."));
         return;
     }
 
@@ -1852,7 +1896,7 @@ void MainWindow::updateStatsCards() {
     const QDate today = QDate::currentDate();
     const QDate monthStart = QDate(today.year(), today.month(), 1);
 
-    const int totalBooks = booksCache.size();
+    int totalBooks = booksCache.size();
     const int totalReaders = readersCache.size();
     
     // Filter loans by date range
@@ -1901,7 +1945,7 @@ void MainWindow::updateStatsCards() {
     if (totalFinesValue) {
         QString finesText = viLocale.toString(totalFines);
         if (totalFines > 0) {
-            finesText += QStringLiteral(".000");
+            finesText += QStringLiteral("");
         }
         finesText += QString::fromUtf8("đ");
         totalFinesValue->setText(finesText);
@@ -1912,7 +1956,7 @@ void MainWindow::updateStatsCards() {
     if (monthlyFinesValue) {
         QString monthlyText = viLocale.toString(monthlyFines);
         if (monthlyFines > 0) {
-            monthlyText += QStringLiteral(".000");
+            monthlyText += QStringLiteral("");
         }
         monthlyText += QString::fromUtf8("đ");
         monthlyFinesValue->setText(monthlyText);
@@ -1920,168 +1964,208 @@ void MainWindow::updateStatsCards() {
 }
 
 void MainWindow::updateStatsCharts() {
-    // Update top books chart
-    if (topBooksChart) {
-        QMap<QString, int> bookBorrowCounts;
+    // Shared list so both charts stay consistent on genre labels/order
+    const QStringList allGenres = {
+        QStringLiteral("Truyen tranh"),
+        QStringLiteral("Khoa hoc"),
+        QStringLiteral("Ky nang mem"),
+        QStringLiteral("Ky nang song"),
+        QStringLiteral("Van hoc"),
+        QStringLiteral("Lich su"),
+        QStringLiteral("Khoa hoc vien tuong"),
+        QStringLiteral("Khac"),
+        QStringLiteral("Kinh te"),
+        QStringLiteral("Tieu thuyet"),
+        QStringLiteral("Cong nghe"),
+        QStringLiteral("Tam ly"),
+        QStringLiteral("Ngon tinh")
+    };
+
+    // Genre distribution
+    if (genreChart) {
+        // Ensure all known genres appear on the X axis with 0 counts when absent
+        custom::Map<QString, int> genreCounts;
+        for (const auto &g : allGenres) {
+            genreCounts[g] = 0;
+        }
+
         for (const auto &loan : loansCache) {
             const QDate borrowDate = loan.getBorrowDate().isValid() ? bridge::toQDate(loan.getBorrowDate()) : QDate();
-            
-            // Skip loans outside the selected date range
-            if (!borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) {
-                continue;
-            }
-            
-            QString bookId = bridge::toQString(loan.getBookId());
-            QString bookTitle = bookId;
-            
+            if (!borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) continue;
+
+            QString bookGenre;
+            const QString bookId = bridge::toQString(loan.getBookId());
             for (const auto &book : booksCache) {
                 if (bridge::toQString(book.getId()) == bookId) {
-                    bookTitle = bridge::toQString(book.getTitle());
-                    if (bookTitle.length() > 20) {
-                        bookTitle = bookTitle.left(17) + "...";
-                    }
+                    bookGenre = bridge::toQString(book.getGenre());
                     break;
                 }
             }
-            bookBorrowCounts[bookTitle]++;
+            if (bookGenre.isEmpty()) bookGenre = QStringLiteral("Khac");
+
+            if (!statsSelectedGenre.isEmpty() &&
+                statsSelectedGenre != QStringLiteral("Tất cả") &&
+                statsSelectedGenre != QStringLiteral("Tat ca") &&
+                bookGenre != statsSelectedGenre) {
+                continue;
+            }
+
+            if (genreCounts.value(bookGenre, -1) == -1) {
+                genreCounts[bookGenre] = 0;
+            }
+            genreCounts[bookGenre]++;
         }
-        
-        // Get top 5
-        QList<QPair<QString, int>> items;
-        for (auto it = bookBorrowCounts.constBegin(); it != bookBorrowCounts.constEnd(); ++it) {
-            items.append(qMakePair(it.key(), it.value()));
+
+        StatsChart::Series series;
+        series.name = tr("So luot muon");
+        for (const auto &g : allGenres) {
+            series.values.append(static_cast<double>(genreCounts.value(g, 0)));
         }
-        std::sort(items.begin(), items.end(), [](const QPair<QString, int> &a, const QPair<QString, int> &b) {
-            return a.second > b.second;
-        });
-        
-        QStringList top5Labels;
-        QVector<double> top5Values;
-        int limit = std::min(5, static_cast<int>(items.size()));
-        for (int i = 0; i < limit; ++i) {
-            top5Labels.append(items[i].first);
-            top5Values.append(items[i].second);
+
+        genreChart->setCategories(allGenres);
+        genreChart->setSeries({series});
+        genreChart->setTitle(tr("Thong ke theo the loai"));
+        genreChart->setAxisLabels(tr("The loai"), tr("So luot muon"));
+    }
+
+    // Top borrowed genres (chart + side list)
+    if (topBooksChart) {
+        custom::Map<QString, int> genreBorrowCounts;
+        // Initialize to 0 so all genres show up on the chart
+        for (const auto &g : allGenres) {
+            genreBorrowCounts[g] = 0;
         }
-        
-        topBooksChart->setCategories(top5Labels);
+
+        for (const auto &loan : loansCache) {
+            const QDate borrowDate = loan.getBorrowDate().isValid() ? bridge::toQDate(loan.getBorrowDate()) : QDate();
+            if (!borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) continue;
+
+            const QString bookId = bridge::toQString(loan.getBookId());
+            QString bookGenre;
+            for (const auto &book : booksCache) {
+                if (bridge::toQString(book.getId()) == bookId) {
+                    bookGenre = bridge::toQString(book.getGenre());
+                    break;
+                }
+            }
+            if (bookGenre.isEmpty()) bookGenre = QStringLiteral("Khac");
+
+            if (!statsSelectedGenre.isEmpty() &&
+                statsSelectedGenre != QStringLiteral("Tất cả") &&
+                statsSelectedGenre != QStringLiteral("Tat ca") &&
+                bookGenre != statsSelectedGenre) {
+                continue;
+            }
+
+            if (genreBorrowCounts.value(bookGenre, -1) == -1) {
+                genreBorrowCounts[bookGenre] = 0;
+            }
+            genreBorrowCounts[bookGenre]++;
+        }
+
         StatsChart::Series series;
         series.name = QStringLiteral("So luot muon");
-        series.values = top5Values;
         series.color = QColor(0x1d, 0x4e, 0xd8);
+        for (const auto &g : allGenres) {
+            series.values.append(static_cast<double>(genreBorrowCounts.value(g, 0)));
+        }
+
+        topBooksChart->setCategories(allGenres);
         topBooksChart->setSeries({series});
-        
-        // Populate top books list (bên phải)
+        topBooksChart->setTitle(tr("The loai muon nhieu nhat"));
+        topBooksChart->setAxisLabels(tr("The loai"), tr("So luot muon"));
+
+        // Populate the list with the most-borrowed genres for quick reference
+        QList<QPair<QString, int>> items;
+        for (auto it = genreBorrowCounts.constBegin(); it != genreBorrowCounts.constEnd(); ++it) {
+            items.append(qMakePair(it.key(), it.value()));
+        }
+        std::sort(items.begin(), items.end(), [](const auto &a, const auto &b) { return a.second > b.second; });
+
         if (topBooksList) {
             topBooksList->clear();
+            const int limit = std::min(5, static_cast<int>(items.size()));
             for (int i = 0; i < limit; ++i) {
-                QListWidgetItem *item = new QListWidgetItem(items[i].first);
+                if (items[i].second <= 0) continue;
+                auto *item = new QListWidgetItem(items[i].first);
                 item->setData(Qt::UserRole + 1, QString::number(items[i].second));
                 topBooksList->addItem(item);
             }
         }
     }
-    
-    // Update revenue bar chart (show monthly revenue breakdown)
+
+    // Revenue split chart
     if (revenueChart) {
         qint64 totalFines = 0;
         for (const auto &loan : loansCache) {
             const QDate borrowDate = loan.getBorrowDate().isValid() ? bridge::toQDate(loan.getBorrowDate()) : QDate();
-            
-            // Skip loans outside the selected date range
-            if (!borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) {
-                continue;
-            }
-            
+            if (!borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) continue;
             totalFines += std::max(0, loan.getFine());
         }
-        
-        int cardFees = static_cast<int>(totalFines * 0.7 / 1000);  // Convert to thousands
-        int fines = static_cast<int>(totalFines * 0.3 / 1000);
-        
+
+        const int cardFees = static_cast<int>(totalFines * 0.7 / 1000);  // Convert to thousands
+        const int fines = static_cast<int>(totalFines * 0.3 / 1000);
+
         QStringList categories;
         categories << QStringLiteral("Lam the") << QStringLiteral("Tien phat");
-        
+
         StatsChart::Series series;
         series.name = QStringLiteral("Doanh thu (nghin dong)");
         series.values = {static_cast<double>(cardFees), static_cast<double>(fines)};
-        series.color = QColor(59, 130, 246);  // Blue
-        
+        series.color = QColor(59, 130, 246);
+
         revenueChart->setCategories(categories);
         revenueChart->setSeries({series});
         revenueChart->setValueSuffix(QStringLiteral("k"));
     }
-    
-    // Update active readers list
+
+    // Active readers list
     if (activeReadersList) {
         activeReadersList->clear();
-        
-        // Count total borrows per reader
-        QMap<QString, int> readerBorrowCounts;
+
+        custom::Map<QString, int> readerBorrowCounts;
+        QSet<QString> overdueReaders;
+
+        const QDate today = QDate::currentDate();
         for (const auto &loan : loansCache) {
             const QDate borrowDate = loan.getBorrowDate().isValid() ? bridge::toQDate(loan.getBorrowDate()) : QDate();
-            
-            // Skip loans outside the selected date range
-            if (!borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) {
-                continue;
-            }
-            
-            QString readerId = bridge::toQString(loan.getReaderId());
+            if (!borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) continue;
+
+            const QString readerId = bridge::toQString(loan.getReaderId());
             readerBorrowCounts[readerId]++;
+
+            const QString status = normalizedStatus(bridge::toQString(loan.getStatus()));
+            const QDate due = loan.getDueDate().isValid() ? bridge::toQDate(loan.getDueDate()) : QDate();
+            const bool overdue = (status == QStringLiteral("OVERDUE")) ||
+                                 (status == QStringLiteral("BORROWED") && due.isValid() && due < today);
+            if (overdue) overdueReaders.insert(readerId);
         }
-        
-        // Get top readers
-        QList<QPair<QString, int>> readerItems;
+
+        QList<QPair<QString, int>> ranked;
+        ranked.reserve(readersCache.size());
         for (const auto &reader : readersCache) {
             if (!reader.isActive()) continue;
-            QString readerId = bridge::toQString(reader.getId());
-            int borrowCount = readerBorrowCounts.value(readerId, 0);
-            if (borrowCount > 0) {
-                QString readerName = bridge::toQString(reader.getFullName());
-                readerItems.append(qMakePair(readerName, borrowCount));
-            }
+            const QString readerId = bridge::toQString(reader.getId());
+            ranked.append(qMakePair(readerId, readerBorrowCounts.value(readerId, 0)));
         }
-        
-        std::sort(readerItems.begin(), readerItems.end(), [](const QPair<QString, int> &a, const QPair<QString, int> &b) {
-            return a.second > b.second;
-        });
-        
-        int limit = std::min(5, static_cast<int>(readerItems.size()));
-        for (int i = 0; i < limit; ++i) {
-            QString readerName = readerItems[i].first;
-            int borrowCount = readerItems[i].second;
-            
-            // Kiểm tra trạng thái trễ hạn
-            bool hasOverdue = false;
-            QString readerId;
-            for (const auto &reader : readersCache) {
-                if (bridge::toQString(reader.getFullName()) == readerName) {
-                    readerId = bridge::toQString(reader.getId());
-                    break;
-                }
-            }
-            
-            if (!readerId.isEmpty()) {
-                const QDate today = QDate::currentDate();
-                for (const auto &loan : loansCache) {
-                    if (bridge::toQString(loan.getReaderId()) == readerId) {
-                        const QDate dueDate = loan.getDueDate().isValid() ? bridge::toQDate(loan.getDueDate()) : QDate();
-                        if (dueDate.isValid() && !loan.getReturnDate().isValid() && today > dueDate) {
-                            hasOverdue = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            
-            // Format: ● Tên (icon trễ hạn nếu có)      số
-            QString icon = hasOverdue ? QString::fromUtf8("⚠") : QString::fromUtf8("●");
-            QString displayText = icon + QString(" ") + readerName;
+        std::sort(ranked.begin(), ranked.end(), [](const auto &a, const auto &b) { return a.second > b.second; });
+
+        for (const auto &entry : ranked) {
+            const auto readerOpt = std::find_if(readersCache.cbegin(), readersCache.cend(), [&](const model::Reader &r) {
+                return bridge::toQString(r.getId()) == entry.first;
+            });
+            if (readerOpt == readersCache.cend()) continue;
+
+            const QString readerName = bridge::toQString(readerOpt->getFullName());
+            const bool hasOverdue = overdueReaders.contains(entry.first);
+            const QString icon = hasOverdue ? QString::fromUtf8("⚠") : QString::fromUtf8("●");
+            QString displayText = icon + QStringLiteral(" ") + readerName;
             if (hasOverdue) {
-                displayText += QString("\n   Tre han 1 lan");
+                displayText += QStringLiteral("\n   Tre han");
             }
-            
-            QListWidgetItem *item = new QListWidgetItem(displayText);
-            item->setData(Qt::UserRole + 1, QString::number(borrowCount));
+
+            auto *item = new QListWidgetItem(displayText);
+            item->setData(Qt::UserRole + 1, QString::number(entry.second));
             activeReadersList->addItem(item);
         }
     }
@@ -2089,21 +2173,47 @@ void MainWindow::updateStatsCharts() {
 
 void MainWindow::applyStatsFilter() {
     const QDate today = QDate::currentDate();
-    
     // Get selected time period
-    QString timePeriod = timePeriodCombo ? timePeriodCombo->currentText() : QStringLiteral("Tuan nay");
-    
+    QString timePeriod = timePeriodCombo ? timePeriodCombo->currentText() : QStringLiteral("Hom nay");
+    // Get selected genre if available
+    QString selectedGenre;
+    if (!genreFilterCombo) {
+        const QWidget *searchWidget = ui->statsTab;
+        if (const auto scrollContent = ui->statsTab->findChild<QWidget *>(QStringLiteral("statsScrollContent"))) {
+            searchWidget = scrollContent;
+        }
+        genreFilterCombo = searchWidget->findChild<QComboBox *>(QStringLiteral("genreFilterCombo"));
+    }
+    if (genreFilterCombo) selectedGenre = genreFilterCombo->currentText();
+    // Store for chart update
+    this->statsSelectedGenre = selectedGenre;
     // Calculate date range
     QDate startDate;
     QDate endDate = today;
-    
-    if (timePeriod == QStringLiteral("Tuan nay")) {
-        startDate = today.addDays(-(today.dayOfWeek() - 1));
+    // Lấy 2 QDateEdit custom nếu có
+    const QWidget *searchWidget = ui->statsTab;
+    if (const auto scrollContent = ui->statsTab->findChild<QWidget *>(QStringLiteral("statsScrollContent"))) {
+        searchWidget = scrollContent;
+    }
+    QDateEdit *customStartDateEdit = searchWidget->findChild<QDateEdit *>(QStringLiteral("customStartDateEdit"));
+    QDateEdit *customEndDateEdit = searchWidget->findChild<QDateEdit *>(QStringLiteral("customEndDateEdit"));
+
+    if (timePeriod == QStringLiteral("Hom nay")) {
+        startDate = today;
+    } else if (timePeriod == QStringLiteral("7 ngay gan day")) {
+        startDate = today.addDays(-6);
     } else if (timePeriod == QStringLiteral("Thang nay")) {
         startDate = QDate(today.year(), today.month(), 1);
-    } else if (timePeriod == QStringLiteral("Nam nay")) {
-        startDate = QDate(today.year(), 1, 1);
-    } else { // Tat ca
+    } else if (timePeriod == QStringLiteral("Thang truoc")) {
+        int prevMonth = today.month() - 1;
+        int year = today.year();
+        if (prevMonth == 0) { prevMonth = 12; year--; }
+        startDate = QDate(year, prevMonth, 1);
+        endDate = QDate(year, prevMonth, QDate(year, prevMonth, 1).daysInMonth());
+    } else if (timePeriod == QStringLiteral("Tuy chon...") && customStartDateEdit && customEndDateEdit) {
+        startDate = customStartDateEdit->date();
+        endDate = customEndDateEdit->date();
+    } else {
         startDate = QDate(2000, 1, 1);
     }
     
@@ -2178,15 +2288,15 @@ void MainWindow::handleAddBook() {
     if (dialog.exec() != QDialog::Accepted) return;
     const auto newBook = dialog.book();
     if (const auto exists = std::any_of(booksCache.cbegin(), booksCache.cend(), [&](const model::Book &b) { return b.getId() == newBook.getId(); })) {
-        QMessageBox::warning(this, tr("Trung lap"), tr("Ma sach nay da ton tai."));
+        showWarningDialog(tr("Trung lap"), tr("Ma sach nay da ton tai."));
         return;
     }
     if (!bookService.addBook(newBook)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the them sach moi."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the them sach moi."));
         return;
     }
     reloadData();
-    statusBar()->showMessage(tr("Da them sach moi."), 2000);
+    notifyEvent(tr("Da them sach moi."), EventSeverity::Success, 2000);
 }
 
 void MainWindow::configureStaffsTab() {
@@ -2238,7 +2348,7 @@ void MainWindow::populateStaffs() {
     applyStaffFilter();
 }
 
-void MainWindow::fillStaffsList(const QVector<model::Staff> &staffs) const {
+void MainWindow::fillStaffsList(const custom::Vector<model::Staff> &staffs) const {
     if (!staffsList) return;
 
     const QListWidgetItem *currentItem = staffsList->currentItem();
@@ -2252,29 +2362,30 @@ void MainWindow::fillStaffsList(const QVector<model::Staff> &staffs) const {
 
     int restoreRow = -1;
     for (int row = 0; row < staffs.size(); ++row) {
-    const auto &s = staffs[row];
-    const QString id = bridge::toQString(s.getId());
-    const QString name = bridge::toQString(s.getFullName());
-    const QString gender = bridge::toQString(s.getGender());
-    const QString address = bridge::toQString(s.getAddress());
-    const QString phone = bridge::toQString(s.getPhone());
-    const QString email = bridge::toQString(s.getEmail());
-    const QString position = bridge::toQString(s.getPosition());
-    const QString notes = bridge::toQString(s.getNotes());
-    const QString dob = s.getDob().isValid() ? bridge::toQDate(s.getDob()).toString(Qt::ISODate) : tr("Khong ro");
-    const QString hireDate = s.getHireDate().isValid() ? bridge::toQDate(s.getHireDate()).toString(Qt::ISODate) : tr("Khong ro");
+        const auto &s = staffs[row];
+        const QString id = bridge::toQString(s.getId());
+        const QString name = bridge::toQString(s.getFullName());
+        const QString gender = bridge::toQString(s.getGender());
+        const QString address = bridge::toQString(s.getAddress());
+        const QString phone = bridge::toQString(s.getPhone());
+        const QString email = bridge::toQString(s.getEmail());
+        const QString position = bridge::toQString(s.getPosition());
+        const QString notes = bridge::toQString(s.getNotes());
+        const QString dob = s.getDob().isValid() ? bridge::toQDate(s.getDob()).toString(Qt::ISODate) : tr("Khong ro");
+        const QString hireDate = s.getHireDate().isValid() ? bridge::toQDate(s.getHireDate()).toString(Qt::ISODate) : tr("Khong ro");
         const bool active = s.isActive();
         const QString statusText = active ? tr("Dang lam viec") : tr("Da nghi viec");
         const QString statusCode = active ? QStringLiteral("ACTIVE") : QStringLiteral("INACTIVE");
 
         const QString headerLine = tr("%1 - %2").arg(id, name);
-        const QString metaLine = tr("SDT: %1 | Email: %2").arg(phone.isEmpty() ? tr("Khong ro") : phone)
-                                                          .arg(email.isEmpty() ? tr("Khong ro") : email);
-        const QString detailLine = tr("Dia chi: %1 | Gioi tinh: %2").arg(address.isEmpty() ? tr("Khong ro") : address)
-                                                                    .arg(gender.isEmpty() ? tr("Khong ro") : gender);
-        const QString secondaryLine = tr("Ngay vao: %1 | Sinh: %2")
-                                          .arg(hireDate)
-                                          .arg(dob);
+        const QString metaLine = tr("Vi tri: %1 | SDT: %2").arg(position.isEmpty() ? tr("Khong ro") : position)
+                                                          .arg(phone.isEmpty() ? tr("Khong ro") : phone);
+        const QString detailLine = tr("Email: %1 | Gioi tinh: %2").arg(email.isEmpty() ? tr("Khong ro") : email)
+                                                                  .arg(gender.isEmpty() ? tr("Khong ro") : gender);
+        const QString secondaryLine = tr("Sinh: %1 | Vao lam: %2 | Dia chi: %3")
+                                       .arg(dob)
+                                       .arg(hireDate)
+                                       .arg(address.isEmpty() ? tr("Khong ro") : address);
 
         auto *item = new QListWidgetItem();
         item->setData(Qt::UserRole, id);
@@ -2285,8 +2396,9 @@ void MainWindow::fillStaffsList(const QVector<model::Staff> &staffs) const {
         item->setData(kCardRoleSecondaryDetail, secondaryLine);
         item->setData(kCardRoleBadgeText, statusText);
         item->setData(kCardRoleBadgeColor, statusBadgeColor(statusCode));
-        item->setData(kCardRolePillText, position.isEmpty() ? QString() : tr("Chuc vu: %1").arg(position));
+        item->setData(kCardRolePillText, position.isEmpty() ? QString() : position);
         item->setData(kCardRolePillColor, QVariant());
+
         QStringList tooltipLines{headerLine, metaLine, detailLine, secondaryLine, tr("Trang thai: %1").arg(statusText)};
         if (!notes.trimmed().isEmpty()) {
             tooltipLines.append(tr("Ghi chu: %1").arg(notes));
@@ -2315,7 +2427,7 @@ void MainWindow::fillStaffsList(const QVector<model::Staff> &staffs) const {
 }
 
 void MainWindow::applyStaffFilter() {
-    QVector<model::Staff> filtered;
+    custom::Vector<model::Staff> filtered;
     filtered.reserve(staffsCache.size());
     const QString term = staffSearchEdit ? staffSearchEdit->text().trimmed().toLower() : QString();
     const QString statusCode = staffStatusFilter ? staffStatusFilter->currentData().toString() : QStringLiteral("ALL");
@@ -2354,27 +2466,27 @@ void MainWindow::handleAddStaff() {
     if (dialog.exec() != QDialog::Accepted) return;
     const auto staff = dialog.staff();
     if (const auto exists = std::any_of(staffsCache.cbegin(), staffsCache.cend(), [&](const model::Staff &s) { return s.getId() == staff.getId(); })) {
-        QMessageBox::warning(this, tr("Trung lap"), tr("Ma nhan vien da ton tai."));
+        showWarningDialog(tr("Trung lap"), tr("Ma nhan vien da ton tai."));
         return;
     }
     if (!staffService.addStaff(staff)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the them nhan vien."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the them nhan vien."));
         return;
     }
     reloadData();
-    statusBar()->showMessage(tr("Da them nhan vien."), 2000);
+    notifyEvent(tr("Da them nhan vien."), EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleEditStaff() {
     if (!adminRole) return;
     const auto row = currentRow(staffsList);
     if (!row.has_value()) {
-        QMessageBox::information(this, tr("Canh bao"), tr("Vui long chon mot nhan vien."));
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot nhan vien."));
         return;
     }
     const QListWidgetItem *item = staffsList ? staffsList->item(row.value()) : nullptr;
     if (!item) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh nhan vien da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh nhan vien da chon."));
         return;
     }
     QString staffId = item->data(kCardRoleId).toString();
@@ -2382,13 +2494,13 @@ void MainWindow::handleEditStaff() {
         staffId = item->data(Qt::UserRole).toString();
     }
     if (staffId.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh nhan vien da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh nhan vien da chon."));
         return;
     }
     const auto staffKey = bridge::toCustomString(staffId);
     const auto staffOpt = staffService.findById(staffKey);
     if (!staffOpt.has_value()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong tim thay nhan vien da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong tim thay nhan vien da chon."));
         return;
     }
     StaffDialog dialog(this);
@@ -2396,23 +2508,23 @@ void MainWindow::handleEditStaff() {
     if (dialog.exec() != QDialog::Accepted) return;
     const auto updated = dialog.staff();
     if (!staffService.updateStaff(updated)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the cap nhat nhan vien."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the cap nhat nhan vien."));
         return;
     }
     reloadData();
-    statusBar()->showMessage(tr("Da cap nhat nhan vien."), 2000);
+    notifyEvent(tr("Da cap nhat nhan vien."), EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleDeleteStaff() {
     if (!adminRole) return;
     const auto row = currentRow(staffsList);
     if (!row.has_value()) {
-        QMessageBox::information(this, tr("Canh bao"), tr("Vui long chon mot nhan vien."));
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot nhan vien."));
         return;
     }
     const QListWidgetItem *item = staffsList ? staffsList->item(row.value()) : nullptr;
     if (!item) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh nhan vien da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh nhan vien da chon."));
         return;
     }
     QString staffId = item->data(kCardRoleId).toString();
@@ -2420,7 +2532,7 @@ void MainWindow::handleDeleteStaff() {
         staffId = item->data(Qt::UserRole).toString();
     }
     if (staffId.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh nhan vien da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh nhan vien da chon."));
         return;
     }
     const auto staffKey = bridge::toCustomString(staffId);
@@ -2429,29 +2541,28 @@ void MainWindow::handleDeleteStaff() {
         return ::pbl2::bridge::toQString(acc.getEmployeeId()).compare(staffId, Qt::CaseInsensitive) == 0;
     });
     if (linked) {
-        QMessageBox::warning(this, tr("Rang buoc"), tr("Khong the xoa: Nhan vien dang duoc gan voi mot tai khoan."));
+        showWarningDialog(tr("Rang buoc"), tr("Khong the xoa: Nhan vien dang duoc gan voi mot tai khoan."));
         return;
     }
-    const auto reply = QMessageBox::question(this, tr("Xac nhan"), tr("Ban co chac chan muon xoa nhan vien %1?").arg(staffId));
-    if (reply != QMessageBox::Yes) return;
+    if (askEventQuestion(tr("Xac nhan"), tr("Ban co chac chan muon xoa nhan vien %1?").arg(staffId)) != QMessageBox::Yes) return;
     if (!staffService.removeStaff(staffKey)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the xoa nhan vien."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the xoa nhan vien."));
         return;
     }
     reloadData();
-    statusBar()->showMessage(tr("Da xoa nhan vien."), 2000);
+    notifyEvent(tr("Da xoa nhan vien."), EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleToggleStaffActive() {
     if (!adminRole) return;
     const auto row = currentRow(staffsList);
     if (!row.has_value()) {
-        QMessageBox::information(this, tr("Canh bao"), tr("Vui long chon mot nhan vien."));
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot nhan vien."));
         return;
     }
     const QListWidgetItem *item = staffsList ? staffsList->item(row.value()) : nullptr;
     if (!item) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh nhan vien da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh nhan vien da chon."));
         return;
     }
     QString staffId = item->data(kCardRoleId).toString();
@@ -2459,36 +2570,40 @@ void MainWindow::handleToggleStaffActive() {
         staffId = item->data(Qt::UserRole).toString();
     }
     if (staffId.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh nhan vien da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh nhan vien da chon."));
         return;
     }
     const auto staffKey = bridge::toCustomString(staffId);
     const auto staffOpt = staffService.findById(staffKey);
     if (!staffOpt.has_value()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong tim thay nhan vien da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong tim thay nhan vien da chon."));
         return;
     }
     const bool newActive = !staffOpt->isActive();
+    const QString confirmMessage = newActive
+        ? tr("Ban co chac chan muon mo khoa tai khoan nhan vien %1?").arg(staffId)
+        : tr("Ban co chac chan muon khoa tai khoan nhan vien %1?").arg(staffId);
+    if (askEventQuestion(tr("Xac nhan"), confirmMessage) != QMessageBox::Yes) return;
     if (!staffService.setStaffActive(staffKey, newActive)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the cap nhat trang thai nhan vien."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the cap nhat trang thai nhan vien."));
         return;
     }
     reloadData();
-    const QString message = newActive ? tr("Da danh dau nhan vien dang lam viec.")
-                                      : tr("Da danh dau nhan vien da nghi viec.");
-    statusBar()->showMessage(message, 2000);
+    const QString message = newActive ? tr("Da mo khoa tai khoan nhan vien %1.").arg(staffId)
+                                      : tr("Da khoa tai khoan nhan vien %1.").arg(staffId);
+    notifyEvent(message, EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleEditBook() {
     if (!adminRole) return;
     const auto row = currentRow(booksList);
     if (!row.has_value()) {
-        QMessageBox::information(this, tr("Canh bao"), tr("Vui long chon mot cuon sach."));
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot cuon sach."));
         return;
     }
     const QListWidgetItem *item = booksList->item(row.value());
     if (!item) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh sach da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh sach da chon."));
         return;
     }
     QString bookId = item->data(kCardRoleId).toString();
@@ -2496,13 +2611,13 @@ void MainWindow::handleEditBook() {
         bookId = item->data(Qt::UserRole).toString();
     }
     if (bookId.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh sach da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh sach da chon."));
         return;
     }
     const auto bookKey = bridge::toCustomString(bookId);
     const auto bookOpt = bookService.findById(bookKey);
     if (!bookOpt.has_value()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong tim thay sach da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong tim thay sach da chon."));
         return;
     }
     BookDialog dialog(this);
@@ -2510,23 +2625,23 @@ void MainWindow::handleEditBook() {
     if (dialog.exec() != QDialog::Accepted) return;
     const auto updated = dialog.book();
     if (!bookService.updateBook(updated)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the cap nhat thong tin sach."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the cap nhat thong tin sach."));
         return;
     }
     reloadData();
-    statusBar()->showMessage(tr("Da cap nhat thong tin sach."), 2000);
+    notifyEvent(tr("Da cap nhat thong tin sach."), EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleDeleteBook() {
     if (!adminRole) return;
     const auto row = currentRow(booksList);
     if (!row.has_value()) {
-        QMessageBox::information(this, tr("Canh bao"), tr("Vui long chon mot cuon sach."));
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot cuon sach."));
         return;
     }
     const QListWidgetItem *item = booksList->item(row.value());
     if (!item) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh sach da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh sach da chon."));
         return;
     }
     QString bookId = item->data(kCardRoleId).toString();
@@ -2534,18 +2649,66 @@ void MainWindow::handleDeleteBook() {
         bookId = item->data(Qt::UserRole).toString();
     }
     if (bookId.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh sach da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh sach da chon."));
         return;
     }
     const auto bookKey = bridge::toCustomString(bookId);
-    const auto reply = QMessageBox::question(this, tr("Xac nhan"), tr("Ban co chac chan muon xoa sach %1?").arg(bookId));
-    if (reply != QMessageBox::Yes) return;
+    if (askEventQuestion(tr("Xac nhan"), tr("Ban co chac chan muon xoa sach %1?").arg(bookId)) != QMessageBox::Yes) return;
     if (!bookService.removeBook(bookKey)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the xoa sach."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the xoa sach."));
         return;
     }
     reloadData();
-    statusBar()->showMessage(tr("Da xoa sach."), 2000);
+    notifyEvent(tr("Da xoa sach."), EventSeverity::Success, 2000);
+}
+
+void MainWindow::handleRestockBook() {
+    if (!adminRole) return;
+    const auto row = currentRow(booksList);
+    if (!row.has_value()) {
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot cuon sach."));
+        return;
+    }
+    const QListWidgetItem *item = booksList ? booksList->item(row.value()) : nullptr;
+    if (!item) {
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh sach da chon."));
+        return;
+    }
+    QString bookId = item->data(kCardRoleId).toString();
+    if (bookId.isEmpty()) {
+        bookId = item->data(Qt::UserRole).toString();
+    }
+    if (bookId.isEmpty()) {
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh sach da chon."));
+        return;
+    }
+    const auto bookKey = bridge::toCustomString(bookId);
+    const auto bookOpt = bookService.findById(bookKey);
+    if (!bookOpt.has_value()) {
+        showWarningDialog(tr("Khong tim thay"), tr("Khong tim thay sach da chon."));
+        return;
+    }
+
+    bool ok = false;
+    const int amount = QInputDialog::getInt(
+        this,
+        tr("Nhap hang"),
+        tr("So luong nhap them"),
+        10,
+        1,
+        100000,
+        1,
+        &ok);
+    if (!ok || amount <= 0) return;
+
+    model::Book updated = *bookOpt;
+    updated.setQuantity(updated.getQuantity() + amount);
+    if (!bookService.updateBook(updated)) {
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the cap nhat thong tin sach."));
+        return;
+    }
+    reloadData();
+    notifyEvent(tr("Da nhap them %1 ban cho %2.").arg(amount).arg(bookId), EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleAddReader() {
@@ -2555,27 +2718,27 @@ void MainWindow::handleAddReader() {
     if (dialog.exec() != QDialog::Accepted) return;
     const auto reader = dialog.reader();
     if (const auto exists = std::any_of(readersCache.cbegin(), readersCache.cend(), [&](const model::Reader &r) { return r.getId() == reader.getId(); })) {
-        QMessageBox::warning(this, tr("Trung lap"), tr("Ma ban doc nay da ton tai."));
+        showWarningDialog(tr("Trung lap"), tr("Ma ban doc nay da ton tai."));
         return;
     }
     if (!readerService.addReader(reader)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the them ban doc."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the them ban doc."));
         return;
     }
     reloadData();
-    statusBar()->showMessage(tr("Da them ban doc."), 2000);
+    notifyEvent(tr("Da them ban doc."), EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleEditReader() {
     if (!staffRole) return;
     const auto row = currentRow(readersList);
     if (!row.has_value()) {
-        QMessageBox::information(this, tr("Canh bao"), tr("Vui long chon mot ban doc."));
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot ban doc."));
         return;
     }
     const QListWidgetItem *item = readersList ? readersList->item(row.value()) : nullptr;
     if (!item) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh ban doc da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh ban doc da chon."));
         return;
     }
     QString readerId = item->data(kCardRoleId).toString();
@@ -2583,13 +2746,13 @@ void MainWindow::handleEditReader() {
         readerId = item->data(Qt::UserRole).toString();
     }
     if (readerId.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh ban doc da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh ban doc da chon."));
         return;
     }
     const auto readerKey = bridge::toCustomString(readerId);
     const auto readerOpt = readerService.findById(readerKey);
     if (!readerOpt.has_value()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong tim thay ban doc da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong tim thay ban doc da chon."));
         return;
     }
     ReaderDialog dialog(this);
@@ -2597,23 +2760,23 @@ void MainWindow::handleEditReader() {
     if (dialog.exec() != QDialog::Accepted) return;
     const auto updated = dialog.reader();
     if (!readerService.updateReader(updated)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the cap nhat ban doc."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the cap nhat ban doc."));
         return;
     }
     reloadData();
-    statusBar()->showMessage(tr("Da cap nhat ban doc."), 2000);
+    notifyEvent(tr("Da cap nhat ban doc."), EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleDeleteReader() {
     if (!staffRole) return;
     const auto row = currentRow(readersList);
     if (!row.has_value()) {
-        QMessageBox::information(this, tr("Canh bao"), tr("Vui long chon mot ban doc."));
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot ban doc."));
         return;
     }
     const QListWidgetItem *item = readersList ? readersList->item(row.value()) : nullptr;
     if (!item) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh ban doc da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh ban doc da chon."));
         return;
     }
     QString readerId = item->data(kCardRoleId).toString();
@@ -2621,7 +2784,7 @@ void MainWindow::handleDeleteReader() {
         readerId = item->data(Qt::UserRole).toString();
     }
     if (readerId.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh ban doc da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh ban doc da chon."));
         return;
     }
     const auto readerKey = bridge::toCustomString(readerId);
@@ -2633,34 +2796,35 @@ void MainWindow::handleDeleteReader() {
     });
     
     if (hasActiveLoans) {
-        QMessageBox::warning(this, tr("Rang buoc"), 
+        showWarningDialog(tr("Rang buoc"), 
             tr("Khong the xoa: Ban doc dang co phieu muon chua tra."));
         return;
     }
     
-    const auto reply = QMessageBox::question(this, tr("Xac nhan"), 
-        tr("Ban co chac chan muon xoa ban doc %1?").arg(readerId));
-    if (reply != QMessageBox::Yes) return;
+    if (askEventQuestion(tr("Xac nhan"),
+                         tr("Ban co chac chan muon xoa ban doc %1?").arg(readerId)) != QMessageBox::Yes) {
+        return;
+    }
     
     if (!readerService.removeReader(readerKey)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the xoa ban doc."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the xoa ban doc."));
         return;
     }
     
     reloadData();
-    statusBar()->showMessage(tr("Da xoa ban doc."), 2000);
+    notifyEvent(tr("Da xoa ban doc."), EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleToggleReaderActive() {
     if (!staffRole) return;
     const auto row = currentRow(readersList);
     if (!row.has_value()) {
-        QMessageBox::information(this, tr("Canh bao"), tr("Vui long chon mot ban doc."));
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot ban doc."));
         return;
     }
     const QListWidgetItem *item = readersList ? readersList->item(row.value()) : nullptr;
     if (!item) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh ban doc da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh ban doc da chon."));
         return;
     }
     QString readerId = item->data(kCardRoleId).toString();
@@ -2668,39 +2832,43 @@ void MainWindow::handleToggleReaderActive() {
         readerId = item->data(Qt::UserRole).toString();
     }
     if (readerId.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh ban doc da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh ban doc da chon."));
         return;
     }
     const auto readerKey = bridge::toCustomString(readerId);
     const auto readerOpt = readerService.findById(readerKey);
     if (!readerOpt.has_value()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong tim thay ban doc da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong tim thay ban doc da chon."));
         return;
     }
     const bool newActive = !readerOpt->isActive();
+    const QString confirmMessage = newActive
+        ? tr("Ban co chac chan muon mo khoa ban doc %1?").arg(readerId)
+        : tr("Ban co chac chan muon khoa the ban doc %1?").arg(readerId);
+    if (askEventQuestion(tr("Xac nhan"), confirmMessage) != QMessageBox::Yes) return;
     if (!readerService.setReaderActive(readerKey, newActive)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the cap nhat trang thai ban doc."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the cap nhat trang thai ban doc."));
         return;
     }
     reloadData();
-    const QString message = newActive ? tr("Da mo khoa ban doc.")
-                                      : tr("Da tam khoa ban doc.");
-    statusBar()->showMessage(message, 2000);
+    const QString message = newActive ? tr("Da mo khoa ban doc %1.").arg(readerId)
+                                      : tr("Da tam khoa ban doc %1.").arg(readerId);
+    notifyEvent(message, EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleNewLoan() {
     if (!staffRole) return;
     if (readersCache.isEmpty() || booksCache.isEmpty()) {
-        QMessageBox::warning(this, tr("Thieu du lieu"), tr("Can co it nhat mot ban doc va mot cuon sach."));
+        showWarningDialog(tr("Thieu du lieu"), tr("Can co it nhat mot ban doc va mot cuon sach."));
         return;
     }
-    QVector<model::Reader> availableReaders;
+    custom::Vector<model::Reader> availableReaders;
     availableReaders.reserve(readersCache.size());
     for (const auto &reader : readersCache) {
         if (reader.isActive()) availableReaders.append(reader);
     }
     if (availableReaders.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong kha dung"), tr("Khong co doc gia dang hoat dong de tao phieu muon."));
+        showWarningDialog(tr("Khong kha dung"), tr("Khong co doc gia dang hoat dong de tao phieu muon."));
         return;
     }
     LoanDialog dialog(availableReaders, booksCache, currentConfig.getMaxBorrowDays(), this);
@@ -2708,22 +2876,22 @@ void MainWindow::handleNewLoan() {
     if (dialog.exec() != QDialog::Accepted) return;
     auto loan = dialog.loan();
     if (loanService.findById(loan.getLoanId()).has_value()) {
-        QMessageBox::warning(this, tr("Trung lap"), tr("Ma phieu nay da ton tai."));
+        showWarningDialog(tr("Trung lap"), tr("Ma phieu nay da ton tai."));
         return;
     }
     const auto bookOpt = bookService.findById(loan.getBookId());
     if (!bookOpt.has_value()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong tim thay sach da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong tim thay sach da chon."));
         return;
     }
     if (bookOpt->getQuantity() <= 0) {
-        QMessageBox::warning(this, tr("Khong kha dung"), tr("Sach nay da het so luong cho muon."));
+        showWarningDialog(tr("Khong kha dung"), tr("Sach nay da het so luong cho muon."));
         return;
     }
     loan.setStatus(custom::CustomStringLiteral("BORROWED"));
     loan.setFine(0);
     if (!loanService.createLoan(loan)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the tao phieu muon."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the tao phieu muon."));
         return;
     }
 
@@ -2731,24 +2899,24 @@ void MainWindow::handleNewLoan() {
     updatedBook.setQuantity(std::max(0, updatedBook.getQuantity() - 1));
     if (!bookService.updateBook(updatedBook)) {
         loanService.removeLoan(loan.getLoanId());
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the cap nhat so luong sach."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the cap nhat so luong sach."));
         return;
     }
 
     reloadData();
-    statusBar()->showMessage(tr("Da tao phieu muon."), 2000);
+    notifyEvent(tr("Da tao phieu muon."), EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleMarkReturned() {
     if (!staffRole) return;
     const auto row = currentRow(loansList);
     if (!row.has_value()) {
-        QMessageBox::information(this, tr("Canh bao"), tr("Vui long chon mot phieu muon."));
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot phieu muon."));
         return;
     }
     const QListWidgetItem *item = loansList ? loansList->item(row.value()) : nullptr;
     if (!item) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh phieu muon da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh phieu muon da chon."));
         return;
     }
     QString loanId = item->data(kCardRoleId).toString();
@@ -2756,17 +2924,17 @@ void MainWindow::handleMarkReturned() {
         loanId = item->data(Qt::UserRole).toString();
     }
     if (loanId.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh phieu muon da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh phieu muon da chon."));
         return;
     }
     const auto loanKey = bridge::toCustomString(loanId);
     const auto loanOpt = loanService.findById(loanKey);
     if (!loanOpt.has_value()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong tim thay phieu muon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong tim thay phieu muon."));
         return;
     }
     if (normalizedStatus(loanOpt->getStatus()) == QStringLiteral("RETURNED")) {
-        QMessageBox::information(this, tr("Thong bao"), tr("Phieu nay da duoc dong."));
+        showInfoDialog(tr("Thong bao"), tr("Phieu nay da duoc dong."));
         return;
     }
 
@@ -2777,11 +2945,11 @@ void MainWindow::handleMarkReturned() {
     const int fine = lateDays * currentConfig.getFinePerDay();
 
     if (!loanService.updateStatus(loanKey, custom::CustomStringLiteral("RETURNED"), bridge::toCoreDate(returnDate))) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the cap nhat trang thai phieu."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the cap nhat trang thai phieu."));
         return;
     }
     if (!loanService.applyFine(loanKey, fine)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the cap nhat tien phat."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the cap nhat tien phat."));
         return;
     }
 
@@ -2790,24 +2958,24 @@ void MainWindow::handleMarkReturned() {
         model::Book updatedBook = *bookOpt;
         updatedBook.setQuantity(updatedBook.getQuantity() + 1);
         if (!bookService.updateBook(updatedBook)) {
-            QMessageBox::warning(this, tr("Canh bao"), tr("Khong the cap nhat so luong sach."));
+            showWarningDialog(tr("Canh bao"), tr("Khong the cap nhat so luong sach."));
         }
     }
 
     reloadData();
-    statusBar()->showMessage(tr("Da dong phieu. Tien phat: %1 VND").arg(fine), 3000);
+    notifyEvent(tr("Da dong phieu. Tien phat: %1 VND").arg(fine), EventSeverity::Success, 3000);
 }
 
 void MainWindow::handleExtendLoan() {
     if (!staffRole) return;
     const auto row = currentRow(loansList);
     if (!row.has_value()) {
-        QMessageBox::information(this, tr("Canh bao"), tr("Vui long chon mot phieu muon."));
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot phieu muon."));
         return;
     }
     const QListWidgetItem *item = loansList ? loansList->item(row.value()) : nullptr;
     if (!item) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh phieu muon da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh phieu muon da chon."));
         return;
     }
     QString loanId = item->data(kCardRoleId).toString();
@@ -2815,7 +2983,7 @@ void MainWindow::handleExtendLoan() {
         loanId = item->data(Qt::UserRole).toString();
     }
     if (loanId.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh phieu muon da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh phieu muon da chon."));
         return;
     }
     bool ok = false;
@@ -2824,7 +2992,7 @@ void MainWindow::handleExtendLoan() {
     const auto loanKey = bridge::toCustomString(loanId);
     const auto loanOpt = loanService.findById(loanKey);
     if (!loanOpt.has_value()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong tim thay phieu muon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong tim thay phieu muon."));
         return;
     }
     model::Loan updatedLoan = *loanOpt;
@@ -2832,11 +3000,11 @@ void MainWindow::handleExtendLoan() {
     updatedLoan.setDueDate(bridge::toCoreDate(adjustedDueDate));
     updatedLoan.setStatus(custom::CustomStringLiteral("BORROWED"));
     if (!loanService.updateLoan(updatedLoan)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the gia han phieu."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the gia han phieu."));
         return;
     }
     reloadData();
-    statusBar()->showMessage(tr("Da gia han phieu."), 2000);
+    notifyEvent(tr("Da gia han phieu."), EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleMarkLost() {
@@ -2851,12 +3019,12 @@ void MainWindow::handleDeleteLoan() {
     if (!staffRole) return;
     const auto row = currentRow(loansList);
     if (!row.has_value()) {
-        QMessageBox::information(this, tr("Canh bao"), tr("Vui long chon mot phieu muon."));
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot phieu muon."));
         return;
     }
     const QListWidgetItem *item = loansList ? loansList->item(row.value()) : nullptr;
     if (!item) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh phieu muon da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh phieu muon da chon."));
         return;
     }
 
@@ -2865,13 +3033,13 @@ void MainWindow::handleDeleteLoan() {
         loanId = item->data(Qt::UserRole).toString();
     }
     if (loanId.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh phieu muon da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh phieu muon da chon."));
         return;
     }
     const auto loanKey = bridge::toCustomString(loanId);
     const auto loanOpt = loanService.findById(loanKey);
     if (!loanOpt.has_value()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong tim thay phieu muon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong tim thay phieu muon."));
         return;
     }
     
@@ -2879,20 +3047,24 @@ void MainWindow::handleDeleteLoan() {
     
     // If loan is still BORROWED, need to return the book quantity
     if (loanStatus == QStringLiteral("BORROWED")) {
-        const auto reply = QMessageBox::question(this, tr("Xac nhan"), 
-            tr("Phieu muon nay dang o trang thai 'Dang muon'. Xoa se tu dong hoan tra sach. Ban co chac chan?"));
-        if (reply != QMessageBox::Yes) return;
+        if (askEventQuestion(
+                tr("Xac nhan"),
+                tr("Phieu muon nay dang o trang thai 'Dang muon'. Xoa se tu dong hoan tra sach. Ban co chac chan?")) !=
+            QMessageBox::Yes) {
+            return;
+        }
         
         // Return book quantity
         // handled after removal
     } else {
-        const auto reply = QMessageBox::question(this, tr("Xac nhan"), 
-            tr("Ban co chac chan muon xoa phieu muon %1?").arg(loanId));
-        if (reply != QMessageBox::Yes) return;
+        if (askEventQuestion(tr("Xac nhan"), tr("Ban co chac chan muon xoa phieu muon %1?").arg(loanId)) !=
+            QMessageBox::Yes) {
+            return;
+        }
     }
 
     if (!loanService.removeLoan(loanKey)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the xoa phieu muon."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the xoa phieu muon."));
         return;
     }
 
@@ -2902,25 +3074,25 @@ void MainWindow::handleDeleteLoan() {
             model::Book updatedBook = *bookOpt;
             updatedBook.setQuantity(updatedBook.getQuantity() + 1);
             if (!bookService.updateBook(updatedBook)) {
-                QMessageBox::warning(this, tr("Canh bao"), tr("Khong the cap nhat so luong sach."));
+                showWarningDialog(tr("Canh bao"), tr("Khong the cap nhat so luong sach."));
             }
         }
     }
 
     reloadData();
-    statusBar()->showMessage(tr("Da xoa phieu muon."), 2000);
+    notifyEvent(tr("Da xoa phieu muon."), EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleLossOrDamage(const QString &status) {
     if (!staffRole) return;
     const auto row = currentRow(loansList);
     if (!row.has_value()) {
-        QMessageBox::information(this, tr("Canh bao"), tr("Vui long chon mot phieu muon."));
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot phieu muon."));
         return;
     }
     const QListWidgetItem *item = loansList ? loansList->item(row.value()) : nullptr;
     if (!item) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh phieu muon da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh phieu muon da chon."));
         return;
     }
     QString loanId = item->data(kCardRoleId).toString();
@@ -2928,17 +3100,17 @@ void MainWindow::handleLossOrDamage(const QString &status) {
         loanId = item->data(Qt::UserRole).toString();
     }
     if (loanId.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh phieu muon da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh phieu muon da chon."));
         return;
     }
     const auto loanKey = bridge::toCustomString(loanId);
     const auto loanOpt = loanService.findById(loanKey);
     if (!loanOpt.has_value()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong tim thay phieu muon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong tim thay phieu muon."));
         return;
     }
     if (normalizedStatus(loanOpt->getStatus()) == QStringLiteral("RETURNED")) {
-        QMessageBox::information(this, tr("Thong bao"), tr("Phieu nay da dong, khong the bao mat/hong."));
+        showInfoDialog(tr("Thong bao"), tr("Phieu nay da dong, khong the bao mat/hong."));
         return;
     }
 
@@ -2968,21 +3140,32 @@ void MainWindow::handleLossOrDamage(const QString &status) {
     const QDate today = QDate::currentDate();
     const auto statusKey = bridge::toCustomString(status);
     if (!loanService.updateStatus(loanKey, statusKey, bridge::toCoreDate(today))) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the cap nhat trang thai phieu."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the cap nhat trang thai phieu."));
         return;
     }
     if (!loanService.applyFine(loanKey, fee)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the cap nhat tien phat."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the cap nhat tien phat."));
         return;
     }
 
     const auto bookOpt = bookService.findById(loanOpt->getBookId());
     if (bookOpt.has_value()) {
         model::Book updatedBook = *bookOpt;
-        updatedBook.setQuantity(std::max(0, updatedBook.getQuantity() - 1));
-        updatedBook.setStatus(model::canonicalBookStatus(bridge::toCustomString(status)));
+        // Chỉ giảm số lượng nếu phiếu mượn chưa bị trừ (tức là không phải đang ở trạng thái 'BORROWED')
+        bool shouldSetStatus = false;
+        if (normalizedStatus(loanOpt->getStatus()) != QStringLiteral("BORROWED")) {
+            updatedBook.setQuantity(std::max(0, updatedBook.getQuantity() - 1));
+            // Nếu sau khi giảm còn 0 quyển, chuyển trạng thái sách sang 'HET'
+            if (updatedBook.getQuantity() == 0) {
+                shouldSetStatus = true;
+            }
+        }
+        // Nếu đang mượn thì không giảm số lượng, không đổi trạng thái
+        if (shouldSetStatus) {
+            updatedBook.setStatus(model::canonicalBookStatus(custom::CustomStringLiteral("HET")));
+        }
         if (!bookService.updateBook(updatedBook)) {
-            QMessageBox::warning(this, tr("Canh bao"), tr("Khong the cap nhat thong tin sach."));
+            showWarningDialog(tr("Canh bao"), tr("Khong the cap nhat thong tin sach."));
         }
     }
 
@@ -3008,11 +3191,18 @@ void MainWindow::handleLossOrDamage(const QString &status) {
     req.setStatus(custom::CustomStringLiteral("PENDING"));
     req.setCreatedAt(bridge::toCoreDateTime(QDateTime::currentDateTime()));
     if (!reportService.submitRequest(req)) {
-        QMessageBox::warning(this, tr("Canh bao"), tr("Khong the ghi nhan bao cao."));
+        showWarningDialog(tr("Canh bao"), tr("Khong the ghi nhan bao cao."));
     }
 
     reloadData();
-    statusBar()->showMessage(tr("Da ghi nhan %1.").arg(statusLabel.toLower()), 3000);
+    notifyEvent(tr("Da ghi nhan %1.").arg(statusLabel.toLower()), EventSeverity::Success, 3000);
+
+    // Disable thao tác lại trên item vừa thao tác (nếu có)
+    if (loansList && row.has_value()) {
+        if (QListWidgetItem *item = loansList->item(row.value())) {
+            item->setFlags(item->flags() & ~Qt::ItemIsEnabled);
+        }
+    }
 }
 
 void MainWindow::handleSubmitReport() {
@@ -3020,23 +3210,23 @@ void MainWindow::handleSubmitReport() {
     ReportRequestDialog dialog(bridge::toQString(currentAccount.getUsername()), this);
     if (dialog.exec() != QDialog::Accepted) return;
     if (!reportService.submitRequest(dialog.reportRequest())) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the gui bao cao."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the gui bao cao."));
         return;
     }
     reloadData();
-    statusBar()->showMessage(tr("Da gui bao cao."), 2000);
+    notifyEvent(tr("Da gui bao cao."), EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleReportStatusChange(const QString &status) {
     if (!adminRole) return;
     const auto row = currentRow(reportsList);
     if (!row.has_value()) {
-        QMessageBox::information(this, tr("Canh bao"), tr("Vui long chon mot bao cao."));
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot bao cao."));
         return;
     }
     const QListWidgetItem *item = reportsList ? reportsList->item(row.value()) : nullptr;
     if (!item) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh bao cao da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh bao cao da chon."));
         return;
     }
     QString requestId = item->data(kCardRoleId).toString();
@@ -3044,31 +3234,30 @@ void MainWindow::handleReportStatusChange(const QString &status) {
         requestId = item->data(Qt::UserRole).toString();
     }
     if (requestId.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh bao cao da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh bao cao da chon."));
         return;
     }
     if (!reportService.updateStatus(bridge::toCustomString(requestId), bridge::toCustomString(status))) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the cap nhat trang thai."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the cap nhat trang thai."));
         return;
     }
     reloadData();
-    statusBar()->showMessage(tr("Da cap nhat trang thai bao cao."), 2000);
+    notifyEvent(tr("Da cap nhat trang thai bao cao."), EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleLogout() {
-    const auto reply = QMessageBox::question(
-        this, 
-        tr("Đăng xuất"), 
+    const auto reply = askEventQuestion(
+        tr("Đăng xuất"),
         tr("Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?"),
         QMessageBox::Yes | QMessageBox::No,
         QMessageBox::No  // Default to No to prevent accidental logout
     );
-    
+
     if (reply != QMessageBox::Yes) return;
 
     // Show a brief "logging out" message
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    statusBar()->showMessage(tr("Đang đăng xuất..."));
+    notifyEvent(tr("Đang đăng xuất..."), EventSeverity::Info, 0);
     
     // Disable logout controls to avoid re-entry while we perform the transition.
     if (ui) {
@@ -3104,7 +3293,7 @@ void MainWindow::setupNavigationMenu() {
         QString iconName;
     };
 
-    QVector<NavEntry> entries;
+    custom::Vector<NavEntry> entries;
     entries.reserve(tabs->count());
     for (int i = 0; i < tabs->count(); ++i) {
         const QString tabText = tabs->tabText(i);
@@ -3118,7 +3307,6 @@ void MainWindow::setupNavigationMenu() {
             iconName = QStringLiteral("book");
             description = tr("Quan ly danh muc sach, trang thai va ton kho.");
         } else if (normalized.contains(QStringLiteral("doc gia"))) {
-                
             iconName = QStringLiteral("reader");
             description = tr("Theo doi ho so ban doc va han muc su dung.");
         } else if (normalized.contains(QStringLiteral("phieu")) || normalized.contains(QStringLiteral("muon"))) {
@@ -3136,7 +3324,7 @@ void MainWindow::setupNavigationMenu() {
         } else if (normalized.contains(QStringLiteral("tai khoan"))) {
             iconName = QStringLiteral("account");
             description = tr("Quan tri tai khoan dang nhap va trang thai.");
-        } else if (normalized.contains(QStringLiteral("cau hinh")) || normalized.contains(QStringLiteral("thiet lap"))) {
+        } else if (normalized.contains(QStringLiteral("cau hinh")) || normalized.contains(QStringLiteral("thiet lap")) || normalized.contains(QStringLiteral("cai dat"))) {
             iconName = QStringLiteral("setting");
             description = tr("Dieu chinh tham so he thong va quy tac hoat dong.");
         } else {
@@ -3197,7 +3385,10 @@ void MainWindow::setupNavigationMenu() {
             // Bottom action buttons: reload and logout
             QPushButton *reloadBtn = new QPushButton(tr("Tai lai"), navRail);
             reloadBtn->setFixedHeight(36);
-            connect(reloadBtn, &QPushButton::clicked, [this]() { reloadData(); statusBar()->showMessage(tr("Da tai lai."), 1500); });
+            connect(reloadBtn, &QPushButton::clicked, [this]() {
+                reloadData();
+                notifyEvent(tr("Da tai lai."), EventSeverity::Success, 1500);
+            });
             railLayout->addWidget(reloadBtn);
             QPushButton *logoutBtn = new QPushButton(tr("Dang xuat"), navRail);
             logoutBtn->setFixedHeight(36);
@@ -3238,10 +3429,6 @@ void MainWindow::setNavigationCollapsed(bool collapsed, bool pinned) {
         navRailButton->raise();
     }
 
-    if (navToggleButton) {
-        navToggleButton->setText(collapsed ? tr("Hiện") : tr("Ẩn"));
-        navToggleButton->setToolTip(collapsed ? tr("Hiển thị thanh điều hướng") : tr("Ẩn thanh điều hướng"));
-    }
 
     repositionNavRailButton();
 }
@@ -3323,7 +3510,7 @@ void MainWindow::handleAddAccount() {
     const auto usernameKey = dialog.username();
     const QString username = bridge::toQString(usernameKey);
     if (accountService.findByUsername(usernameKey).has_value()) {
-        QMessageBox::warning(this, tr("Trung lap"), tr("Ten dang nhap da ton tai."));
+        showWarningDialog(tr("Trung lap"), tr("Ten dang nhap da ton tai."));
         return;
     }
     const QString staffId = bridge::toQString(dialog.staffId()).trimmed();
@@ -3331,7 +3518,7 @@ void MainWindow::handleAddAccount() {
     if (!staffId.isEmpty()) {
         staffKey = bridge::toCustomString(staffId);
         if (!staffService.findById(staffKey.value()).has_value()) {
-            QMessageBox::warning(this, tr("Khong hop le"), tr("Nhan vien khong ton tai."));
+            showWarningDialog(tr("Khong hop le"), tr("Nhan vien khong ton tai."));
             return;
         }
     }
@@ -3344,23 +3531,23 @@ void MainWindow::handleAddAccount() {
         created = accountService.createAccount(usernameKey, passwordKey, roleKey, dialog.isActive(), staffKey.value());
     }
     if (!created) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the tao tai khoan."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the tao tai khoan."));
         return;
     }
     reloadData();
-    statusBar()->showMessage(tr("Da tao tai khoan moi."), 2000);
+    notifyEvent(tr("Da tao tai khoan moi."), EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleResetPassword() {
     if (!adminRole) return;
     const auto row = currentRow(accountsList);
     if (!row.has_value()) {
-        QMessageBox::information(this, tr("Canh bao"), tr("Vui long chon mot tai khoan."));
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot tai khoan."));
         return;
     }
     const QListWidgetItem *item = accountsList ? accountsList->item(row.value()) : nullptr;
     if (!item) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh tai khoan da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh tai khoan da chon."));
         return;
     }
     QString username = item->data(kCardRoleId).toString();
@@ -3368,30 +3555,30 @@ void MainWindow::handleResetPassword() {
         username = item->data(Qt::UserRole).toString();
     }
     if (username.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh tai khoan da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh tai khoan da chon."));
         return;
     }
     bool ok = false;
     const QString newPassword = QInputDialog::getText(this, tr("Dat lai mat khau"), tr("Nhap mat khau moi"), QLineEdit::Password, QString(), &ok);
     if (!ok || newPassword.isEmpty()) return;
     if (!accountService.updatePassword(bridge::toCustomString(username), bridge::toCustomString(newPassword))) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the dat lai mat khau."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the dat lai mat khau."));
         return;
     }
     reloadData();
-    statusBar()->showMessage(tr("Da dat lai mat khau."), 2000);
+    notifyEvent(tr("Da dat lai mat khau."), EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleToggleAccountActive() {
     if (!adminRole) return;
     const auto row = currentRow(accountsList);
     if (!row.has_value()) {
-        QMessageBox::information(this, tr("Canh bao"), tr("Vui long chon mot tai khoan."));
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot tai khoan."));
         return;
     }
     const QListWidgetItem *item = accountsList ? accountsList->item(row.value()) : nullptr;
     if (!item) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh tai khoan da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh tai khoan da chon."));
         return;
     }
     QString username = item->data(kCardRoleId).toString();
@@ -3399,35 +3586,42 @@ void MainWindow::handleToggleAccountActive() {
         username = item->data(Qt::UserRole).toString();
     }
     if (username.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh tai khoan da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh tai khoan da chon."));
         return;
     }
     const auto usernameKey = bridge::toCustomString(username);
     const auto accountOpt = accountService.findByUsername(usernameKey);
     if (!accountOpt.has_value()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong tim thay tai khoan."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong tim thay tai khoan."));
         return;
     }
     model::Account updated = *accountOpt;
     updated.setActive(!updated.isActive());
+    const QString confirmMessage = updated.isActive()
+        ? tr("Ban co chac chan muon mo khoa tai khoan %1?").arg(username)
+        : tr("Ban co chac chan muon khoa tai khoan %1?").arg(username);
+    if (askEventQuestion(tr("Xac nhan"), confirmMessage) != QMessageBox::Yes) return;
     if (!accountService.updateAccount(updated)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the cap nhat tai khoan."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the cap nhat tai khoan."));
         return;
     }
     reloadData();
-    statusBar()->showMessage(tr("Da thay doi trang thai tai khoan."), 2000);
+    const QString statusMessage = updated.isActive()
+        ? tr("Da mo khoa tai khoan %1.").arg(username)
+        : tr("Da khoa tai khoan %1.").arg(username);
+    notifyEvent(statusMessage, EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleDeleteAccount() {
     if (!adminRole) return;
     const auto row = currentRow(accountsList);
     if (!row.has_value()) {
-        QMessageBox::information(this, tr("Canh bao"), tr("Vui long chon mot tai khoan."));
+        showInfoDialog(tr("Canh bao"), tr("Vui long chon mot tai khoan."));
         return;
     }
     const QListWidgetItem *item = accountsList ? accountsList->item(row.value()) : nullptr;
     if (!item) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh tai khoan da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh tai khoan da chon."));
         return;
     }
     QString username = item->data(kCardRoleId).toString();
@@ -3435,21 +3629,22 @@ void MainWindow::handleDeleteAccount() {
         username = item->data(Qt::UserRole).toString();
     }
     if (username.isEmpty()) {
-        QMessageBox::warning(this, tr("Khong tim thay"), tr("Khong the xac dinh tai khoan da chon."));
+        showWarningDialog(tr("Khong tim thay"), tr("Khong the xac dinh tai khoan da chon."));
         return;
     }
     if (username == bridge::toQString(currentAccount.getUsername())) {
-        QMessageBox::warning(this, tr("Khong hop le"), tr("Khong the xoa tai khoan dang dang nhap."));
+        showWarningDialog(tr("Khong hop le"), tr("Khong the xoa tai khoan dang dang nhap."));
         return;
     }
-    const auto reply = QMessageBox::question(this, tr("Xac nhan"), tr("Ban co chac chan muon xoa tai khoan %1?").arg(username));
-    if (reply != QMessageBox::Yes) return;
+    if (askEventQuestion(tr("Xac nhan"), tr("Ban co chac chan muon xoa tai khoan %1?").arg(username)) != QMessageBox::Yes) {
+        return;
+    }
     if (!accountService.removeAccount(bridge::toCustomString(username))) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the xoa tai khoan."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the xoa tai khoan."));
         return;
     }
     reloadData();
-    statusBar()->showMessage(tr("Da xoa tai khoan."), 2000);
+    notifyEvent(tr("Da xoa tai khoan."), EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleSaveConfig() {
@@ -3459,11 +3654,11 @@ void MainWindow::handleSaveConfig() {
     cfg.setFinePerDay(finePerDaySpin->value());
     cfg.setMaxBooksPerReader(maxBooksPerReaderSpin->value());
     if (!configService.save(cfg)) {
-        QMessageBox::warning(this, tr("Khong thanh cong"), tr("Khong the luu cau hinh."));
+        showWarningDialog(tr("Khong thanh cong"), tr("Khong the luu cau hinh."));
         return;
     }
     currentConfig = cfg;
-    statusBar()->showMessage(tr("Da luu cau hinh."), 2000);
+    notifyEvent(tr("Da luu cau hinh."), EventSeverity::Success, 2000);
 }
 
 }  // namespace pbl2::ui

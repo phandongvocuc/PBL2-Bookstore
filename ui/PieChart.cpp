@@ -13,14 +13,14 @@ PieChart::PieChart(QWidget *parent) : QWidget(parent) {
     setMinimumSize(200, 200);
 }
 
-void PieChart::setSegments(const QVector<QPair<QString, int>> &segments) {
+void PieChart::setSegments(const custom::Vector<QPair<QString, int>> &segments) {
     segments_ = segments;
     ensureColors(segments_.size());
     update();
 }
 
 void PieChart::ensureColors(int n) {
-    static const QVector<QColor> base{
+    static const custom::Vector<QColor> base{
         QColor(0x4E, 0x79, 0xA7), QColor(0xA6, 0xCD, 0x6B), QColor(0xF6, 0xC1, 0x3E),
         QColor(0xE8, 0x5C, 0x4A), QColor(0x8E, 0x6D, 0xC7), QColor(0x4A, 0xC4, 0xC9),
         QColor(0xFF, 0x99, 0xCC), QColor(0x99, 0xCC, 0xFF)
@@ -75,4 +75,3 @@ void PieChart::paintEvent(QPaintEvent *event) {
 }
 
 }  // namespace ui
-

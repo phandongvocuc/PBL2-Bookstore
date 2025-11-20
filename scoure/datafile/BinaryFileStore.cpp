@@ -155,7 +155,7 @@ BookRecord BinaryFileStore::packBook(const model::Book &value) {
     assignText(record.title, sizeof(record.title), value.getTitle());
     assignText(record.author, sizeof(record.author), value.getAuthor());
     assignText(record.genre, sizeof(record.genre), value.getGenre());
-    assignText(record.isbn, sizeof(record.isbn), value.getIsbn());
+    assignText(record.publisher, sizeof(record.publisher), value.getPublisher());
     record.publishDate = packDate(value.getPublishDate());
     record.publishYear = value.getPublishYear();
     record.quantity = value.getQuantity();
@@ -170,7 +170,7 @@ model::Book BinaryFileStore::unpackBook(const BookRecord &record) {
     value.setTitle(CustomString(record.title));
     value.setAuthor(CustomString(record.author));
     value.setGenre(CustomString(record.genre));
-    value.setIsbn(CustomString(record.isbn));
+    value.setPublisher(CustomString(record.publisher));
     value.setPublishDate(unpackDate(record.publishDate));
     value.setPublishYear(record.publishYear);
     value.setQuantity(record.quantity);
@@ -414,4 +414,3 @@ model::SystemConfig BinaryFileStore::readConfig(const CustomString &path) {
 }
 
 }  // namespace pbl2::serialization
-

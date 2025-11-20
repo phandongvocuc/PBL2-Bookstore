@@ -2,7 +2,7 @@
 
 #include <QDialog>
 #include <QString>
-#include <QVector>
+#include "core/custom/QtContainers.h"
 #include "core/custom/CustomString.h"
 #include "model/Staff.h"
 
@@ -25,7 +25,7 @@ public:
     custom::CustomString role() const;
     bool isActive() const;
     // Staff linkage accessors
-    void setStaffList(const QVector<model::Staff> &staffs) const;
+    void setStaffList(const custom::Vector<model::Staff> &staffs) const;
     custom::CustomString staffId() const;
 
 protected:
@@ -47,4 +47,3 @@ private:
 };
 
 }  // namespace ui
-

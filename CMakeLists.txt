@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(Pbl2Book LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 6.2 COMPONENTS Widgets REQUIRED)
@@ -22,6 +22,11 @@ qt_add_resources(ICON_RESOURCES
 
 add_executable(pbl2_book ${SOURCES} ${HEADERS} ${ICON_RESOURCES})
 
+# Ensure the target uses C++20 (in addition to the global setting)
+if (TARGET pbl2_book)
+    target_compile_features(pbl2_book PRIVATE cxx_std_20)
+endif()
+
 target_include_directories(pbl2_book PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/header
     ${CMAKE_CURRENT_SOURCE_DIR}/header/service
@@ -34,4 +39,3 @@ target_link_libraries(pbl2_book Qt6::Widgets Qt6::Core Qt6::Gui)
 # Test login executable removed - use debug_login.cpp instead
 
 install(TARGETS pbl2_book)
-

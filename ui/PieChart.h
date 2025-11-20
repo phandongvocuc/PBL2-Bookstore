@@ -1,9 +1,10 @@
 #pragma once
 
 #include <QWidget>
-#include <QVector>
+#include "core/custom/QtContainers.h"
 #include <QPair>
 #include <QString>
+#include <QColor>
 
 namespace pbl2::ui {
 
@@ -13,18 +14,17 @@ public:
     explicit PieChart(QWidget *parent = nullptr);
 
     // segments: pair<label, value>
-    void setSegments(const QVector<QPair<QString, int>> &segments);
+    void setSegments(const custom::Vector<QPair<QString, int>> &segments);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
-    QVector<QPair<QString, int>> segments_;
-    QVector<QColor> colors_;
+    custom::Vector<QPair<QString, int>> segments_;
+    custom::Vector<QColor> colors_;
     void ensureColors(int n);
 };
 
 }  // namespace pbl2::ui
 
 using PieChart = pbl2::ui::PieChart;
-

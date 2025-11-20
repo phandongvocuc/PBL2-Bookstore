@@ -36,12 +36,12 @@ void Book::setGenre(const custom::CustomString &value) {
     genre = value;
 }
 
-const custom::CustomString &Book::getIsbn() const {
-    return isbn;
+const custom::CustomString &Book::getPublisher() const {
+    return publisher;
 }
 
-void Book::setIsbn(const custom::CustomString &value) {
-    isbn = value;
+void Book::setPublisher(const custom::CustomString &value) {
+    publisher = value;
 }
 
 const core::Date &Book::getPublishDate() const {

@@ -35,7 +35,7 @@ private:
     QLineEdit *titleEdit{nullptr};
     QLineEdit *authorEdit{nullptr};
     QComboBox *genreCombo{nullptr};
-    QLineEdit *isbnEdit{nullptr};
+    QLineEdit *publisherEdit{nullptr};
     QDateEdit *publishDateEdit{nullptr};
     QSpinBox *publishYearSpin{nullptr};
     QSpinBox *quantitySpin{nullptr};

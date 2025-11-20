@@ -1,6 +1,7 @@
 #include "BookDialog.h"
 #include "BookStatus.h"
 #include "QtBridge.h"
+#include <QAbstractSpinBox>
 #include <QComboBox>
 #include <QDateEdit>
 #include <QDate>
@@ -34,12 +35,12 @@ QStringList defaultGenres() {
         QStringLiteral("Van hoc"),
         QStringLiteral("Lich su"),
         QStringLiteral("Khoa hoc vien tuong"),
-        QStringLiteral("Khac"),
         QStringLiteral("Kinh te"),
         QStringLiteral("Tieu thuyet"),
         QStringLiteral("Cong nghe"),
         QStringLiteral("Tam ly"),
-        QStringLiteral("Ngon tinh")
+        QStringLiteral("Ngon tinh"),
+        QStringLiteral("Khac")
     };
 }
 
@@ -86,7 +87,7 @@ BookDialog::BookDialog(QWidget *parent) : QDialog(parent) {
     genreCombo->setEditable(true);
     genreCombo->addItems(defaultGenres());
     genreCombo->setInsertPolicy(QComboBox::NoInsert);
-    isbnEdit = new QLineEdit(this);
+    publisherEdit = new QLineEdit(this);
 
     publishDateEdit = new QDateEdit(this);
     publishDateEdit->setCalendarPopup(true);
@@ -121,10 +122,13 @@ BookDialog::BookDialog(QWidget *parent) : QDialog(parent) {
     form->addRow(tr("Tieu de"), titleEdit);
     form->addRow(tr("Tac gia"), authorEdit);
     form->addRow(tr("The loai"), genreCombo);
-    form->addRow(tr("Ma ISBN"), isbnEdit);
+    form->addRow(tr("Nha xuat ban"), publisherEdit);
     form->addRow(tr("Ngay phat hanh"), publishDateEdit);
     form->addRow(tr("Nam xuat ban"), publishYearSpin);
-    form->addRow(tr("So luong"), quantitySpin);
+    quantitySpin->setReadOnly(true);
+    quantitySpin->setButtonSymbols(QAbstractSpinBox::NoButtons);
+
+    form->addRow(tr("So luong (tu dong)"), quantitySpin);
     form->addRow(tr("Tinh trang"), statusCombo);
     form->addRow(tr("Tom tat"), summaryEdit);
     formGroup->setLayout(form);
@@ -149,7 +153,7 @@ void BookDialog::setBook(const model::Book &book, bool editing) {
     titleEdit->setText(bridge::toQString(book.getTitle()));
     authorEdit->setText(bridge::toQString(book.getAuthor()));
     genreCombo->setEditText(bridge::toQString(book.getGenre()));
-    isbnEdit->setText(bridge::toQString(book.getIsbn()));
+    publisherEdit->setText(bridge::toQString(book.getPublisher()));
     const QDate date = bridge::toQDate(book.getPublishDate());
     publishDateEdit->setDate(date.isValid() ? date : QDate::currentDate());
     publishYearSpin->setValue(book.getPublishYear());
@@ -177,7 +181,7 @@ model::Book BookDialog::book() const {
     b.setTitle(bridge::toCustomString(titleEdit->text().trimmed()));
     b.setAuthor(bridge::toCustomString(authorEdit->text().trimmed()));
     b.setGenre(bridge::toCustomString(genreCombo->currentText().trimmed()));
-    b.setIsbn(bridge::toCustomString(isbnEdit->text().trimmed()));
+    b.setPublisher(bridge::toCustomString(publisherEdit->text().trimmed()));
     b.setPublishDate(bridge::toCoreDate(publishDateEdit->date()));
     b.setPublishYear(publishYearSpin->value());
     b.setQuantity(quantitySpin->value());

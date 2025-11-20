@@ -38,7 +38,7 @@ struct BookRecord {
     char title[256];
     char author[128];
     char genre[64];
-    char isbn[32];
+    char publisher[128];
     DateRecord publishDate;
     int32_t publishYear;
     int32_t quantity;
@@ -171,4 +171,3 @@ protected:
 };
 
 }  // namespace pbl2::serialization
-

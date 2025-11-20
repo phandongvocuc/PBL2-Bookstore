@@ -2,6 +2,7 @@
 
 #include <QMainWindow>
 #include <QString>
+#include <QMessageBox>
 
 #include <memory>
 #include <QDate>
@@ -24,6 +25,7 @@
 #include "model/Staff.h"
 #include "SystemConfig.h"
 #include "StatsWidget.h"
+#include "core/custom/QtContainers.h"
 
 namespace Ui {
 class MainWindow;
@@ -39,7 +41,6 @@ class QComboBox;
 class QPushButton;
 class QSpinBox;
 class QCheckBox;
-
 namespace pbl2::ui {
 
 class MainWindow final : public QMainWindow {
@@ -48,6 +49,7 @@ class MainWindow final : public QMainWindow {
 public:
     MainWindow(const QString &dataDir, const model::Account &signedInAccount, QWidget *parent = nullptr);
     ~MainWindow() override;
+    enum class EventSeverity { Info, Success, Warning, Error };
 
 signals:
     void logoutRequested();
@@ -73,7 +75,7 @@ private:
     void populateStaffs();
     void populateLoans();
     void populateReports();
-    void fillReportsList(const QVector<model::ReportRequest> &reports) const;
+    void fillReportsList(const custom::Vector<model::ReportRequest> &reports) const;
     void applyReportFilter();
     void clearReportFilter();
     void updateStatisticsSummary();
@@ -81,18 +83,19 @@ private:
     void refreshConfigInputs() const;
 
     void applyBookFilter();
-    void fillBooksList(const QVector<model::Book> &books) const;
+    void fillBooksList(const custom::Vector<model::Book> &books) const;
     void applyReaderFilter();
-    void fillReadersList(const QVector<model::Reader> &readers) const;
+    void fillReadersList(const custom::Vector<model::Reader> &readers) const;
     void applyStaffFilter();
-    void fillStaffsList(const QVector<model::Staff> &staffs) const;
+    void fillStaffsList(const custom::Vector<model::Staff> &staffs) const;
     void applyLoanFilter();
-    void fillLoansList(const QVector<model::Loan> &loans);
-    void fillAccountsList(const QVector<model::Account> &accounts);
+    void fillLoansList(const custom::Vector<model::Loan> &loans);
+    void fillAccountsList(const custom::Vector<model::Account> &accounts);
 
     void handleAddBook();
     void handleEditBook();
     void handleDeleteBook();
+    void handleRestockBook();
 
     void handleAddReader();
     void handleEditReader();
@@ -188,12 +191,12 @@ private:
     QLineEdit *reportStaffFilter{nullptr};
     QDateEdit *reportFromFilter{nullptr};
     QDateEdit *reportToFilter{nullptr};
-    QVector<model::ReportRequest> reportsCache;
-    QVector<model::Book> booksCache;
-    QVector<model::Reader> readersCache;
-    QVector<model::Staff> staffsCache;
-    QVector<model::Loan> loansCache;
-    QVector<model::Account> accountsCache;
+    custom::Vector<model::ReportRequest> reportsCache;
+    custom::Vector<model::Book> booksCache;
+    custom::Vector<model::Reader> readersCache;
+    custom::Vector<model::Staff> staffsCache;
+    custom::Vector<model::Loan> loansCache;
+    custom::Vector<model::Account> accountsCache;
 
     QLineEdit *bookSearchEdit{nullptr};
     QComboBox *bookStatusFilter{nullptr};
@@ -209,6 +212,8 @@ private:
     QSpinBox *maxBooksPerReaderSpin{nullptr};
 
     QComboBox *timePeriodCombo{nullptr};
+    QComboBox *genreFilterCombo{nullptr};
+    QString statsSelectedGenre;
     QTableWidget *loanStatsTable{nullptr};
     QLabel *overdueCount{nullptr};
     QLabel *monthlyFinesValue{nullptr};
@@ -216,6 +221,7 @@ private:
     QListWidget *topBooksList{nullptr};
     StatsChart *topBooksChart{nullptr};
     StatsChart *revenueChart{nullptr};
+    StatsChart *genreChart{nullptr};
     QPushButton *applyFilterButton{nullptr};
     
     QDate statsStartDate;
@@ -230,6 +236,12 @@ private:
     bool adminRole{false};
     bool staffRole{false};
     model::SystemConfig currentConfig;
+
+    void notifyEvent(const QString &message, EventSeverity severity = EventSeverity::Info, int durationMs = 2000);
+    void showInfoDialog(const QString &title, const QString &message);
+    void showWarningDialog(const QString &title, const QString &message);
+    void showErrorDialog(const QString &title, const QString &message);
+    QMessageBox::StandardButton askEventQuestion(const QString &title, const QString &message, QMessageBox::StandardButtons buttons = QMessageBox::Yes | QMessageBox::No, QMessageBox::StandardButton defaultButton = QMessageBox::NoButton);
 };
 
 }  // namespace pbl2::ui

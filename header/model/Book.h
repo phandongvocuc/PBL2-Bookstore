@@ -19,8 +19,8 @@ public:
     const custom::CustomString &getGenre() const;
     void setGenre(const custom::CustomString &value);
 
-    const custom::CustomString &getIsbn() const;
-    void setIsbn(const custom::CustomString &value);
+    const custom::CustomString &getPublisher() const;
+    void setPublisher(const custom::CustomString &value);
 
     const core::Date &getPublishDate() const;
     void setPublishDate(const core::Date &value);
@@ -42,7 +42,7 @@ private:
     custom::CustomString title;
     custom::CustomString author;
     custom::CustomString genre;
-    custom::CustomString isbn;
+    custom::CustomString publisher;
     core::Date publishDate;
     int publishYear{0};
     int quantity{0};
@@ -51,4 +51,3 @@ private:
 };
 
 }  // namespace model
-

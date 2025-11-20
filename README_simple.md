@@ -142,7 +142,7 @@ bool BooksRepository::saveAll(const DynamicArray<Book>& books) {
         row.push_back(book.getTitle());        // "Harry Potter"
         row.push_back(book.getAuthor());       // "J.K. Rowling"
         row.push_back(book.getGenre());        // "Fantasy"
-        row.push_back(book.getIsbn());         // "978-0439708180"
+        row.push_back(book.getPublisher());    // "Bloomsbury"
         row.push_back(book.getPublishDate().toIsoString()); // "1997-06-26"
         row.push_back(String::fromInt(book.getQuantity())); // "5"
         row.push_back(book.getStatus());       // "available"
@@ -170,7 +170,7 @@ DynamicArray<Book> BooksRepository::loadAll() {
         book.setTitle(row[1]);                 // "Harry Potter" → Title
         book.setAuthor(row[2]);                // "J.K. Rowling" → Author
         book.setGenre(row[3]);                 // "Fantasy" → Genre
-        book.setIsbn(row[4]);                  // "978-0439708180" → ISBN
+        book.setPublisher(row[4]);             // "Bloomsbury" → Publisher
         book.setPublishDate(Date::fromIsoString(row[5])); // "1997-06-26" → Date
         book.setQuantity(String::toInt(row[6])); // "5" → int 5
         book.setStatus(row[7]);                // "available" → Status

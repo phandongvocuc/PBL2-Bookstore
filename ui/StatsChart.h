@@ -2,8 +2,8 @@
 
 #include <QWidget>
 #include <QStringList>
-#include <QVector>
 #include <QColor>
+#include "core/custom/QtContainers.h"
 
 namespace pbl2::ui {
 
@@ -15,7 +15,7 @@ public:
 
     struct Series {
         QString name;
-        QVector<double> values;
+        custom::Vector<double> values;
         QColor color;
     };
 
@@ -24,8 +24,9 @@ public:
     void setMode(Mode mode);
     void setTitle(const QString &title);
     void setCategories(const QStringList &categories);
-    void setSeries(const QVector<Series> &series);
+    void setSeries(const custom::Vector<Series> &series);
     void setValueSuffix(const QString &suffix);
+    void setAxisLabels(const QString &xLabel, const QString &yLabel);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -35,7 +36,9 @@ private:
     QString title_;
     QString valueSuffix_;
     QStringList categories_;
-    QVector<Series> series_;
+    custom::Vector<Series> series_;
+    QString xAxisLabel_{QStringLiteral("Ngày/Tháng")};
+    QString yAxisLabel_{QStringLiteral("Sách")};
 
     void drawBackground(QPainter &painter) const;
     void drawTitle(QPainter &painter, const QRect &area) const;

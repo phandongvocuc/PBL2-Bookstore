@@ -4,7 +4,7 @@
 #include <QLabel>
 #include <QFrame>
 #include <QListWidget>
-#include <QMap>
+#include "core/custom/QtContainers.h"
 #include "StatsChart.h"
 #include "PieChart.h"
 
@@ -16,37 +16,45 @@ class StatsWidget : public QWidget {
 public:
     explicit StatsWidget(QWidget *parent = nullptr);
 
-    void updateStats(int totalBooks, int totalReaders, int totalLoans, 
+    void updateStats(int totalBooks, int monthlyLoans, int activeLoans,
                      int overdueLoans, qint64 totalFines);
     
-    void updateTopBooksChart(const QMap<QString, int> &bookBorrowCounts);
+    void updateTopBooksChart(const custom::Map<QString, int> &bookBorrowCounts);
     
+    void updateCategoryChart(const custom::Map<QString, int> &categoryBorrowCounts);
+
+    void updateMonthlyChart(const custom::Vector<int> &monthlyBorrowCounts);
+
     void updatePieChart(int cardFees, int fines);
     
-    void updateLoansList(const QVector<QPair<QString, QString>> &loans);
+    void updateLoansList(const custom::Vector<QPair<QString, QString>> &loans);
     
-    void updateActiveReadersList(const QVector<QString> &readers);
+    void updateActiveReadersList(const custom::Vector<QString> &readers);
 
 private:
     void setupUi();
     
     // Summary cards
-    QLabel *totalBooksValue;
-    QLabel *totalReadersValue;
-    QLabel *totalLoansValue;
-    QLabel *totalFinesValue;
+    QLabel *totalBooksValue{nullptr};
+    QLabel *monthlyLoansValue{nullptr};
+    QLabel *activeLoansValue{nullptr};
+    QLabel *overdueValue{nullptr};
+    QLabel *totalFinesValue{nullptr};
+    QLabel *fineSummaryLabel{nullptr};
+    QLabel *overdueBooksLabel{nullptr};
+    QLabel *overdueReadersLabel{nullptr};
     
     // Charts
-    StatsChart *topBooksChart;
-    PieChart *revenuePieChart;
+    StatsChart *topBooksChart{nullptr};
+    StatsChart *categoryChart{nullptr};
+    StatsChart *monthlyChart{nullptr};
+    PieChart *revenuePieChart{nullptr};
     
     // Lists
-    QListWidget *recentLoansList;
-    QListWidget *activeReadersList;
+    QListWidget *recentLoansList{nullptr};
+    QListWidget *activeReadersList{nullptr};
     
-    QFrame *createStatsCard(const QString &title, const QString &icon, 
-                            const QString &bgColor, const QString &borderColor);
+    QFrame *createStatsCard(const QString &title, const QString &icon = QString());
 };
 
 }  // namespace pbl2::ui
-

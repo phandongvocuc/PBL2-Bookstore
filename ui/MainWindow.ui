@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
-    <height>700</height>
+    <width>1313</width>
+    <height>866</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -16,9 +16,9 @@
     <height>600</height>
    </size>
   </property>
-     <property name="windowTitle">
-      <string>HE THONG CHO THUE TRUYEN VA SACH PBL2</string>
-     </property>
+  <property name="windowTitle">
+   <string>HE THONG CHO THUE TRUYEN VA SACH PBL2</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="centralLayout">
     <property name="spacing">
@@ -82,8 +82,8 @@
          </property>
         </widget>
        </item>
-  <item>
-   <widget class="QListWidget" name="navigationList">
+       <item>
+        <widget class="QListWidget" name="navigationList">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -92,20 +92,20 @@
          </property>
         </widget>
        </item>
-  <item>
-   <widget class="QPushButton" name="refreshButton">
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="text">
-     <string>Tai lai</string>
-    </property>
-   </widget>
-  </item>
-         <item>
+       <item>
+        <widget class="QPushButton" name="refreshButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Tai lai</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="logoutButton">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -118,8 +118,8 @@
          </property>
         </widget>
        </item>
-       </layout>
-      </widget>
+      </layout>
+     </widget>
     </item>
     <item>
      <widget class="QTabWidget" name="tabs">
@@ -233,12 +233,12 @@
              <item>
               <widget class="QLineEdit" name="bookSearchEdit">
                <property name="placeholderText">
-                <string>Tim theo tieu de, tac gia, the loai hoac ISBN</string>
+                <string>Tim theo tieu de, tac gia, the loai hoac nha xuat ban</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="bookStatusFilter" />
+              <widget class="QComboBox" name="bookStatusFilter"/>
              </item>
              <item>
               <widget class="QPushButton" name="bookFilterButton">
@@ -253,7 +253,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QListWidget" name="booksList" />
+         <widget class="QListWidget" name="booksList"/>
         </item>
         <item>
          <widget class="QGroupBox" name="booksActionsGroup">
@@ -294,6 +294,13 @@
             <widget class="QPushButton" name="deleteBookButton">
              <property name="text">
               <string>Xoa sach</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="restockBookButton">
+             <property name="text">
+              <string>Nhap hang</string>
              </property>
             </widget>
            </item>
@@ -364,7 +371,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="readerStatusFilter" />
+            <widget class="QComboBox" name="readerStatusFilter"/>
            </item>
            <item>
             <widget class="QPushButton" name="readerFilterButton">
@@ -377,7 +384,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QListWidget" name="readersList" />
+         <widget class="QListWidget" name="readersList"/>
         </item>
         <item>
          <widget class="QGroupBox" name="readersActionsGroup">
@@ -414,13 +421,13 @@
              </property>
             </widget>
            </item>
-            <item>
-             <widget class="QPushButton" name="toggleReaderStatusButton">
-              <property name="text">
-               <string>Tam khoa / Mo khoa</string>
-              </property>
-             </widget>
-            </item>
+           <item>
+            <widget class="QPushButton" name="toggleReaderStatusButton">
+             <property name="text">
+              <string>Tam khoa / Mo khoa</string>
+             </property>
+            </widget>
+           </item>
            <item>
             <widget class="QPushButton" name="deleteReaderButton">
              <property name="text">
@@ -495,7 +502,7 @@
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QComboBox" name="loanStatusFilter" />
+            <widget class="QComboBox" name="loanStatusFilter"/>
            </item>
            <item row="0" column="2">
             <widget class="QPushButton" name="loanFilterButton">
@@ -508,7 +515,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QListWidget" name="loansList" />
+         <widget class="QListWidget" name="loansList"/>
         </item>
         <item>
          <widget class="QGroupBox" name="loansActionsGroup">
@@ -671,7 +678,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QListWidget" name="reportsList" />
+         <widget class="QListWidget" name="reportsList"/>
         </item>
         <item>
          <widget class="QGroupBox" name="reportsActionsGroup">
@@ -755,19 +762,19 @@
         </property>
         <item>
          <widget class="QScrollArea" name="statsScrollArea">
+          <property name="frameShape">
+           <enum>QFrame::Shape::NoFrame</enum>
+          </property>
           <property name="widgetResizable">
            <bool>true</bool>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
           </property>
           <widget class="QWidget" name="statsScrollContent">
            <property name="geometry">
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1100</width>
-             <height>750</height>
+             <width>991</width>
+             <height>822</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="statsTabLayout">
@@ -787,598 +794,588 @@
              <number>12</number>
             </property>
             <item>
-         <widget class="QGroupBox" name="statsFilterGroup">
-          <property name="title">
-           <string>Bo loc</string>
-          </property>
-          <layout class="QHBoxLayout" name="statsFilterLayout">
-           <property name="spacing">
-            <number>12</number>
-           </property>
-           <item>
-            <widget class="QLabel" name="timePeriodLabel">
-             <property name="text">
-              <string>Thoi gian:</string>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-               <bold>true</bold>
-              </font>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="timePeriodCombo">
-             <property name="minimumSize">
-              <size>
-               <width>150</width>
-               <height>0</height>
-              </size>
-             </property>
-             <item>
-              <property name="text">
-               <string>Tuan nay</string>
+             <widget class="QGroupBox" name="statsFilterGroup">
+              <property name="title">
+               <string>Bo loc</string>
               </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Thang nay</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Nam nay</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Tat ca</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="applyFilterButton">
-             <property name="text">
-              <string>Ap dung</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer>
-             <property name="orientation">
-              <enum>Qt::Orientation::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="statsCardsLayout">
-          <property name="spacing">
-           <number>12</number>
-          </property>
-          <item>
-           <widget class="QGroupBox" name="totalBooksCard">
-            <property name="minimumSize">
-             <size>
-              <width>150</width>
-              <height>90</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>90</height>
-             </size>
-            </property>
-            <property name="title">
-             <string>Tong So Sach</string>
-            </property>
-            <property name="styleSheet">
-             <string>QGroupBox { background: white; border: 2px solid #3b82f6; border-radius: 8px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }</string>
-            </property>
-            <widget class="QLabel" name="totalBooksValue">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>30</y>
-               <width>130</width>
-               <height>40</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>0</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>20</pointsize>
-               <bold>true</bold>
-              </font>
-             </property>
-            </widget>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="totalReadersCard">
-            <property name="minimumSize">
-             <size>
-              <width>150</width>
-              <height>90</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>90</height>
-             </size>
-            </property>
-            <property name="title">
-             <string>Tong Doc Gia</string>
-            </property>
-            <property name="styleSheet">
-             <string>QGroupBox { background: white; border: 2px solid #10b981; border-radius: 8px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }</string>
-            </property>
-            <widget class="QLabel" name="totalReadersValue">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>30</y>
-               <width>130</width>
-               <height>40</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>0</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>20</pointsize>
-               <bold>true</bold>
-              </font>
-             </property>
-            </widget>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="totalLoansCard">
-            <property name="minimumSize">
-             <size>
-              <width>150</width>
-              <height>90</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>90</height>
-             </size>
-            </property>
-            <property name="title">
-             <string>Tong Phieu Muon</string>
-            </property>
-            <property name="styleSheet">
-             <string>QGroupBox { background: white; border: 2px solid #f59e0b; border-radius: 8px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }</string>
-            </property>
-            <widget class="QLabel" name="totalLoansValue">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>30</y>
-               <width>130</width>
-               <height>40</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>0</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>20</pointsize>
-               <bold>true</bold>
-              </font>
-             </property>
-            </widget>
-           </widget>
-          </item>
-          <item>
-           <widget class="QGroupBox" name="totalFinesCard">
-            <property name="minimumSize">
-             <size>
-              <width>150</width>
-              <height>90</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>90</height>
-             </size>
-            </property>
-            <property name="title">
-             <string>Tong Tien Phat</string>
-            </property>
-            <property name="styleSheet">
-             <string>QGroupBox { background: white; border: 2px solid #ef4444; border-radius: 8px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }</string>
-            </property>
-            <widget class="QLabel" name="totalFinesValue">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>30</y>
-               <width>130</width>
-               <height>40</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>0đ</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-             <property name="font">
-              <font>
-               <pointsize>20</pointsize>
-               <bold>true</bold>
-              </font>
-             </property>
-            </widget>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="chartsRowLayout">
-          <property name="spacing">
-           <number>12</number>
-          </property>
-          <item>
-           <widget class="QFrame" name="topBooksFrame">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-              <horstretch>1</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="styleSheet">
-             <string>QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }</string>
-            </property>
-            <layout class="QVBoxLayout" name="topBooksFrameLayout">
-             <item>
-              <widget class="QLabel" name="topBooksTitle">
-               <property name="text">
-                <string>Luot thue theo the loai</string>
+              <layout class="QHBoxLayout" name="statsFilterLayout">
+               <property name="spacing">
+                <number>12</number>
                </property>
-               <property name="font">
-                <font>
-                 <pointsize>10</pointsize>
-                 <bold>true</bold>
-                </font>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="StatsChart" name="topBooksChart">
-               <property name="minimumSize">
-                <size>
-                 <width>200</width>
-                 <height>160</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>160</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QFrame" name="topBooksListFrame">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-              <horstretch>1</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="styleSheet">
-             <string>QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }</string>
-            </property>
-            <layout class="QVBoxLayout" name="topBooksListLayout">
-             <item>
-              <widget class="QLabel" name="topBooksListTitle">
-               <property name="text">
-                <string>Sach muon nhieu nhat</string>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>10</pointsize>
-                 <bold>true</bold>
-                </font>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QListWidget" name="topBooksList">
-               <property name="minimumSize">
-                <size>
-                 <width>200</width>
-                 <height>160</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>160</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="bottomRowLayout">
-          <property name="spacing">
-           <number>12</number>
-          </property>
-          <item>
-           <layout class="QVBoxLayout" name="warningColumn">
-            <property name="spacing">
-             <number>10</number>
-            </property>
-            <item>
-             <widget class="QFrame" name="overdueWarningFrame">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                <horstretch>1</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="frameShape">
-               <enum>QFrame::StyledPanel</enum>
-              </property>
-              <property name="styleSheet">
-               <string>QFrame { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; }</string>
-              </property>
-              <layout class="QVBoxLayout">
                <item>
-                <widget class="QLabel" name="overdueWarningTitle">
-                 <property name="text">
-                  <string>⚠ Tre han</string>
-                 </property>
+                <widget class="QLabel" name="timePeriodLabel">
                  <property name="font">
                   <font>
-                   <pointsize>10</pointsize>
+                   <pointsize>11</pointsize>
                    <bold>true</bold>
                   </font>
                  </property>
-                 <property name="styleSheet">
-                  <string>color: #dc2626;</string>
+                 <property name="text">
+                  <string>Thoi gian:</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="overdueCount">
+                <widget class="QComboBox" name="timePeriodCombo">
+                 <property name="minimumSize">
+                  <size>
+                   <width>150</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>Tuan nay</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Thang nay</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Nam nay</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Tat ca</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="applyFilterButton">
                  <property name="text">
-                  <string>0 sach dang tre</string>
-                 </property>
-                 <property name="font">
-                  <font>
-                   <pointsize>14</pointsize>
-                   <bold>true</bold>
-                  </font>
-                 </property>
-                 <property name="styleSheet">
-                  <string>color: #991b1b;</string>
+                  <string>Ap dung</string>
                  </property>
                 </widget>
+               </item>
+               <item>
+                <spacer>
+                 <property name="orientation">
+                  <enum>Qt::Orientation::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
               </layout>
              </widget>
             </item>
             <item>
-             <widget class="QFrame" name="monthlyFinesFrame">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                <horstretch>1</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
+             <layout class="QHBoxLayout" name="statsCardsLayout">
+              <property name="spacing">
+               <number>12</number>
               </property>
-              <property name="frameShape">
-               <enum>QFrame::StyledPanel</enum>
-              </property>
-              <property name="styleSheet">
-               <string>QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }</string>
-              </property>
-              <layout class="QVBoxLayout">
-               <item>
-                <widget class="QLabel" name="monthlyFinesTitle">
-                 <property name="text">
-                  <string>Tien phat thang nay</string>
+              <item>
+               <widget class="QGroupBox" name="totalBooksCard">
+                <property name="minimumSize">
+                 <size>
+                  <width>150</width>
+                  <height>90</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>90</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string>QGroupBox { background: white; border: 2px solid #3b82f6; border-radius: 8px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }</string>
+                </property>
+                <property name="title">
+                 <string>Tong So Sach</string>
+                </property>
+                <widget class="QLabel" name="totalBooksValue">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>30</y>
+                   <width>130</width>
+                   <height>40</height>
+                  </rect>
                  </property>
                  <property name="font">
                   <font>
-                   <pointsize>10</pointsize>
+                   <pointsize>20</pointsize>
                    <bold>true</bold>
                   </font>
                  </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="monthlyFinesValue">
                  <property name="text">
-                  <string>0d</string>
+                  <string>0</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="totalReadersCard">
+                <property name="minimumSize">
+                 <size>
+                  <width>150</width>
+                  <height>90</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>90</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string>QGroupBox { background: white; border: 2px solid #10b981; border-radius: 8px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }</string>
+                </property>
+                <property name="title">
+                 <string>Tong Doc Gia</string>
+                </property>
+                <widget class="QLabel" name="totalReadersValue">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>30</y>
+                   <width>130</width>
+                   <height>40</height>
+                  </rect>
                  </property>
                  <property name="font">
                   <font>
-                   <pointsize>14</pointsize>
+                   <pointsize>20</pointsize>
                    <bold>true</bold>
                   </font>
                  </property>
-                 <property name="styleSheet">
-                  <string>color: #111827;</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="monthlyFinesSubtitle">
                  <property name="text">
-                  <string>Thang nay</string>
+                  <string>0</string>
                  </property>
-                 <property name="styleSheet">
-                  <string>color: #6b7280; font-size: 10px;</string>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
                  </property>
                 </widget>
-               </item>
-              </layout>
-             </widget>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="totalLoansCard">
+                <property name="minimumSize">
+                 <size>
+                  <width>150</width>
+                  <height>90</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>90</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string>QGroupBox { background: white; border: 2px solid #f59e0b; border-radius: 8px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }</string>
+                </property>
+                <property name="title">
+                 <string>Tong Phieu Muon</string>
+                </property>
+                <widget class="QLabel" name="totalLoansValue">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>30</y>
+                   <width>130</width>
+                   <height>40</height>
+                  </rect>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>20</pointsize>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>0</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="totalFinesCard">
+                <property name="minimumSize">
+                 <size>
+                  <width>150</width>
+                  <height>90</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>90</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string>QGroupBox { background: white; border: 2px solid #ef4444; border-radius: 8px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }</string>
+                </property>
+                <property name="title">
+                 <string>Tong Tien Phat</string>
+                </property>
+                <widget class="QLabel" name="totalFinesValue">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>30</y>
+                   <width>130</width>
+                   <height>40</height>
+                  </rect>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>20</pointsize>
+                   <bold>true</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>0đ</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="chartsRowLayout">
+            <property name="spacing">
+             <number>12</number>
+            </property>
+            <item>
+              <widget class="QFrame" name="topBooksFrame">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                 <horstretch>2</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>520</width>
+                  <height>300</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string>QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }</string>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::Shape::StyledPanel</enum>
+                </property>
+                <layout class="QVBoxLayout" name="topBooksFrameLayout">
+                 <item>
+                  <widget class="QLabel" name="topBooksTitle">
+                   <property name="font">
+                    <font>
+                     <pointsize>10</pointsize>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Luot thue theo the loai</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="StatsChart" name="topBooksChart" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>500</width>
+                     <height>240</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QFrame" name="topBooksListFrame">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                  <horstretch>1</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="styleSheet">
+                 <string>QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }</string>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::Shape::StyledPanel</enum>
+                </property>
+                <layout class="QVBoxLayout" name="topBooksListLayout">
+                 <item>
+                  <widget class="QLabel" name="topBooksListTitle">
+                   <property name="font">
+                   <font>
+                    <pointsize>10</pointsize>
+                    <bold>true</bold>
+                   </font>
+                  </property>
+                  <property name="text">
+                    <string>The loai muon nhieu nhat</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QListWidget" name="topBooksList">
+                   <property name="minimumSize">
+                    <size>
+                     <width>200</width>
+                     <height>160</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>160</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="bottomRowLayout">
+              <property name="spacing">
+               <number>12</number>
+              </property>
+              <item>
+               <layout class="QVBoxLayout" name="warningColumn">
+                <property name="spacing">
+                 <number>10</number>
+                </property>
+                <item>
+                 <widget class="QFrame" name="overdueWarningFrame">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                    <horstretch>1</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="styleSheet">
+                   <string>QFrame { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; }</string>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::Shape::StyledPanel</enum>
+                  </property>
+                  <layout class="QVBoxLayout">
+                   <item>
+                    <widget class="QLabel" name="overdueWarningTitle">
+                     <property name="font">
+                      <font>
+                       <pointsize>10</pointsize>
+                       <bold>true</bold>
+                      </font>
+                     </property>
+                     <property name="styleSheet">
+                      <string>color: #dc2626;</string>
+                     </property>
+                     <property name="text">
+                      <string>⚠ Tre han</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="overdueCount">
+                     <property name="font">
+                      <font>
+                       <pointsize>14</pointsize>
+                       <bold>true</bold>
+                      </font>
+                     </property>
+                     <property name="styleSheet">
+                      <string>color: #991b1b;</string>
+                     </property>
+                     <property name="text">
+                      <string>0 sach dang tre</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QFrame" name="monthlyFinesFrame">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                    <horstretch>1</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="styleSheet">
+                   <string>QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }</string>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::Shape::StyledPanel</enum>
+                  </property>
+                  <layout class="QVBoxLayout">
+                   <item>
+                    <widget class="QLabel" name="monthlyFinesTitle">
+                     <property name="font">
+                      <font>
+                       <pointsize>10</pointsize>
+                       <bold>true</bold>
+                      </font>
+                     </property>
+                     <property name="text">
+                      <string>Tien phat </string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="monthlyFinesValue">
+                     <property name="font">
+                      <font>
+                       <pointsize>14</pointsize>
+                       <bold>true</bold>
+                      </font>
+                     </property>
+                     <property name="styleSheet">
+                      <string>color: #111827;</string>
+                     </property>
+                     <property name="text">
+                      <string>0d</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QFrame" name="revenueChartFrame">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                  <horstretch>1</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>200</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string>QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; }</string>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::Shape::StyledPanel</enum>
+                </property>
+                <layout class="QVBoxLayout">
+                 <item>
+                  <widget class="QLabel" name="revenueChartTitle">
+                   <property name="font">
+                    <font>
+                     <pointsize>10</pointsize>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Doanh thu</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="StatsChart" name="revenueChart" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>140</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>140</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QFrame" name="activeReadersFrame">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                  <horstretch>1</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>200</height>
+                 </size>
+                </property>
+                <property name="styleSheet">
+                 <string>QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; }</string>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::Shape::StyledPanel</enum>
+                </property>
+                <layout class="QVBoxLayout">
+                 <item>
+                  <widget class="QLabel" name="activeReadersTitle">
+                   <property name="font">
+                    <font>
+                     <pointsize>10</pointsize>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Hoat dong ban doc</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QListWidget" name="activeReadersList">
+                   <property name="minimumSize">
+                    <size>
+                     <width>100</width>
+                     <height>140</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>140</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
-          </item>
-          <item>
-           <widget class="QFrame" name="revenueChartFrame">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-              <horstretch>1</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>200</height>
-             </size>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="styleSheet">
-             <string>QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; }</string>
-            </property>
-            <layout class="QVBoxLayout">
-             <item>
-              <widget class="QLabel" name="revenueChartTitle">
-               <property name="text">
-                <string>Doanh thu</string>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>10</pointsize>
-                 <bold>true</bold>
-                </font>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="StatsChart" name="revenueChart">
-               <property name="minimumSize">
-                <size>
-                 <width>100</width>
-                 <height>140</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>140</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QFrame" name="activeReadersFrame">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-              <horstretch>1</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>200</height>
-             </size>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="styleSheet">
-             <string>QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; }</string>
-            </property>
-            <layout class="QVBoxLayout">
-             <item>
-              <widget class="QLabel" name="activeReadersTitle">
-               <property name="text">
-                <string>Hoat dong ban doc</string>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>10</pointsize>
-                 <bold>true</bold>
-                </font>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QListWidget" name="activeReadersList">
-               <property name="minimumSize">
-                <size>
-                 <width>100</width>
-                 <height>140</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>140</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-        </item>
-            </layout>
-           </widget>
           </widget>
-         </item>
-        </layout>
-       </widget>
-     <widget class="QWidget" name="staffsTab">
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="staffsTab">
        <attribute name="title">
         <string>Nhan vien</string>
        </attribute>
@@ -1426,9 +1423,9 @@
              </property>
             </widget>
            </item>
-            <item>
-             <widget class="QComboBox" name="staffStatusFilter" />
-            </item>
+           <item>
+            <widget class="QComboBox" name="staffStatusFilter"/>
+           </item>
            <item>
             <widget class="QPushButton" name="staffFilterButton">
              <property name="text">
@@ -1440,7 +1437,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QListWidget" name="staffsList" />
+         <widget class="QListWidget" name="staffsList"/>
         </item>
         <item>
          <widget class="QGroupBox" name="staffsActionsGroup">
@@ -1484,13 +1481,13 @@
              </property>
             </widget>
            </item>
-            <item>
-             <widget class="QPushButton" name="toggleStaffStatusButton">
-              <property name="text">
-               <string>Chuyen trang thai</string>
-              </property>
-             </widget>
-            </item>
+           <item>
+            <widget class="QPushButton" name="toggleStaffStatusButton">
+             <property name="text">
+              <string>Chuyen trang thai</string>
+             </property>
+            </widget>
+           </item>
            <item>
             <spacer name="staffsActionsSpacer">
              <property name="orientation">
@@ -1530,7 +1527,7 @@
          <number>18</number>
         </property>
         <item>
-         <widget class="QListWidget" name="accountsList" />
+         <widget class="QListWidget" name="accountsList"/>
         </item>
         <item>
          <widget class="QGroupBox" name="accountsActionsGroup">
@@ -1601,7 +1598,7 @@
       </widget>
       <widget class="QWidget" name="settingsTab">
        <attribute name="title">
-        <string>Cau hinh</string>
+        <string>Cai dat</string>
        </attribute>
        <layout class="QVBoxLayout" name="settingsTabLayout">
         <property name="spacing">
@@ -1648,7 +1645,7 @@
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QSpinBox" name="maxBorrowDaysSpin" />
+            <widget class="QSpinBox" name="maxBorrowDaysSpin"/>
            </item>
            <item row="1" column="0">
             <widget class="QLabel" name="finePerDayLabel">
@@ -1658,7 +1655,7 @@
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QSpinBox" name="finePerDaySpin" />
+            <widget class="QSpinBox" name="finePerDaySpin"/>
            </item>
            <item row="2" column="0">
             <widget class="QLabel" name="maxBooksPerReaderLabel">
@@ -1668,7 +1665,7 @@
             </widget>
            </item>
            <item row="2" column="1">
-            <widget class="QSpinBox" name="maxBooksPerReaderSpin" />
+            <widget class="QSpinBox" name="maxBooksPerReaderSpin"/>
            </item>
            <item row="3" column="0" colspan="2">
             <widget class="QPushButton" name="saveConfigButton">
@@ -1691,7 +1688,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1254</width>
+     <width>1313</width>
      <height>37</height>
     </rect>
    </property>
@@ -1699,12 +1696,12 @@
     <property name="title">
      <string>He thong</string>
     </property>
-    <addaction name="refreshAction" />
-    <addaction name="logoutAction" />
+    <addaction name="refreshAction"/>
+    <addaction name="logoutAction"/>
    </widget>
-   <addaction name="menuSystem" />
+   <addaction name="menuSystem"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar" />
+  <widget class="QStatusBar" name="statusbar"/>
   <action name="refreshAction">
    <property name="text">
     <string>Reset</string>
@@ -1717,12 +1714,12 @@
   </action>
  </widget>
  <customwidgets>
- <customwidget>
-  <class>PieChart</class>
-  <extends>QWidget</extends>
-  <header>PieChart.h</header>
- </customwidget>
-</customwidgets>
- <resources />
- <connections />
+  <customwidget>
+   <class>StatsChart</class>
+   <extends>QWidget</extends>
+   <header>StatsChart.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
 </ui>
