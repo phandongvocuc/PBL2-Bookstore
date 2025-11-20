@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>menu.svg</file>
+        <file>book.png</file>
+        <file>reader.png</file>
+        <file>loan.png</file>
+        <file>report.png</file>
+        <file>home.png</file>
+        <file>staff.png</file>
+        <file>t.png</file>
+        <file>account.png</file>
+        <file>setting.png</file>
+    </qresource>
+</RCC>
