@@ -71,6 +71,7 @@ struct LoanRecord {
     DateRecord returnDate;
     char status[32];
     int32_t fine;
+    char staffUsername[64];
 };
 
 struct AccountRecord {

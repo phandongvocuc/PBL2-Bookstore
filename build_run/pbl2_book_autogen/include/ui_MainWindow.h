@@ -210,7 +210,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName("MainWindow");
-        MainWindow->resize(1313, 866);
+        MainWindow->resize(1302, 1022);
         MainWindow->setMinimumSize(QSize(800, 600));
         refreshAction = new QAction(MainWindow);
         refreshAction->setObjectName("refreshAction");
@@ -718,10 +718,11 @@ public:
         topBooksFrame = new QFrame(statsScrollContent);
         topBooksFrame->setObjectName("topBooksFrame");
         QSizePolicy sizePolicy3(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Preferred);
-        sizePolicy3.setHorizontalStretch(1);
+        sizePolicy3.setHorizontalStretch(2);
         sizePolicy3.setVerticalStretch(0);
         sizePolicy3.setHeightForWidth(topBooksFrame->sizePolicy().hasHeightForWidth());
         topBooksFrame->setSizePolicy(sizePolicy3);
+        topBooksFrame->setMinimumSize(QSize(520, 300));
         topBooksFrame->setFrameShape(QFrame::Shape::StyledPanel);
         topBooksFrameLayout = new QVBoxLayout(topBooksFrame);
         topBooksFrameLayout->setObjectName("topBooksFrameLayout");
@@ -736,8 +737,7 @@ public:
 
         topBooksChart = new StatsChart(topBooksFrame);
         topBooksChart->setObjectName("topBooksChart");
-        topBooksChart->setMinimumSize(QSize(200, 160));
-        topBooksChart->setMaximumSize(QSize(16777215, 160));
+        topBooksChart->setMinimumSize(QSize(500, 240));
 
         topBooksFrameLayout->addWidget(topBooksChart);
 
@@ -746,8 +746,11 @@ public:
 
         topBooksListFrame = new QFrame(statsScrollContent);
         topBooksListFrame->setObjectName("topBooksListFrame");
-        sizePolicy3.setHeightForWidth(topBooksListFrame->sizePolicy().hasHeightForWidth());
-        topBooksListFrame->setSizePolicy(sizePolicy3);
+        QSizePolicy sizePolicy4(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Preferred);
+        sizePolicy4.setHorizontalStretch(1);
+        sizePolicy4.setVerticalStretch(0);
+        sizePolicy4.setHeightForWidth(topBooksListFrame->sizePolicy().hasHeightForWidth());
+        topBooksListFrame->setSizePolicy(sizePolicy4);
         topBooksListFrame->setFrameShape(QFrame::Shape::StyledPanel);
         topBooksListLayout = new QVBoxLayout(topBooksListFrame);
         topBooksListLayout->setObjectName("topBooksListLayout");
@@ -778,8 +781,8 @@ public:
         warningColumn->setObjectName("warningColumn");
         overdueWarningFrame = new QFrame(statsScrollContent);
         overdueWarningFrame->setObjectName("overdueWarningFrame");
-        sizePolicy3.setHeightForWidth(overdueWarningFrame->sizePolicy().hasHeightForWidth());
-        overdueWarningFrame->setSizePolicy(sizePolicy3);
+        sizePolicy4.setHeightForWidth(overdueWarningFrame->sizePolicy().hasHeightForWidth());
+        overdueWarningFrame->setSizePolicy(sizePolicy4);
         overdueWarningFrame->setFrameShape(QFrame::Shape::StyledPanel);
         vboxLayout = new QVBoxLayout(overdueWarningFrame);
         vboxLayout->setObjectName("vboxLayout");
@@ -800,8 +803,8 @@ public:
 
         monthlyFinesFrame = new QFrame(statsScrollContent);
         monthlyFinesFrame->setObjectName("monthlyFinesFrame");
-        sizePolicy3.setHeightForWidth(monthlyFinesFrame->sizePolicy().hasHeightForWidth());
-        monthlyFinesFrame->setSizePolicy(sizePolicy3);
+        sizePolicy4.setHeightForWidth(monthlyFinesFrame->sizePolicy().hasHeightForWidth());
+        monthlyFinesFrame->setSizePolicy(sizePolicy4);
         monthlyFinesFrame->setFrameShape(QFrame::Shape::StyledPanel);
         vboxLayout1 = new QVBoxLayout(monthlyFinesFrame);
         vboxLayout1->setObjectName("vboxLayout1");
@@ -825,8 +828,8 @@ public:
 
         revenueChartFrame = new QFrame(statsScrollContent);
         revenueChartFrame->setObjectName("revenueChartFrame");
-        sizePolicy3.setHeightForWidth(revenueChartFrame->sizePolicy().hasHeightForWidth());
-        revenueChartFrame->setSizePolicy(sizePolicy3);
+        sizePolicy4.setHeightForWidth(revenueChartFrame->sizePolicy().hasHeightForWidth());
+        revenueChartFrame->setSizePolicy(sizePolicy4);
         revenueChartFrame->setMaximumSize(QSize(16777215, 200));
         revenueChartFrame->setFrameShape(QFrame::Shape::StyledPanel);
         vboxLayout2 = new QVBoxLayout(revenueChartFrame);
@@ -849,8 +852,8 @@ public:
 
         activeReadersFrame = new QFrame(statsScrollContent);
         activeReadersFrame->setObjectName("activeReadersFrame");
-        sizePolicy3.setHeightForWidth(activeReadersFrame->sizePolicy().hasHeightForWidth());
-        activeReadersFrame->setSizePolicy(sizePolicy3);
+        sizePolicy4.setHeightForWidth(activeReadersFrame->sizePolicy().hasHeightForWidth());
+        activeReadersFrame->setSizePolicy(sizePolicy4);
         activeReadersFrame->setMaximumSize(QSize(16777215, 200));
         activeReadersFrame->setFrameShape(QFrame::Shape::StyledPanel);
         vboxLayout3 = new QVBoxLayout(activeReadersFrame);

@@ -68,4 +68,12 @@ void Loan::setFine(int value) {
     fine = value;
 }
 
+const custom::CustomString &Loan::getStaffUsername() const {
+    return staffUsername;
+}
+
+void Loan::setStaffUsername(const custom::CustomString &value) {
+    staffUsername = value;
+}
+
 }  // namespace pbl2::model

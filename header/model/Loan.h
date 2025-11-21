@@ -30,6 +30,9 @@ public:
     int getFine() const;
     void setFine(int value);
 
+    const custom::CustomString &getStaffUsername() const;
+    void setStaffUsername(const custom::CustomString &value);
+
 private:
     custom::CustomString loanId;
     custom::CustomString readerId;
@@ -39,7 +42,7 @@ private:
     core::Date returnDate;
     custom::CustomString status;
     int fine{0};
+    custom::CustomString staffUsername;
 };
 
 }  // namespace model
-

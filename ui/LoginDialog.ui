@@ -13,13 +13,6 @@
   <property name="windowTitle">
    <string>Đăng nhập</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">QDialog{
-background-color: rgb(70, 70, 70);
-    padding: 6px 12px;
-    font-weight: bold;
-}</string>
-  </property>
   <widget class="QLabel" name="titleLabel">
    <property name="geometry">
     <rect>
@@ -67,22 +60,6 @@ background-color: rgb(70, 70, 70);
      <height>51</height>
     </rect>
    </property>
-   <property name="styleSheet">
-    <string notr="true">QPushButton {
-    background-color: #4CAF50;   /* Màu nền nút */
-    color: white;                /* Màu chữ */
-    border-radius: 10px;         /* Bo góc */
-    padding: 6px 12px;
-    font-weight: bold;
-}
-QPushButton:hover {
-    background-color:E74C3C ;   /* Khi rê chuột */
-}
-
-QPushButton:pressed {
-    background-color: #2e7031;   /* Khi nhấn giữ */
-}</string>
-   </property>
    <property name="text">
     <string>Đăng nhập</string>
    </property>
@@ -101,23 +78,6 @@ QPushButton:pressed {
    </property>
    <property name="autoFillBackground">
     <bool>false</bool>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">QPushButton {
-    background-color: #E74C3C;   /* Màu nền nút */
-    color: white;                /* Màu chữ */
-    border-radius: 10px;         /* Bo góc */
-    padding: 6px 12px;
-    font-weight: bold;
-}
-
-QPushButton:hover {
-    background-color:E74C3C ;   /* Khi rê chuột */
-}
-
-QPushButton:pressed {
-    background-color: #2e7031;   /* Khi nhấn giữ */
-}</string>
    </property>
    <property name="text">
     <string>Thoát</string>

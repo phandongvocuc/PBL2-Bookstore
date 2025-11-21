@@ -16,7 +16,7 @@ class StatsWidget : public QWidget {
 public:
     explicit StatsWidget(QWidget *parent = nullptr);
 
-    void updateStats(int totalBooks, int monthlyLoans, int activeLoans,
+    void updateStats(int totalBooks, int totalReaders, int totalLoans,
                      int overdueLoans, qint64 totalFines);
     
     void updateTopBooksChart(const custom::Map<QString, int> &bookBorrowCounts);
@@ -36,9 +36,8 @@ private:
     
     // Summary cards
     QLabel *totalBooksValue{nullptr};
-    QLabel *monthlyLoansValue{nullptr};
-    QLabel *activeLoansValue{nullptr};
-    QLabel *overdueValue{nullptr};
+    QLabel *totalReadersValue{nullptr};
+    QLabel *totalLoansValue{nullptr};
     QLabel *totalFinesValue{nullptr};
     QLabel *fineSummaryLabel{nullptr};
     QLabel *overdueBooksLabel{nullptr};

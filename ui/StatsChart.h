@@ -27,6 +27,7 @@ public:
     void setSeries(const custom::Vector<Series> &series);
     void setValueSuffix(const QString &suffix);
     void setAxisLabels(const QString &xLabel, const QString &yLabel);
+    void setShowLegend(bool show);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -39,6 +40,7 @@ private:
     custom::Vector<Series> series_;
     QString xAxisLabel_{QStringLiteral("Ngày/Tháng")};
     QString yAxisLabel_{QStringLiteral("Sách")};
+    bool showLegend_{true};
 
     void drawBackground(QPainter &painter) const;
     void drawTitle(QPainter &painter, const QRect &area) const;

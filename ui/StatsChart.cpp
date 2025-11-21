@@ -51,6 +51,12 @@ void StatsChart::setAxisLabels(const QString &xLabel, const QString &yLabel) {
     if (changed) update();
 }
 
+void StatsChart::setShowLegend(bool show) {
+    if (showLegend_ == show) return;
+    showLegend_ = show;
+    update();
+}
+
 void StatsChart::paintEvent(QPaintEvent *event) {
     Q_UNUSED(event);
     QPainter painter(this);
@@ -60,7 +66,7 @@ void StatsChart::paintEvent(QPaintEvent *event) {
 
     if (categories_.isEmpty() || series_.isEmpty()) {
         painter.setPen(QPen(palette().mid().color()));
-        painter.drawText(rect(), Qt::AlignCenter, QObject::tr("Khong co du lieu"));
+        painter.drawText(rect(), Qt::AlignCenter, QObject::tr("Không có dữ liệu"));
         return;
     }
 
@@ -85,7 +91,9 @@ void StatsChart::paintEvent(QPaintEvent *event) {
         break;
     }
 
-    drawLegend(painter, plotArea);
+    if (showLegend_) {
+        drawLegend(painter, plotArea);
+    }
     drawTitle(painter, rect().adjusted(leftMargin, 0, -rightMargin, -plotArea.height()));
 }
 

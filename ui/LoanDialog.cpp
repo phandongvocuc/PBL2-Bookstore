@@ -38,7 +38,11 @@ QString displayBook(const Book &book) {
 namespace pbl2 {
 namespace ui {
 
-LoanDialog::LoanDialog(const custom::Vector<model::Reader> &readers, const custom::Vector<model::Book> &books, int maxBorrowDays, QWidget *parent)
+LoanDialog::LoanDialog(const custom::Vector<model::Reader> &readers,
+                       const custom::Vector<model::Book> &books,
+                       int maxBorrowDays,
+                       const QString &staffUsername,
+                       QWidget *parent)
         : QDialog(parent),
             readers(readers),
             books(books) {
@@ -47,35 +51,20 @@ LoanDialog::LoanDialog(const custom::Vector<model::Reader> &readers, const custo
     setWindowIcon(QIcon(":/ui/resources/icons/loan.png"));
     QFont font("Segoe UI", 11);
     setFont(font);
-    setStyleSheet(R"(
-QDialog { background: #f8fafc; border-radius: 12px; }
-QGroupBox { font-weight: bold; border-radius: 8px; }
-QLineEdit, QComboBox, QSpinBox, QDateEdit, QPlainTextEdit {
-    min-height: 32px; font-size: 11pt; border-radius: 10px; background: #fff;
-    border: 1.5px solid #e3e8f0; padding-left: 10px;
-}
-QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDateEdit:focus, QPlainTextEdit:focus {
-    border: 2px solid #2f6ad0; background: #f0f6ff;
-}
-QDialogButtonBox QPushButton, QPushButton {
-    min-width: 100px; min-height: 36px; font-size: 11pt; border-radius: 10px;
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #2f6ad0, stop:1 #6c63ff);
-    color: #fff; font-weight: 500; border: none;
-}
-QDialogButtonBox QPushButton:hover, QPushButton:hover {
-    background: #466ee6;
-}
-QDialogButtonBox QPushButton:disabled, QPushButton:disabled {
-    background: #bfc9db; color: #fff;
-}
-/* Form labels: darker for better contrast */
-QLabel { font-size: 11pt; color: #6b7280; }
-QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; font-weight: 600; }
-)");
+    // Dùng chung style đơn giản với Thong tin ban doc
+    setStyleSheet("QDialog { background: #f8fafc; border-radius: 12px; } "
+                  "QGroupBox { font-weight: bold; } "
+                  "QLineEdit, QComboBox, QSpinBox, QDateEdit, QPlainTextEdit { "
+                  "  min-height: 32px; font-size: 11pt; } "
+                  "QDialogButtonBox QPushButton { "
+                  "  min-width: 90px; min-height: 32px; font-size: 11pt; } "
+                  "QLabel { font-size: 11pt; } ");
 
     loanIdEdit = new QLineEdit(this);
     readerCombo = new QComboBox(this);
     bookCombo = new QComboBox(this);
+    staffEdit = new QLineEdit(this);
+    staffEdit->setReadOnly(true);
 
     for (const auto &reader : readers) {
         readerCombo->addItem(displayReader(reader), QVariant(pbl2::bridge::toQString(reader.getId())));
@@ -84,6 +73,8 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; font-wei
         const QString bookId = pbl2::bridge::toQString(book.getId());
         bookCombo->addItem(displayBook(book), QVariant(bookId));
     }
+
+    staffEdit->setText(staffUsername);
 
     borrowDateEdit = new QDateEdit(this);
     borrowDateEdit->setCalendarPopup(true);
@@ -109,6 +100,7 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; font-wei
     form->addRow(tr("Ma phieu"), loanIdEdit);
     form->addRow(tr("Ban doc"), readerCombo);
     form->addRow(tr("Sach"), bookCombo);
+    form->addRow(tr("Nhan vien lap phieu"), staffEdit);
     form->addRow(tr("Ngay muon"), borrowDateEdit);
     form->addRow(tr("Ngay tra han"), dueDateEdit);
     formGroup->setLayout(form);

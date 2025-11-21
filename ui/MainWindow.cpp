@@ -550,10 +550,6 @@ void MainWindow::setupUi() {
         ui->centralLayout->setStretch(0, 0);
         ui->centralLayout->setStretch(1, 1);
     }
-    if (ui->chartsRowLayout) {
-        ui->chartsRowLayout->setStretch(0, 3);
-        ui->chartsRowLayout->setStretch(1, 2);
-    }
 
     tabs = ui->tabs;
     booksList = ui->booksList;
@@ -1100,6 +1096,8 @@ void MainWindow::configureStatsTab() {
         timePeriodCombo->addItem(tr("Thang nay"));
         timePeriodCombo->addItem(tr("Thang truoc"));
         timePeriodCombo->addItem(tr("Tuy chon..."));
+        // Mac dinh chon "Thang nay" de bieu do luon co du lieu hon
+        timePeriodCombo->setCurrentIndex(2);
         if (customStartDateEdit && customEndDateEdit) {
             connect(timePeriodCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=](int idx) {
                 bool custom = (idx == 4);
@@ -1220,6 +1218,20 @@ void MainWindow::configureStatsTab() {
     // Connect filter button
     if (applyFilterButton) {
         connect(applyFilterButton, &QPushButton::clicked, this, &MainWindow::applyStatsFilter);
+    }
+
+    // Place the StatsWidget inside the scroll area's content,
+    // directly under the "Bo loc" group.
+    if (ui->statsScrollContent && !statsWidget) {
+        statsWidget = new StatsWidget(ui->statsScrollContent);
+
+        auto *contentLayout = qobject_cast<QVBoxLayout *>(ui->statsScrollContent->layout());
+        if (!contentLayout) {
+            contentLayout = new QVBoxLayout(ui->statsScrollContent);
+            contentLayout->setContentsMargins(12, 12, 12, 12);
+            contentLayout->setSpacing(10);
+        }
+        contentLayout->addWidget(statsWidget);
     }
 }
 
@@ -1560,6 +1572,7 @@ void MainWindow::fillLoansList(const custom::Vector<model::Loan> &loans) {
         const QString loanId = bridge::toQString(loan.getLoanId());
         const QString readerId = bridge::toQString(loan.getReaderId());
         const QString bookId = bridge::toQString(loan.getBookId());
+        const QString staffUsername = bridge::toQString(loan.getStaffUsername()).trimmed();
         const QString statusCode = normalizedStatus(bridge::toQString(loan.getStatus()));
         const QString statusText = loanStatusText(bridge::toQString(loan.getStatus()));
 
@@ -1568,7 +1581,8 @@ void MainWindow::fillLoansList(const custom::Vector<model::Loan> &loans) {
         const QString returnDate = loan.getReturnDate().isValid() ? bridge::toQDate(loan.getReturnDate()).toString(Qt::ISODate) : tr("Chua tra");
 
         const QString headerLine = tr("%1 - %2").arg(loanId, bookDisplay(bookId));
-        const QString metaLine = tr("Ban doc: %1").arg(readerDisplay(readerId));
+        const QString staffDisplay = staffUsername.isEmpty() ? tr("Khong ro") : staffUsername;
+        const QString metaLine = tr("Ban doc: %1 | NV: %2").arg(readerDisplay(readerId), staffDisplay);
         const QString detailLine = tr("Muon: %1 | Han: %2").arg(borrowDate, dueDate);
         QString extraDetail;
         if (statusCode == QStringLiteral("OVERDUE")) {
@@ -1596,7 +1610,13 @@ void MainWindow::fillLoansList(const custom::Vector<model::Loan> &loans) {
         item->setData(kCardRoleBadgeColor, statusBadgeColor(statusCode));
         item->setData(kCardRolePillText, tr("Tien phat: %1 VND").arg(loan.getFine()));
         item->setData(kCardRolePillColor, QVariant());
-        item->setToolTip(QStringList{headerLine, metaLine, detailLine, extraDetail, tr("Trang thai: %1").arg(statusText)}.join('\n'));
+        item->setToolTip(QStringList{headerLine,
+                                     metaLine,
+                                     detailLine,
+                                     extraDetail,
+                                     tr("Trang thai: %1").arg(statusText),
+                                     tr("Nhan vien lap phieu: %1").arg(staffDisplay)}
+                             .join('\n'));
         item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
         QSize hint = item->sizeHint();
@@ -1628,11 +1648,12 @@ void MainWindow::applyLoanFilter() {
         const QString loanId = bridge::toQString(loan.getLoanId());
         const QString readerId = bridge::toQString(loan.getReaderId());
         const QString bookId = bridge::toQString(loan.getBookId());
+        const QString staffUsername = bridge::toQString(loan.getStaffUsername());
         const QString statusCode = normalizedStatus(bridge::toQString(loan.getStatus()));
         const QString statusText = loanStatusText(bridge::toQString(loan.getStatus()));
 
         if (!term.isEmpty()) {
-            const QString haystack = QStringList{loanId, readerId, bookId, statusCode, statusText}
+            const QString haystack = QStringList{loanId, readerId, bookId, staffUsername, statusCode, statusText}
                                          .join(' ')
                                          .toLower();
             if (!haystack.contains(term)) continue;
@@ -1886,8 +1907,8 @@ void MainWindow::handleViewReportDetails() {
 void MainWindow::updateStatisticsSummary() { refreshSimpleStats(); }
 
 void MainWindow::refreshSimpleStats() {
-    updateStatsCards();
-    updateStatsCharts();
+    // Use the same logic as when the user clicks the filter button
+    // so date range, cards, charts and the dashboard widget stay in sync.
     applyStatsFilter();
 }
 
@@ -2171,6 +2192,108 @@ void MainWindow::updateStatsCharts() {
     }
 }
 
+void MainWindow::updateStatsDashboardWidget() {
+    if (!statsWidget) return;
+
+    const QDate today = QDate::currentDate();
+    const int totalBooks = booksCache.size();
+    const int totalReaders = readersCache.size();
+    const int totalLoans = loansCache.size();
+
+    int overdueLoans = 0;
+    qint64 totalFines = 0;
+
+    // Aggregate high‑level numbers
+    for (const auto &loan : loansCache) {
+        const QDate dueDate = loan.getDueDate().isValid() ? bridge::toQDate(loan.getDueDate()) : QDate();
+        const bool hasReturn = loan.getReturnDate().isValid();
+
+        const QString status = normalizedStatus(loan.getStatus());
+        const bool isBorrowed = status == QStringLiteral("BORROWED");
+        const bool isOverdueStatus = status == QStringLiteral("OVERDUE");
+        const bool overdueByDate = (!hasReturn && dueDate.isValid() && today > dueDate);
+
+        if (isOverdueStatus || overdueByDate) {
+            ++overdueLoans;
+        }
+
+        totalFines += std::max(0, loan.getFine());
+    }
+
+    statsWidget->updateStats(totalBooks, totalReaders, totalLoans, overdueLoans, totalFines);
+
+    // Borrow counts by category (genre) within the current filter range
+    custom::Map<QString, int> categoryCounts;
+    for (const auto &loan : loansCache) {
+        const QDate borrowDate = loan.getBorrowDate().isValid() ? bridge::toQDate(loan.getBorrowDate()) : QDate();
+        // Skip loans outside the selected date range or without a valid borrow date
+        if (!borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) {
+            continue;
+        }
+
+        const QString bookId = bridge::toQString(loan.getBookId());
+        QString bookGenre;
+        for (const auto &book : booksCache) {
+            if (bridge::toQString(book.getId()) == bookId) {
+                bookGenre = bridge::toQString(book.getGenre());
+                break;
+            }
+        }
+        if (bookGenre.isEmpty()) {
+            bookGenre = tr("Khác");
+        }
+
+        const int current = categoryCounts.value(bookGenre, 0);
+        categoryCounts[bookGenre] = current + 1;
+    }
+    statsWidget->updateCategoryChart(categoryCounts);
+
+    // Top borrowed books (by title) within the current filter range
+    custom::Map<QString, int> bookBorrowCounts;
+    for (const auto &loan : loansCache) {
+        const QDate borrowDate = loan.getBorrowDate().isValid() ? bridge::toQDate(loan.getBorrowDate()) : QDate();
+        // Skip loans outside the selected date range or without a valid borrow date
+        if (!borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) {
+            continue;
+        }
+
+        const QString bookId = bridge::toQString(loan.getBookId());
+        QString title;
+        for (const auto &book : booksCache) {
+            if (bridge::toQString(book.getId()) == bookId) {
+                title = bridge::toQString(book.getTitle());
+                break;
+            }
+        }
+        if (title.isEmpty()) {
+            title = bookId;
+        }
+
+        const int current = bookBorrowCounts.value(title, 0);
+        bookBorrowCounts[title] = current + 1;
+    }
+    statsWidget->updateTopBooksChart(bookBorrowCounts);
+
+    // Monthly borrow counts for the current year
+    int monthlyRaw[12] = {0};
+    for (const auto &loan : loansCache) {
+        const QDate borrowDate = loan.getBorrowDate().isValid() ? bridge::toQDate(loan.getBorrowDate()) : QDate();
+        if (!borrowDate.isValid() || borrowDate.year() != today.year()) {
+            continue;
+        }
+        const int monthIndex = borrowDate.month() - 1;
+        if (monthIndex >= 0 && monthIndex < 12) {
+            ++monthlyRaw[monthIndex];
+        }
+    }
+
+    custom::Vector<int> monthlyCounts;
+    for (int i = 0; i < 12; ++i) {
+        monthlyCounts.append(monthlyRaw[i]);
+    }
+    statsWidget->updateMonthlyChart(monthlyCounts);
+}
+
 void MainWindow::applyStatsFilter() {
     const QDate today = QDate::currentDate();
     // Get selected time period
@@ -2224,6 +2347,7 @@ void MainWindow::applyStatsFilter() {
     // Refresh all stats with new date range
     updateStatsCards();
     updateStatsCharts();
+    updateStatsDashboardWidget();
 }
 
 void MainWindow::refreshAccounts() {
@@ -2871,10 +2995,12 @@ void MainWindow::handleNewLoan() {
         showWarningDialog(tr("Khong kha dung"), tr("Khong co doc gia dang hoat dong de tao phieu muon."));
         return;
     }
-    LoanDialog dialog(availableReaders, booksCache, currentConfig.getMaxBorrowDays(), this);
+    const QString staffDisplay = bridge::toQString(currentAccount.getUsername()).trimmed();
+    LoanDialog dialog(availableReaders, booksCache, currentConfig.getMaxBorrowDays(), staffDisplay, this);
     dialog.presetLoanId(nextLoanId(), true);
     if (dialog.exec() != QDialog::Accepted) return;
     auto loan = dialog.loan();
+    loan.setStaffUsername(currentAccount.getUsername());
     if (loanService.findById(loan.getLoanId()).has_value()) {
         showWarningDialog(tr("Trung lap"), tr("Ma phieu nay da ton tai."));
         return;

@@ -23,6 +23,7 @@ public:
     LoanDialog(const custom::Vector<model::Reader> &readers,
                const custom::Vector<model::Book> &books,
                int maxBorrowDays,
+               const QString &staffUsername,
                QWidget *parent = nullptr);
 
     void presetLoanId(const QString &loanId, bool lockField = true);
@@ -40,6 +41,7 @@ private:
     QLineEdit *loanIdEdit{nullptr};
     QComboBox *readerCombo{nullptr};
     QComboBox *bookCombo{nullptr};
+    QLineEdit *staffEdit{nullptr};
     QDateEdit *borrowDateEdit{nullptr};
     QDateEdit *dueDateEdit{nullptr};
     QLabel *errorLabel{nullptr};

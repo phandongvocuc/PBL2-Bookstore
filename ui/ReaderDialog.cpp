@@ -24,32 +24,14 @@ ReaderDialog::ReaderDialog(QWidget *parent) : QDialog(parent) {
     setWindowIcon(QIcon(":/ui/resources/icons/reader.png"));
     const QFont font("Segoe UI", 11);
     setFont(font);
-    setStyleSheet(R"(
-QDialog { background: #f8fafc; border-radius: 12px; }
-QGroupBox { font-weight: bold; border-radius: 8px; }
-QLineEdit, QComboBox, QSpinBox, QDateEdit, QPlainTextEdit {
-    min-height: 32px; font-size: 11pt; border-radius: 10px; background: #fff;
-    border: 1.5px solid #e3e8f0; padding-left: 10px;
-}
-QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDateEdit:focus, QPlainTextEdit:focus {
-    border: 2px solid #2f6ad0; background: #f0f6ff;
-}
-QDialogButtonBox QPushButton, QPushButton {
-    min-width: 100px; min-height: 36px; font-size: 11pt; border-radius: 10px;
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #2f6ad0, stop:1 #6c63ff);
-    color: #fff; font-weight: 500; border: none;
-}
-QDialogButtonBox QPushButton:hover, QPushButton:hover {
-    background: #466ee6;
-}
-QDialogButtonBox QPushButton:disabled, QPushButton:disabled {
-    background: #bfc9db; color: #fff;
-}
-QLabel { font-size: 11pt; }
-QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
-)");
-    // Modern font and light background
-    setStyleSheet("QDialog { background: #f8fafc; border-radius: 12px; } QGroupBox { font-weight: bold; } QLineEdit, QComboBox, QSpinBox, QDateEdit, QPlainTextEdit { min-height: 32px; font-size: 11pt; } QDialogButtonBox QPushButton { min-width: 90px; min-height: 32px; font-size: 11pt; } QLabel { font-size: 11pt; } ");
+    // Giữ nguyên style đơn giản cho màn Thông tin độc giả
+    setStyleSheet("QDialog { background: #f8fafc; border-radius: 12px; } "
+                  "QGroupBox { font-weight: bold; } "
+                  "QLineEdit, QComboBox, QSpinBox, QDateEdit, QPlainTextEdit { "
+                  "  min-height: 32px; font-size: 11pt; } "
+                  "QDialogButtonBox QPushButton { "
+                  "  min-width: 90px; min-height: 32px; font-size: 11pt; } "
+                  "QLabel { font-size: 11pt; } ");
 
     idEdit = new QLineEdit(this);
     fullNameEdit = new QLineEdit(this);

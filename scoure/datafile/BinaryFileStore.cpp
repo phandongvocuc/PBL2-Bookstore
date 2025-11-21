@@ -225,6 +225,7 @@ LoanRecord BinaryFileStore::packLoan(const model::Loan &value) {
     record.returnDate = packDate(value.getReturnDate());
     assignText(record.status, sizeof(record.status), value.getStatus());
     record.fine = value.getFine();
+    assignText(record.staffUsername, sizeof(record.staffUsername), value.getStaffUsername());
     return record;
 }
 
@@ -238,6 +239,7 @@ model::Loan BinaryFileStore::unpackLoan(const LoanRecord &record) {
     value.setReturnDate(unpackDate(record.returnDate));
     value.setStatus(CustomString(record.status));
     value.setFine(record.fine);
+    value.setStaffUsername(CustomString(record.staffUsername));
     return value;
 }
 

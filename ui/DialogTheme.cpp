@@ -6,119 +6,105 @@ namespace pbl2::ui {
 
 namespace {
 QString buildDialogStylesheet() {
-    return QString::fromLatin1(
-        "QDialog {"
-        "  background-color: #f8fafc;"
-        "  color: #0f172a;"
-        "}"
-        "QLabel {"
-        "  color: #0f172a;"
-        "  font-size: 14px;"
-        "}"
-        "QGroupBox {"
-        "  background-color: #ffffff;"
-        "  border: 1px solid #d8e3f2;"
-        "  border-radius: 12px;"
-        "  margin-top: 12px;"
-        "  padding-top: 12px;"
-        "}"
-        "QGroupBox::title {"
-        "  subcontrol-origin: margin;"
-        "  left: 16px;"
-        "  padding: 0 8px;"
-        "  font-weight: 600;"
-        "  color: #1f2937;"
-        "}"
-        "QCheckBox {"
-        "  color: #0f172a;"
-        "  font-size: 14px;"
-        "  spacing: 8px;"
-        "}"
-        "QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox, QDateEdit, QDateTimeEdit, QPlainTextEdit, QTextEdit {"
-        "  border: 1px solid #cbd5f5;"
-        "  border-radius: 8px;"
-        "  padding: 8px 14px;"
-        "  min-height: 36px;"
-        "  background-color: #ffffff;"
-        "  color: #0f172a;"
-        "  selection-background-color: #bfdbfe;"
-        "  selection-color: #0f172a;"
-        "}"
-        "QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QDoubleSpinBox:focus, QDateEdit:focus, QDateTimeEdit:focus, QPlainTextEdit:focus, QTextEdit:focus {"
-        "  border: 1px solid #1d4ed8;"
-        "  background-color: #f8fafc;"
-        "}"
-        "QComboBox::drop-down {"
-        "  border: none;"
-        "}"
-        "QComboBox QAbstractItemView {"
-        "  background-color: #ffffff;"
-        "  border: 1px solid #d8e3f2;"
-        "  selection-background-color: rgba(37, 99, 235, 0.18);"
-        "  selection-color: #0f172a;"
-        "}"
-        "QCheckBox::indicator {"
-        "  width: 18px;"
-        "  height: 18px;"
-        "  border: 1px solid #cbd5f5;"
-        "  border-radius: 4px;"
-        "  background: #ffffff;"
-        "}"
-    "QCheckBox::indicator:checked {"
-    "  background-color: #2563eb;"
-    "  border-color: #1d4ed8;"
-    "  image: url(:/qt-project.org/styles/commonstyle/images/check.png);"
-    "  background-position: center;"
-    "  background-repeat: no-repeat;"
-        "}"
-        "QCheckBox::indicator:unchecked:hover {"
-        "  border-color: #94a3f5;"
-        "}" 
-        "QCheckBox::indicator:disabled {"
-        "  background: #e2e8f0;"
-        "  border-color: #cbd5f5;"
-        "}"
-    /* Default button style (secondary/neutral actions) */
-    "QPushButton {"
-    "  background-color: #374151;" /* slate-700 */
-    "  color: #ffffff;"
-    "  border-radius: 8px;"
-    "  padding: 8px 16px;"
-    "  font-weight: 600;"
-    "  border: none;"
-    "}"
-    "QPushButton:hover {"
-    "  background-color: #4b5563;"
-    "}"
-    "QPushButton:pressed {"
-    "  background-color: #111827;"
-    "}"
+    QString s;
 
-    /* Primary dialog actions (OK/Save) use a blue gradient for emphasis */
-    "QDialogButtonBox QPushButton {"
-    "  background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #3B82F6, stop:1 #2563EB);"
-    "  color: #ffffff;"
-    "  border-radius: 8px;"
-    "  padding: 8px 20px;"
-    "  font-weight: 700;"
-    "  border: none;"
-    "}"
-    "QDialogButtonBox QPushButton:hover {"
-    "  background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #60A5FA, stop:1 #3B82F6);"
-    "}"
-    "QDialogButtonBox QPushButton:pressed {"
-    "  background: #1E40AF;"
-    "}"
-        "QDialogButtonBox QPushButton:disabled {"
-        "  background-color: #e2e8f0;"
-        "  color: #94a3b8;"
-        "}"
-        "QDialogButtonBox QPushButton::menu-indicator {"
-        "  image: none;"
-        "}"
-        "QPlainTextEdit, QTextEdit {"
-        "  min-height: 120px;"
-        "}");
+    // Base button style – primary action
+    s += "QPushButton {"
+         "  background-color: #1976D2;"   // primary blue
+         "  color: white;"
+         "  border: none;"
+         "  border-radius: 4px;"
+         "  padding: 6px 14px;"
+         "  font-weight: 500;"
+         "}"
+         "QPushButton:hover {"
+         "  background-color: #1565C0;"
+         "}"
+         "QPushButton:pressed {"
+         "  background-color: #0D47A1;"
+         "}"
+         "QPushButton:disabled {"
+         "  background-color: #B0BEC5;"
+         "  color: #ECEFF1;"
+         "}";
+
+    // Secondary / subtle actions (filters, refresh, etc.)
+    s += "QPushButton#refreshButton,"
+         "QPushButton#bookFilterButton,"
+         "QPushButton#readerFilterButton,"
+         "QPushButton#loanFilterButton,"
+         "QPushButton#reportApplyButton,"
+         "QPushButton#reportClearButton,"
+         "QPushButton#staffFilterButton,"
+         "QPushButton#applyFilterButton {"
+         "  background-color: #546E7A;"
+         "}"
+         "QPushButton#refreshButton:hover,"
+         "QPushButton#bookFilterButton:hover,"
+         "QPushButton#readerFilterButton:hover,"
+         "QPushButton#loanFilterButton:hover,"
+         "QPushButton#reportApplyButton:hover,"
+         "QPushButton#reportClearButton:hover,"
+         "QPushButton#staffFilterButton:hover,"
+         "QPushButton#applyFilterButton:hover {"
+         "  background-color: #455A64;"
+         "}";
+
+    // Positive / success actions (approve, return book, etc.)
+    s += "QPushButton#approveReportButton,"
+         "QPushButton#returnLoanButton,"
+         "QPushButton#loginButton,"
+         "QPushButton#saveConfigButton,"
+         "QPushButton#addBookButton,"
+         "QPushButton#addReaderButton,"
+         "QPushButton#addStaffButton,"
+         "QPushButton#addAccountButton {"
+         "  background-color: #2E7D32;"
+         "}"
+         "QPushButton#approveReportButton:hover,"
+         "QPushButton#returnLoanButton:hover,"
+         "QPushButton#loginButton:hover,"
+         "QPushButton#saveConfigButton:hover,"
+         "QPushButton#addBookButton:hover,"
+         "QPushButton#addReaderButton:hover,"
+         "QPushButton#addStaffButton:hover,"
+         "QPushButton#addAccountButton:hover {"
+         "  background-color: #1B5E20;"
+         "}";
+
+    // Warning actions (lost / damaged)
+    s += "QPushButton#lostLoanButton,"
+         "QPushButton#damageLoanButton {"
+         "  background-color: #FB8C00;"
+         "}"
+         "QPushButton#lostLoanButton:hover,"
+         "QPushButton#damageLoanButton:hover {"
+         "  background-color: #EF6C00;"
+         "}";
+
+    // Destructive / danger actions (delete, reject, logout, exit)
+    s += "QPushButton#deleteBookButton,"
+         "QPushButton#deleteReaderButton,"
+         "QPushButton#deleteLoanButton,"
+         "QPushButton#deleteStaffButton,"
+         "QPushButton#deleteAccountButton,"
+         "QPushButton#rejectReportButton,"
+         "QPushButton#logoutButton,"
+         "QPushButton#exitButton {"
+         "  background-color: #E53935;"
+         "}"
+         "QPushButton#deleteBookButton:hover,"
+         "QPushButton#deleteReaderButton:hover,"
+         "QPushButton#deleteLoanButton:hover,"
+         "QPushButton#deleteStaffButton:hover,"
+         "QPushButton#deleteAccountButton:hover,"
+         "QPushButton#rejectReportButton:hover,"
+         "QPushButton#logoutButton:hover,"
+         "QPushButton#exitButton:hover {"
+         "  background-color: #C62828;"
+         "}";
+
+    return s;
 }
 }  // namespace
 
@@ -128,18 +114,7 @@ QString dialogStylesheet() {
 }
 
 void applyDialogPalette(QWidget *widget) {
-    if (!widget) return;
-    QPalette pal = widget->palette();
-    pal.setColor(QPalette::Window, QColor(0xF8, 0xFA, 0xFC));
-    pal.setColor(QPalette::Base, QColor(0xFF, 0xFF, 0xFF));
-    pal.setColor(QPalette::AlternateBase, QColor(0xF1, 0xF5, 0xF9));
-    pal.setColor(QPalette::WindowText, QColor(0x0F, 0x17, 0x2A));
-    pal.setColor(QPalette::Text, QColor(0x0F, 0x17, 0x2A));
-    pal.setColor(QPalette::Button, QColor(0xE2, 0xE8, 0xF0));
-    pal.setColor(QPalette::ButtonText, QColor(0x0F, 0x17, 0x2A));
-    pal.setColor(QPalette::Highlight, QColor(0xDB, 0xEA, 0xFE));
-    pal.setColor(QPalette::HighlightedText, QColor(0x0F, 0x17, 0x2A));
-    widget->setPalette(pal);
+    Q_UNUSED(widget);
 }
 
 void applyDialogTheme(QWidget *widget) {

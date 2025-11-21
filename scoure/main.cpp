@@ -21,22 +21,21 @@ using namespace pbl2;
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
+    // Force a simple, light theme so it does not
+    // switch to macOS dark mode.
     app.setStyle(QStyleFactory::create(QStringLiteral("Fusion")));
 
-    // Apply an application-wide stylesheet and palette to enforce the light dialog theme
-    app.setStyleSheet(pbl2::ui::dialogStylesheet());
-    QPalette appPal = app.palette();
-    appPal.setColor(QPalette::Window, QColor(0xF8, 0xFA, 0xFC));
-    appPal.setColor(QPalette::Base, QColor(0xFF, 0xFF, 0xFF));
-    appPal.setColor(QPalette::AlternateBase, QColor(0xF1, 0xF5, 0xF9));
-    appPal.setColor(QPalette::WindowText, QColor(0x0F, 0x17, 0x2A));
-    appPal.setColor(QPalette::Text, QColor(0x0F, 0x17, 0x2A));
-    appPal.setColor(QPalette::Button, QColor(0xE2, 0xE8, 0xF0));
-    appPal.setColor(QPalette::ButtonText, QColor(0x0F, 0x17, 0x2A));
-    appPal.setColor(QPalette::Highlight, QColor(0xDB, 0xEA, 0xFE));
-    appPal.setColor(QPalette::HighlightedText, QColor(0x0F, 0x17, 0x2A));
-    app.setPalette(appPal);
-
+    QPalette pal;
+    pal.setColor(QPalette::Window, Qt::white);
+    pal.setColor(QPalette::WindowText, Qt::black);
+    pal.setColor(QPalette::Base, Qt::white);
+    pal.setColor(QPalette::AlternateBase, QColor(0xF0, 0xF0, 0xF0));
+    pal.setColor(QPalette::Text, Qt::black);
+    pal.setColor(QPalette::Button, QColor(0xE0, 0xE0, 0xE0));
+    pal.setColor(QPalette::ButtonText, Qt::black);
+    pal.setColor(QPalette::Highlight, QColor(0x80, 0x80, 0x80));
+    pal.setColor(QPalette::HighlightedText, Qt::white);
+    app.setPalette(pal);
 
     const auto dataDir = util::locateDataDir();
     const QString dataDirPath = ::pbl2::bridge::toQString(dataDir);

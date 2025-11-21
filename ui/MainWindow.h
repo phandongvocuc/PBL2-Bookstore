@@ -160,6 +160,7 @@ private:
     QLabel *statsLabel{nullptr};
     
     StatsWidget *statsWidget{nullptr};
+    void updateStatsDashboardWidget();
 
     custom::CustomString dataDirectory;
     service::BookService bookService;
