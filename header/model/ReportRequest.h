@@ -8,34 +8,34 @@ namespace pbl2::model {
 
 class ReportRequest {
 public:
-    const custom::CustomString &getRequestId() const;
+    [[nodiscard]] const custom::CustomString &getRequestId() const;
     void setRequestId(const custom::CustomString &value);
 
-    const custom::CustomString &getStaffUsername() const;
+    [[nodiscard]] const custom::CustomString &getStaffUsername() const;
     void setStaffUsername(const custom::CustomString &value);
 
-    const core::Date &getFromDate() const;
+    [[nodiscard]] const core::Date &getFromDate() const;
     void setFromDate(const core::Date &value);
 
-    const core::Date &getToDate() const;
+    [[nodiscard]] const core::Date &getToDate() const;
     void setToDate(const core::Date &value);
 
-    int getHandledLoans() const;
+    [[nodiscard]] int getHandledLoans() const;
     void setHandledLoans(int value);
 
-    int getLostOrDamaged() const;
+    [[nodiscard]] int getLostOrDamaged() const;
     void setLostOrDamaged(int value);
 
-    int getOverdueReaders() const;
+    [[nodiscard]] int getOverdueReaders() const;
     void setOverdueReaders(int value);
 
-    const custom::CustomString &getNotes() const;
+    [[nodiscard]] const custom::CustomString &getNotes() const;
     void setNotes(const custom::CustomString &value);
 
-    const custom::CustomString &getStatus() const;
+    [[nodiscard]] const custom::CustomString &getStatus() const;
     void setStatus(const custom::CustomString &value);
 
-    const core::DateTime &getCreatedAt() const;
+    [[nodiscard]] const core::DateTime &getCreatedAt() const;
     void setCreatedAt(const core::DateTime &value);
 
 private:

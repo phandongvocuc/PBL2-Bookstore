@@ -1,4 +1,0 @@
-set(__QT_DEPLOY_TARGET_pbl2_book_FILE /Users/nguyenly/eclipse-workspace/Pbl2_book_patched_binaware/Pbl2_book/build/pbl2_book)
-set(__QT_DEPLOY_TARGET_pbl2_book_TYPE EXECUTABLE)
-set(__QT_DEPLOY_TARGET_convert_legacy_bin_FILE /Users/nguyenly/eclipse-workspace/Pbl2_book_patched_binaware/Pbl2_book/build/convert_legacy_bin)
-set(__QT_DEPLOY_TARGET_convert_legacy_bin_TYPE EXECUTABLE)

@@ -12,7 +12,7 @@ class StaffRepository {
 public:
     explicit StaffRepository(const custom::CustomString &dataDir);
 
-    custom::DynamicArray<model::Staff> loadAll() const;
+    [[nodiscard]] custom::DynamicArray<model::Staff> loadAll() const;
     void saveAll(const custom::DynamicArray<model::Staff> &staffs) const;
 
 private:

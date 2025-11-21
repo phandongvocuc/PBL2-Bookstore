@@ -113,7 +113,7 @@ DateRecord BinaryFileStore::packDate(const core::Date &value) {
 }
 
 core::Date BinaryFileStore::unpackDate(const DateRecord &record) {
-    return core::Date(record.year, record.month, record.day);
+    return {record.year, record.month, record.day};
 }
 
 DateTimeRecord BinaryFileStore::packDateTime(const core::DateTime &value) {
@@ -129,7 +129,7 @@ DateTimeRecord BinaryFileStore::packDateTime(const core::DateTime &value) {
 }
 
 core::DateTime BinaryFileStore::unpackDateTime(const DateTimeRecord &record) {
-    return core::DateTime(
+    return {
         record.year,
         record.month,
         record.day,
@@ -137,7 +137,7 @@ core::DateTime BinaryFileStore::unpackDateTime(const DateTimeRecord &record) {
         record.minute,
         record.second,
         record.millisecond
-    );
+    };
 }
 
 void BinaryFileStore::assignText(char *destination, size_t capacity, const CustomString &value) {

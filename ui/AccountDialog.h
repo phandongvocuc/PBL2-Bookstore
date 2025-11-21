@@ -20,19 +20,19 @@ class AccountDialog final : public QDialog {
 public:
     explicit AccountDialog(QWidget *parent = nullptr);
 
-    custom::CustomString username() const;
-    custom::CustomString password() const;
-    custom::CustomString role() const;
-    bool isActive() const;
+    [[nodiscard]] custom::CustomString username() const;
+    [[nodiscard]] custom::CustomString password() const;
+    [[nodiscard]] custom::CustomString role() const;
+    [[nodiscard]] bool isActive() const;
     // Staff linkage accessors
     void setStaffList(const custom::Vector<model::Staff> &staffs) const;
-    custom::CustomString staffId() const;
+    [[nodiscard]] custom::CustomString staffId() const;
 
 protected:
     void accept() override;
 
 private:
-    bool validateInputs() const;
+    [[nodiscard]] bool validateInputs() const;
     void showError(const custom::CustomString &message) const;
 
     QLineEdit *usernameEdit{nullptr};

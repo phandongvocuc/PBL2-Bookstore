@@ -15,16 +15,16 @@ class BookService {
 public:
     explicit BookService(const custom::CustomString &dataDir);
 
-    custom::DynamicArray<model::Book> fetchAll() const;
-    custom::Optional<model::Book> findById(const custom::CustomString &bookId) const;
-    bool addBook(const model::Book &book) const;
-    bool updateBook(const model::Book &book) const;
-    bool removeBook(const custom::CustomString &bookId) const;
+    [[nodiscard]] custom::DynamicArray<model::Book> fetchAll() const;
+    [[nodiscard]] custom::Optional<model::Book> findById(const custom::CustomString &bookId) const;
+    [[nodiscard]] bool addBook(const model::Book &book) const;
+    [[nodiscard]] bool updateBook(const model::Book &book) const;
+    [[nodiscard]] bool removeBook(const custom::CustomString &bookId) const;
 
 private:
     repository::BooksRepository repository;
 
-    custom::DynamicArray<model::Book> ensureLoaded() const;
+    [[nodiscard]] custom::DynamicArray<model::Book> ensureLoaded() const;
     void persist(const custom::DynamicArray<model::Book> &books) const;
     static bool normalizeAvailability(model::Book &book);
 };

@@ -16,10 +16,10 @@ public:
 
     CustomString &operator=(const CustomString &other);
 
-    const char *cStr() const;
-    char *data() const;
-    SizeType length() const;
-    bool isEmpty() const { return _length == 0U; }
+    [[nodiscard]] const char *cStr() const;
+    [[nodiscard]] char *data() const;
+    [[nodiscard]] SizeType length() const;
+    [[nodiscard]] bool isEmpty() const { return _length == 0U; }
 
     bool operator==(const CustomString &other) const { return compare(other) == 0; }
     bool operator!=(const CustomString &other) const { return !(*this == other); }
@@ -32,15 +32,15 @@ public:
 
     const char &operator[](SizeType index) const;
 
-    int compare(const CustomString &other) const;
-    int compare(const CustomString &other, CaseSensitivity cs) const;
+    [[nodiscard]] int compare(const CustomString &other) const;
+    [[nodiscard]] int compare(const CustomString &other, CaseSensitivity cs) const;
     int compare(const char *text, CaseSensitivity cs) const;
 
-    CustomString trimmed() const;
-    CustomString toUpper() const;
+    [[nodiscard]] CustomString trimmed() const;
+    [[nodiscard]] CustomString toUpper() const;
 
-    bool startsWith(const CustomString &prefix, CaseSensitivity cs = CaseSensitivity::Sensitive) const;
-    const unsigned char *bytes() const;
+    [[nodiscard]] bool startsWith(const CustomString &prefix, CaseSensitivity cs = CaseSensitivity::Sensitive) const;
+    [[nodiscard]] const unsigned char *bytes() const;
 
 private:
     char *_data;

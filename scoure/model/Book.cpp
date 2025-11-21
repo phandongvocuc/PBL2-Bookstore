@@ -1,7 +1,5 @@
 #include "model/Book.h"
 
-using namespace std;
-
 namespace pbl2::model {
 
 const custom::CustomString &Book::getId() const {
@@ -56,7 +54,7 @@ int Book::getPublishYear() const {
     return publishYear;
 }
 
-void Book::setPublishYear(int value) {
+void Book::setPublishYear(const int value) {
     publishYear = value;
 }
 
@@ -64,7 +62,7 @@ int Book::getQuantity() const {
     return quantity;
 }
 
-void Book::setQuantity(int value) {
+void Book::setQuantity(const int value) {
     quantity = value;
 }
 

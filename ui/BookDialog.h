@@ -22,13 +22,13 @@ public:
 
     void setBook(const model::Book &book, bool editing);
     void presetId(const QString &id, bool lockField = true);
-    model::Book book() const;
+    [[nodiscard]] model::Book book() const;
 
 protected:
     void accept() override;
 
 private:
-    bool validateInputs() const;
+    [[nodiscard]] bool validateInputs() const;
     void showError(const QString &message) const;
 
     QLineEdit *idEdit{nullptr};

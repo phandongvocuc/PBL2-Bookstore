@@ -10,7 +10,7 @@ class ConfigRepository {
 public:
     explicit ConfigRepository(const custom::CustomString &dataDir);
 
-    model::SystemConfig load() const;
+    [[nodiscard]] model::SystemConfig load() const;
     void save(const model::SystemConfig &config) const;
 
 private:

@@ -7,34 +7,34 @@ namespace pbl2::model {
 
 class Book {
 public:
-    const custom::CustomString &getId() const;
+    [[nodiscard]] const custom::CustomString &getId() const;
     void setId(const custom::CustomString &value);
 
-    const custom::CustomString &getTitle() const;
+    [[nodiscard]] const custom::CustomString &getTitle() const;
     void setTitle(const custom::CustomString &value);
 
-    const custom::CustomString &getAuthor() const;
+    [[nodiscard]] const custom::CustomString &getAuthor() const;
     void setAuthor(const custom::CustomString &value);
 
-    const custom::CustomString &getGenre() const;
+    [[nodiscard]] const custom::CustomString &getGenre() const;
     void setGenre(const custom::CustomString &value);
 
-    const custom::CustomString &getPublisher() const;
+    [[nodiscard]] const custom::CustomString &getPublisher() const;
     void setPublisher(const custom::CustomString &value);
 
-    const core::Date &getPublishDate() const;
+    [[nodiscard]] const core::Date &getPublishDate() const;
     void setPublishDate(const core::Date &value);
 
-    int getPublishYear() const;
+    [[nodiscard]] int getPublishYear() const;
     void setPublishYear(int value);
 
-    int getQuantity() const;
+    [[nodiscard]] int getQuantity() const;
     void setQuantity(int value);
 
-    const custom::CustomString &getStatus() const;
+    [[nodiscard]] const custom::CustomString &getStatus() const;
     void setStatus(const custom::CustomString &value);
 
-    const custom::CustomString &getSummary() const;
+    [[nodiscard]] const custom::CustomString &getSummary() const;
     void setSummary(const custom::CustomString &value);
 
 private:

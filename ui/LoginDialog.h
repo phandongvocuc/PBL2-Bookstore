@@ -20,7 +20,7 @@ class LoginDialog;
 namespace pbl2::ui {
 
 
-class LoginDialog : public QDialog {
+class LoginDialog final : public QDialog {
     Q_OBJECT
 
 public:

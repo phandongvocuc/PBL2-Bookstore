@@ -15,17 +15,17 @@ class ReaderService {
 public:
     explicit ReaderService(const custom::CustomString &dataDir);
 
-    custom::DynamicArray<model::Reader> fetchAll() const;
-    custom::Optional<model::Reader> findById(const custom::CustomString &readerId) const;
-    bool addReader(const model::Reader &reader) const;
-    bool updateReader(const model::Reader &reader) const;
-    bool setReaderActive(const custom::CustomString &readerId, bool active) const;
-    bool removeReader(const custom::CustomString &readerId) const;
+    [[nodiscard]] custom::DynamicArray<model::Reader> fetchAll() const;
+    [[nodiscard]] custom::Optional<model::Reader> findById(const custom::CustomString &readerId) const;
+    [[nodiscard]] bool addReader(const model::Reader &reader) const;
+    [[nodiscard]] bool updateReader(const model::Reader &reader) const;
+    [[nodiscard]] bool setReaderActive(const custom::CustomString &readerId, bool active) const;
+    [[nodiscard]] bool removeReader(const custom::CustomString &readerId) const;
 
 private:
     repository::ReadersRepository repository;
 
-    custom::DynamicArray<model::Reader> ensureLoaded() const;
+    [[nodiscard]] custom::DynamicArray<model::Reader> ensureLoaded() const;
     void persist(const custom::DynamicArray<model::Reader> &readers) const;
 };
 

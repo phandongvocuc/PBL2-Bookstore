@@ -58,24 +58,24 @@ QString normalizedStatus(const QString &text);
 
 QColor statusBadgeColor(const QString &statusCode) {
     const QString normalized = normalizedStatus(statusCode);
-    if (normalized == QStringLiteral("CON")) return QColor(0x28, 0xA7, 0x45);
-    if (normalized == QStringLiteral("HET")) return QColor(0x96, 0x9D, 0xA6);
-    if (normalized == QStringLiteral("MAT")) return QColor(0xD9, 0x3F, 0x3F);
-    if (normalized == QStringLiteral("HONG")) return QColor(0xF0, 0x73, 0x24);
-    if (normalized == QStringLiteral("BORROWED")) return QColor(0x2F, 0x6A, 0xD0);
-    if (normalized == QStringLiteral("RETURNED")) return QColor(0x28, 0xA7, 0x45);
-    if (normalized == QStringLiteral("OVERDUE")) return QColor(0xF5, 0x8B, 0x0A);
-    if (normalized == QStringLiteral("LOST")) return QColor(0xD9, 0x3F, 0x3F);
-    if (normalized == QStringLiteral("DAMAGED")) return QColor(0xF0, 0x73, 0x24);
-    if (normalized == QStringLiteral("PENDING")) return QColor(0xFF, 0xA0, 0x2F);
-    if (normalized == QStringLiteral("APPROVED")) return QColor(0x28, 0xA7, 0x45);
-    if (normalized == QStringLiteral("REJECTED")) return QColor(0xD9, 0x3F, 0x3F);
-    if (normalized == QStringLiteral("ACTIVE")) return QColor(0x28, 0xA7, 0x45);
-    if (normalized == QStringLiteral("INACTIVE")) return QColor(0x96, 0x9D, 0xA6);
-    return QColor(0x2F, 0x6A, 0xD0);
+    if (normalized == QStringLiteral("CON")) return {0x28, 0xA7, 0x45};
+    if (normalized == QStringLiteral("HET")) return {0x96, 0x9D, 0xA6};
+    if (normalized == QStringLiteral("MAT")) return {0xD9, 0x3F, 0x3F};
+    if (normalized == QStringLiteral("HONG")) return {0xF0, 0x73, 0x24};
+    if (normalized == QStringLiteral("BORROWED")) return {0x2F, 0x6A, 0xD0};
+    if (normalized == QStringLiteral("RETURNED")) return {0x28, 0xA7, 0x45};
+    if (normalized == QStringLiteral("OVERDUE")) return {0xF5, 0x8B, 0x0A};
+    if (normalized == QStringLiteral("LOST")) return {0xD9, 0x3F, 0x3F};
+    if (normalized == QStringLiteral("DAMAGED")) return {0xF0, 0x73, 0x24};
+    if (normalized == QStringLiteral("PENDING")) return {0xFF, 0xA0, 0x2F};
+    if (normalized == QStringLiteral("APPROVED")) return {0x28, 0xA7, 0x45};
+    if (normalized == QStringLiteral("REJECTED")) return {0xD9, 0x3F, 0x3F};
+    if (normalized == QStringLiteral("ACTIVE")) return {0x28, 0xA7, 0x45};
+    if (normalized == QStringLiteral("INACTIVE")) return {0x96, 0x9D, 0xA6};
+    return {0x2F, 0x6A, 0xD0};
 }
 
-class CardListDelegate : public QStyledItemDelegate {
+class CardListDelegate final : public QStyledItemDelegate {
 public:
     using QStyledItemDelegate::QStyledItemDelegate;
 
@@ -105,12 +105,12 @@ public:
     const QString detail = index.data(kCardRoleDetail).toString();
     const QString extraDetail = index.data(kCardRoleSecondaryDetail).toString();
         const QString badgeText = index.data(kCardRoleBadgeText).toString();
-        QColor badgeColor = index.data(kCardRoleBadgeColor).value<QColor>();
+        auto badgeColor = index.data(kCardRoleBadgeColor).value<QColor>();
         if (!badgeColor.isValid()) {
             badgeColor = statusBadgeColor(badgeText);
         }
         const QString pillText = index.data(kCardRolePillText).toString();
-        QColor pillColor = index.data(kCardRolePillColor).value<QColor>();
+        auto pillColor = index.data(kCardRolePillColor).value<QColor>();
         if (!pillColor.isValid()) {
             pillColor = option.palette.alternateBase().color();
         }
@@ -147,7 +147,7 @@ public:
         QRect badgeRect(inner.right() - badgeWidth, inner.top(), badgeWidth, badgeHeight);
 
         constexpr auto primaryText = QColor(0x0F, 0x17, 0x2A);
-    QColor secondaryText = QColor(0x4B, 0x55, 0x6B);
+    auto secondaryText = QColor(0x4B, 0x55, 0x6B);
     if (selected) {
         secondaryText = QColor(0x1E, 0x40, 0x8A);
     }
@@ -229,9 +229,9 @@ public:
         }
         titleFont.setBold(true);
 
-        QFont secondary = option.font;
-        QFontMetrics titleMetrics(titleFont);
-        QFontMetrics bodyMetrics(secondary);
+        const QFont secondary = option.font;
+        const QFontMetrics titleMetrics(titleFont);
+        const QFontMetrics bodyMetrics(secondary);
         // Make room for header (1 line) + up to 3 body lines (meta/detail/extra)
         constexpr int bodyLines = 3;
         const int height = 12 + titleMetrics.height() + 6 + bodyMetrics.height() * bodyLines + 12;
@@ -269,7 +269,7 @@ public:
     }
 };
 
-class NavigationListDelegate : public QStyledItemDelegate {
+class NavigationListDelegate final : public QStyledItemDelegate {
 public:
     using QStyledItemDelegate::QStyledItemDelegate;
 
@@ -298,8 +298,7 @@ public:
             painter->save();
             painter->setRenderHint(QPainter::Antialiasing, true);
             const QRect iconRect = option.rect.adjusted(6, 6, -6, -6);
-            QIcon icon = qvariant_cast<QIcon>(index.data(Qt::DecorationRole));
-            if (!icon.isNull()) {
+            if (auto icon = qvariant_cast<QIcon>(index.data(Qt::DecorationRole)); !icon.isNull()) {
                 const QSize isz = option.decorationSize;
                 const QPoint center = iconRect.center();
                 const QRect drawRect(center.x() - isz.width() / 2, center.y() - isz.height() / 2, isz.width(), isz.height());
@@ -473,11 +472,11 @@ QString normalizedStatus(const QString &text) {
 }
 
 QString normalizedStatus(const custom::CustomString &text) {
-    return normalizedStatus(bridge::toQString(text));
+    return normalizedStatus(toQString(text));
 }
 
 QString bookStatusText(const custom::CustomString &code) {
-    const QString value = bridge::toQString(model::canonicalBookStatus(code));
+    const QString value = toQString(model::canonicalBookStatus(code));
     if (value == QStringLiteral("CON")) return QObject::tr("CON");
     if (value == QStringLiteral("HET")) return QObject::tr("HET");
     if (value == QStringLiteral("MAT")) return QObject::tr("MAT");
@@ -524,7 +523,7 @@ namespace pbl2::ui {
 MainWindow::MainWindow(const QString &dataDir, const model::Account &signedInAccount, QWidget *parent)
         : QMainWindow(parent),
             ui(std::make_unique<Ui::MainWindow>()),
-            dataDirectory(bridge::toCustomString(dataDir)),
+            dataDirectory(toCustomString(dataDir)),
             bookService(dataDirectory),
             readerService(dataDirectory),
             staffService(dataDirectory),
@@ -533,7 +532,7 @@ MainWindow::MainWindow(const QString &dataDir, const model::Account &signedInAcc
         reportService(dataDirectory),
         configService(dataDirectory),
         currentAccount(signedInAccount) {
-    const QString roleText = normalizedStatus(bridge::toQString(currentAccount.getRole()));
+    const QString roleText = normalizedStatus(toQString(currentAccount.getRole()));
     staffRole = roleText == QStringLiteral("STAFF") || roleText == QStringLiteral("ADMIN");
     adminRole = roleText == QStringLiteral("ADMIN");
     currentConfig = configService.load();
@@ -654,7 +653,7 @@ void MainWindow::setupUi() {
                 "}");
         }
         tabs->setStyleSheet(QString());
-        connect(tabs, &QTabWidget::currentChanged, [this](int index) {
+        connect(tabs, &QTabWidget::currentChanged, [this](const int index) {
             if (navigationList && navigationList->currentRow() != index) {
                 QSignalBlocker blocker(navigationList);
                 navigationList->setCurrentRow(index);
@@ -682,7 +681,7 @@ void MainWindow::setupUi() {
         navRail->setObjectName("navRail");
         navRail->setFixedWidth(navCollapsedWidth);
         navRail->setVisible(false);
-        QVBoxLayout *railLayout = new QVBoxLayout(navRail);
+        auto railLayout = new QVBoxLayout(navRail);
         railLayout->setContentsMargins(6, 8, 6, 8);
         railLayout->setSpacing(6);
         // Placeholder for top icons; we'll populate after setupNavigationMenu()
@@ -711,8 +710,8 @@ void MainWindow::setupUi() {
 
     userInfoLabel = new QLabel(this);
     const QString signedInLabel = tr("Dang dang nhap %1 (%2)")
-                                      .arg(bridge::toQString(currentAccount.getUsername()).trimmed())
-                                      .arg(bridge::toQString(currentAccount.getRole().trimmed()));
+                                      .arg(toQString(currentAccount.getUsername()).trimmed())
+                                      .arg(toQString(currentAccount.getRole().trimmed()));
     userInfoLabel->setText(signedInLabel);
     userInfoLabel->setFont(accentFont);
     statusBar()->addPermanentWidget(userInfoLabel);
@@ -783,8 +782,7 @@ void MainWindow::setupUi() {
 
     auto removeTabIfExists = [this](QWidget *tabWidget) {
         if (!tabs || !tabWidget) return;
-        const int index = tabs->indexOf(tabWidget);
-        if (index != -1) {
+        if (const int index = tabs->indexOf(tabWidget); index != -1) {
             tabs->removeTab(index);
             tabWidget->setParent(nullptr);
         }
@@ -806,7 +804,7 @@ void MainWindow::setupUi() {
     repositionNavRailButton();
 }
 
-void MainWindow::notifyEvent(const QString &message, EventSeverity severity, int durationMs) {
+void MainWindow::notifyEvent(const QString &message, const EventSeverity severity, const int durationMs) const {
     Q_UNUSED(severity);
     const int duration = durationMs > 0 ? durationMs : 2000;
     if (statusBar()) {
@@ -1083,8 +1081,8 @@ void MainWindow::configureStatsTab() {
     }
     
     timePeriodCombo = searchWidget->findChild<QComboBox *>(QStringLiteral("timePeriodCombo"));
-    QDateEdit *customStartDateEdit = searchWidget->findChild<QDateEdit *>(QStringLiteral("customStartDateEdit"));
-    QDateEdit *customEndDateEdit = searchWidget->findChild<QDateEdit *>(QStringLiteral("customEndDateEdit"));
+    const auto customStartDateEdit = searchWidget->findChild<QDateEdit *>(QStringLiteral("customStartDateEdit"));
+    const auto customEndDateEdit = searchWidget->findChild<QDateEdit *>(QStringLiteral("customEndDateEdit"));
     if (customStartDateEdit && customEndDateEdit) {
         customStartDateEdit->setVisible(false);
         customEndDateEdit->setVisible(false);
@@ -1099,8 +1097,8 @@ void MainWindow::configureStatsTab() {
         // Mac dinh chon "Thang nay" de bieu do luon co du lieu hon
         timePeriodCombo->setCurrentIndex(2);
         if (customStartDateEdit && customEndDateEdit) {
-            connect(timePeriodCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=](int idx) {
-                bool custom = (idx == 4);
+            connect(timePeriodCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=](const int idx) {
+                const bool custom = (idx == 4);
                 customStartDateEdit->setVisible(custom);
                 customEndDateEdit->setVisible(custom);
             });
@@ -1141,12 +1139,12 @@ void MainWindow::configureStatsTab() {
                 if (opt.state & QStyle::State_Selected) {
                     painter->fillRect(opt.rect, opt.palette.highlight());
                 }
+
+                const QString text = index.data(Qt::DisplayRole).toString();
+                const QString count = index.data(Qt::UserRole + 1).toString();
                 
-                QString text = index.data(Qt::DisplayRole).toString();
-                QString count = index.data(Qt::UserRole + 1).toString();
-                
-                QRect textRect = opt.rect.adjusted(5, 2, -50, -2);
-                QRect countRect = opt.rect.adjusted(opt.rect.width() - 55, 2, -5, -2);
+                const QRect textRect = opt.rect.adjusted(5, 2, -50, -2);
+                const QRect countRect = opt.rect.adjusted(opt.rect.width() - 55, 2, -5, -2);
                 
                 QFont font = painter->font();
                 font.setPointSize(10);
@@ -1175,13 +1173,13 @@ void MainWindow::configureStatsTab() {
                 if (opt.state & QStyle::State_Selected) {
                     painter->fillRect(opt.rect, opt.palette.highlight());
                 }
-                
-                QString text = index.data(Qt::DisplayRole).toString();
-                QString count = index.data(Qt::UserRole + 1).toString();
+
+                const QString text = index.data(Qt::DisplayRole).toString();
+                const QString count = index.data(Qt::UserRole + 1).toString();
                 
                 // Vẽ text (có thể nhiều dòng)
-                QRect textRect = opt.rect.adjusted(5, 2, -50, -2);
-                QRect countRect = opt.rect.adjusted(opt.rect.width() - 55, 2, -5, -2);
+                const QRect textRect = opt.rect.adjusted(5, 2, -50, -2);
+                const QRect countRect = opt.rect.adjusted(opt.rect.width() - 55, 2, -5, -2);
                 
                 QFont font = painter->font();
                 font.setPointSize(10);

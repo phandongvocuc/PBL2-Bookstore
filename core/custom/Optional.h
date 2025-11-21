@@ -24,7 +24,7 @@ public:
 
     ~Optional() = default;
 
-    bool has_value() const {
+    [[nodiscard]] bool has_value() const {
         return hasValue;
     }
 

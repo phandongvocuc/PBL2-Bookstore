@@ -1,7 +1,6 @@
 #include "model/Person.h"
 
-using namespace std;  // project-wide request
-
+using namespace std;
 
 namespace pbl2::model {
 
@@ -33,7 +32,7 @@ bool Person::isActive() const {
     return active;
 }
 
-void Person::setActive(bool value) {
+void Person::setActive(const bool value) {
     active = value;
 }
 

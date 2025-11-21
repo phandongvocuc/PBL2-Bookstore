@@ -1,7 +1,5 @@
 #include "model/Loan.h"
 
-using namespace std;  // project-wide request
-
 namespace pbl2::model {
 
 const custom::CustomString &Loan::getLoanId() const {
@@ -64,7 +62,7 @@ int Loan::getFine() const {
     return fine;
 }
 
-void Loan::setFine(int value) {
+void Loan::setFine(const int value) {
     fine = value;
 }
 

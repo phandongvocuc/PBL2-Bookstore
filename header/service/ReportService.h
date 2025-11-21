@@ -13,15 +13,15 @@ class ReportService {
 public:
     explicit ReportService(const custom::CustomString &dataDir);
 
-    custom::DynamicArray<model::ReportRequest> fetchAll() const;
+    [[nodiscard]] custom::DynamicArray<model::ReportRequest> fetchAll() const;
 
-    bool submitRequest(model::ReportRequest request) const;
-    bool updateStatus(const custom::CustomString &requestId, const custom::CustomString &status) const;
+    [[nodiscard]] bool submitRequest(model::ReportRequest request) const;
+    [[nodiscard]] bool updateStatus(const custom::CustomString &requestId, const custom::CustomString &status) const;
 
 private:
     repository::ReportRequestRepository repository;
 
-    custom::DynamicArray<model::ReportRequest> ensureLoaded() const;
+    [[nodiscard]] custom::DynamicArray<model::ReportRequest> ensureLoaded() const;
     void persist(const custom::DynamicArray<model::ReportRequest> &requests) const;
 };
 

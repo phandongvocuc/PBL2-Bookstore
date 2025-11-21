@@ -1,5 +1,4 @@
 #include "model/ReportRequest.h"
-using namespace std;  // project-wide request
 namespace pbl2::model {
 
 const custom::CustomString &ReportRequest::getRequestId() const {
@@ -38,7 +37,7 @@ int ReportRequest::getHandledLoans() const {
     return handledLoans;
 }
 
-void ReportRequest::setHandledLoans(int value) {
+void ReportRequest::setHandledLoans(const int value) {
     handledLoans = value;
 }
 
@@ -46,7 +45,7 @@ int ReportRequest::getLostOrDamaged() const {
     return lostOrDamaged;
 }
 
-void ReportRequest::setLostOrDamaged(int value) {
+void ReportRequest::setLostOrDamaged(const int value) {
     lostOrDamaged = value;
 }
 
@@ -54,7 +53,7 @@ int ReportRequest::getOverdueReaders() const {
     return overdueReaders;
 }
 
-void ReportRequest::setOverdueReaders(int value) {
+void ReportRequest::setOverdueReaders(const int value) {
     overdueReaders = value;
 }
 

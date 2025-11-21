@@ -16,7 +16,7 @@
 #include <iostream>
 
 
-using namespace std;  // project-wide request
+using namespace std;
 using namespace pbl2;
 
 int main(int argc, char *argv[]) {
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
     app.setPalette(pal);
 
     const auto dataDir = util::locateDataDir();
-    const QString dataDirPath = ::pbl2::bridge::toQString(dataDir);
+    const QString dataDirPath = bridge::toQString(dataDir);
     service::AccountService accountService(dataDir);
 
     unique_ptr<ui::MainWindow> window;

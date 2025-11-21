@@ -5,32 +5,31 @@
 namespace pbl2::model {
 
 struct Loan {
-public:
-    const custom::CustomString &getLoanId() const;
+    [[nodiscard]] const custom::CustomString &getLoanId() const;
     void setLoanId(const custom::CustomString &value);
 
-    const custom::CustomString &getReaderId() const;
+    [[nodiscard]] const custom::CustomString &getReaderId() const;
     void setReaderId(const custom::CustomString &value);
 
-    const custom::CustomString &getBookId() const;
+    [[nodiscard]] const custom::CustomString &getBookId() const;
     void setBookId(const custom::CustomString &value);
 
-    const core::Date &getBorrowDate() const;
+    [[nodiscard]] const core::Date &getBorrowDate() const;
     void setBorrowDate(const core::Date &value);
 
-    const core::Date &getDueDate() const;
+    [[nodiscard]] const core::Date &getDueDate() const;
     void setDueDate(const core::Date &value);
 
-    const core::Date &getReturnDate() const;
+    [[nodiscard]] const core::Date &getReturnDate() const;
     void setReturnDate(const core::Date &value);
 
-    const custom::CustomString &getStatus() const;
+    [[nodiscard]] const custom::CustomString &getStatus() const;
     void setStatus(const custom::CustomString &value);
 
-    int getFine() const;
+    [[nodiscard]] int getFine() const;
     void setFine(int value);
 
-    const custom::CustomString &getStaffUsername() const;
+    [[nodiscard]] const custom::CustomString &getStaffUsername() const;
     void setStaffUsername(const custom::CustomString &value);
 
 private:

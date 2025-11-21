@@ -5,7 +5,7 @@
 #include "QtBridge.h"
 #include "ui_LoginDialog.h"
 
-using namespace std;  // project-wide request
+using namespace std;
 
 namespace {
 

@@ -14,22 +14,22 @@ custom::DynamicArray<model::Account> AccountService::fetchAll() const { return e
 
 custom::Optional<model::Account> AccountService::findByUsername(const custom::CustomString &username) const {
     const custom::CustomString trimmed = username.trimmed();
-    if (trimmed.isEmpty()) return custom::Optional<model::Account>();
+    if (trimmed.isEmpty()) return {};
     const auto accounts = ensureLoaded();
-    if (accounts.isEmpty()) return custom::Optional<model::Account>();
-    for (custom::DynamicArray<model::Account>::ConstIterator it = accounts.cbegin(); it != accounts.cend(); ++it) {
-        if (it->getUsername().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
-            return custom::Optional(*it);
+    if (accounts.isEmpty()) return {};
+    for (const auto & account : accounts) {
+        if (account.getUsername().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
+            return custom::Optional(account);
         }
     }
-    return custom::Optional<model::Account>();
+    return {};
 }
 
 custom::Optional<model::Account> AccountService::authenticate(const custom::CustomString &username, const custom::CustomString &password) const {
     const custom::CustomString trimmed = username.trimmed();
-    if (trimmed.isEmpty() || password.isEmpty()) return custom::Optional<model::Account>();
-    auto accounts = ensureLoaded();
-    if (accounts.isEmpty()) return custom::Optional<model::Account>();
+    if (trimmed.isEmpty() || password.isEmpty()) return {};
+    const auto accounts = ensureLoaded();
+    if (accounts.isEmpty()) return {};
     const custom::CustomString hashed = repository::AccountsRepository::hashPassword(password);
     model::Account *candidate = nullptr;
     for (custom::DynamicArray<model::Account>::Iterator it = accounts.begin(); it != accounts.end(); ++it) {
@@ -38,9 +38,9 @@ custom::Optional<model::Account> AccountService::authenticate(const custom::Cust
             break;
         }
     }
-    if (!candidate) return custom::Optional<model::Account>();
-    if (candidate->getPasswordHash() != hashed) return custom::Optional<model::Account>();
-    if (!candidate->isActive()) return custom::Optional<model::Account>();
+    if (!candidate) return {};
+    if (candidate->getPasswordHash() != hashed) return {};
+    if (!candidate->isActive()) return {};
 
     candidate->setLastLogin(core::DateTime::nowUtc());
     persist(accounts);
@@ -70,11 +70,11 @@ bool AccountService::updateAccount(const model::Account &account) const {
         if (isEmployeeIdInUse(newStaffId, account.getUsername())) return false;
     }
 
-    auto accounts = ensureLoaded();
+    const auto accounts = ensureLoaded();
     bool updated = false;
-    for (custom::DynamicArray<model::Account>::Iterator it = accounts.begin(); it != accounts.end(); ++it) {
-        if (it->getUsername().compare(account.getUsername(), custom::CaseSensitivity::Insensitive) == 0) {
-            *it = account;
+    for (auto & it : accounts) {
+        if (it.getUsername().compare(account.getUsername(), custom::CaseSensitivity::Insensitive) == 0) {
+            it = account;
             updated = true;
             break;
         }
@@ -87,11 +87,11 @@ bool AccountService::updateAccount(const model::Account &account) const {
 bool AccountService::updatePassword(const custom::CustomString &username, const custom::CustomString &newPassword) const {
     const custom::CustomString trimmed = username.trimmed();
     if (trimmed.isEmpty() || newPassword.isEmpty()) return false;
-    auto accounts = ensureLoaded();
+    const auto accounts = ensureLoaded();
     bool updated = false;
-    for (custom::DynamicArray<model::Account>::Iterator it = accounts.begin(); it != accounts.end(); ++it) {
-        if (it->getUsername().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
-            it->setPasswordHash(repository::AccountsRepository::hashPassword(newPassword));
+    for (auto & account : accounts) {
+        if (account.getUsername().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
+            account.setPasswordHash(repository::AccountsRepository::hashPassword(newPassword));
             updated = true;
             break;
         }
@@ -125,8 +125,7 @@ custom::DynamicArray<model::Account> AccountService::ensureLoaded() const {
     custom::DynamicArray<custom::CustomString> ids;
     ids.reserve(accounts.size());
     bool mutated = false;
-    for (custom::DynamicArray<model::Account>::SizeType i = 0U; i < accounts.size(); ++i) {
-        model::Account &acc = accounts[i];
+    for (auto & acc : accounts) {
         custom::CustomString id = acc.getAccountId().trimmed();
         if (id.isEmpty()) {
             id = core::IdGenerator::nextId(ids, custom::CustomStringLiteral("AC"), 3);
@@ -150,8 +149,7 @@ bool AccountService::isEmployeeIdInUse(const custom::CustomString &staffId, cons
     if (trimmedStaff.isEmpty()) return false;
     const custom::CustomString trimmedExclude = excludeUsername.trimmed();
     const auto accounts = ensureLoaded();
-    for (custom::DynamicArray<model::Account>::ConstIterator it = accounts.cbegin(); it != accounts.cend(); ++it) {
-        const model::Account &acc = *it;
+    for (const auto & acc : accounts) {
         if (acc.getEmployeeId().trimmed().isEmpty()) continue;
         if (acc.getEmployeeId().compare(trimmedStaff, custom::CaseSensitivity::Insensitive) != 0) continue;
         if (!trimmedExclude.isEmpty() && acc.getUsername().compare(trimmedExclude, custom::CaseSensitivity::Insensitive) == 0) {
@@ -171,8 +169,8 @@ bool AccountService::createAccountInternal(const custom::CustomString &username,
 
     auto accounts = ensureLoaded();
     bool usernameExists = false;
-    for (custom::DynamicArray<model::Account>::ConstIterator it = accounts.cbegin(); it != accounts.cend(); ++it) {
-        if (it->getUsername().compare(cleanUsername, custom::CaseSensitivity::Insensitive) == 0) {
+    for (const auto & account : accounts) {
+        if (account.getUsername().compare(cleanUsername, custom::CaseSensitivity::Insensitive) == 0) {
             usernameExists = true;
             break;
         }
@@ -181,11 +179,11 @@ bool AccountService::createAccountInternal(const custom::CustomString &username,
 
     if (!employee.isEmpty()) {
         bool employeeUsed = false;
-        for (custom::DynamicArray<model::Account>::ConstIterator it = accounts.cbegin(); it != accounts.cend(); ++it) {
-            if (it->getEmployeeId().trimmed().isEmpty()) {
+        for (const auto & account : accounts) {
+            if (account.getEmployeeId().trimmed().isEmpty()) {
                 continue;
             }
-            if (it->getEmployeeId().compare(employee, custom::CaseSensitivity::Insensitive) == 0) {
+            if (account.getEmployeeId().compare(employee, custom::CaseSensitivity::Insensitive) == 0) {
                 employeeUsed = true;
                 break;
             }
@@ -195,8 +193,8 @@ bool AccountService::createAccountInternal(const custom::CustomString &username,
 
     custom::DynamicArray<custom::CustomString> ids;
     ids.reserve(accounts.size());
-    for (custom::DynamicArray<model::Account>::ConstIterator it = accounts.cbegin(); it != accounts.cend(); ++it) {
-        if (const custom::CustomString existingId = it->getAccountId().trimmed(); !existingId.isEmpty()) ids.pushBack(existingId);
+    for (const auto & account : accounts) {
+        if (const custom::CustomString existingId = account.getAccountId().trimmed(); !existingId.isEmpty()) ids.pushBack(existingId);
     }
 
     model::Account account;

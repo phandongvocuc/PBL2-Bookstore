@@ -9,16 +9,16 @@ class Person {
 public:
     virtual ~Person() = default;
 
-    const custom::CustomString &getId() const;
+    [[nodiscard]] const custom::CustomString &getId() const;
     void setId(const custom::CustomString &value);
 
-    const custom::CustomString &getFullName() const;
+    [[nodiscard]] const custom::CustomString &getFullName() const;
     void setFullName(const custom::CustomString &value);
 
-    const core::Date &getDob() const;
+    [[nodiscard]] const core::Date &getDob() const;
     void setDob(const core::Date &value);
 
-    bool isActive() const;
+    [[nodiscard]] bool isActive() const;
     void setActive(bool value);
 
 protected:

@@ -111,18 +111,18 @@ int CustomString::compare(const char *text, const CaseSensitivity cs) const {
 }
 
 CustomString CustomString::trimmed() const {
-    if (_length == 0U) return CustomString();
+    if (_length == 0U) return {};
     SizeType start = 0U;
     while (start < _length && isSpace(_data[start])) {
         ++start;
     }
-    if (start == _length) return CustomString();
+    if (start == _length) return {};
     SizeType end = _length - 1U;
     while (end > start && isSpace(_data[end])) {
         --end;
     }
     const SizeType newLen = end - start + 1U;
-    return CustomString(_data + start, newLen);
+    return {_data + start, newLen};
 }
 
 CustomString CustomString::toUpper() const {

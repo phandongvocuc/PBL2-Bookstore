@@ -10,24 +10,24 @@ custom::DynamicArray<model::Reader> ReaderService::fetchAll() const { return ens
 
 custom::Optional<model::Reader> ReaderService::findById(const custom::CustomString &readerId) const {
     const auto trimmed = readerId.trimmed();
-    if (trimmed.isEmpty()) return custom::Optional<model::Reader>();
+    if (trimmed.isEmpty()) return {};
     const auto readers = ensureLoaded();
-    if (readers.isEmpty()) return custom::Optional<model::Reader>();
-    for (custom::DynamicArray<model::Reader>::ConstIterator it = readers.cbegin(); it != readers.cend(); ++it) {
-        if (it->getId().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
-            return custom::Optional(*it);
+    if (readers.isEmpty()) return {};
+    for (const auto & reader : readers) {
+        if (reader.getId().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
+            return custom::Optional(reader);
         }
     }
-    return custom::Optional<model::Reader>();
+    return {};
 }
 
 bool ReaderService::addReader(const model::Reader &reader) const {
     auto readers = ensureLoaded();
 
-    const model::Reader copy = reader;
+    const model::Reader& copy = reader;
     bool exists = false;
-    for (custom::DynamicArray<model::Reader>::ConstIterator it = readers.cbegin(); it != readers.cend(); ++it) {
-        if (it->getId().compare(copy.getId(), custom::CaseSensitivity::Insensitive) == 0) {
+    for (const auto & reader1 : readers) {
+        if (reader1.getId().compare(copy.getId(), custom::CaseSensitivity::Insensitive) == 0) {
             exists = true;
             break;
         }
@@ -40,11 +40,11 @@ bool ReaderService::addReader(const model::Reader &reader) const {
 }
 
 bool ReaderService::updateReader(const model::Reader &reader) const {
-    auto readers = ensureLoaded();
+    const auto readers = ensureLoaded();
     bool updated = false;
-    for (custom::DynamicArray<model::Reader>::Iterator it = readers.begin(); it != readers.end(); ++it) {
-        if (it->getId().compare(reader.getId(), custom::CaseSensitivity::Insensitive) == 0) {
-            *it = reader;
+    for (auto & it : readers) {
+        if (it.getId().compare(reader.getId(), custom::CaseSensitivity::Insensitive) == 0) {
+            it = reader;
             updated = true;
             break;
         }
@@ -55,12 +55,12 @@ bool ReaderService::updateReader(const model::Reader &reader) const {
 }
 
 bool ReaderService::setReaderActive(const custom::CustomString &readerId, const bool active) const {
-    auto readers = ensureLoaded();
+    const auto readers = ensureLoaded();
     bool changed = false;
-    for (custom::DynamicArray<model::Reader>::Iterator it = readers.begin(); it != readers.end(); ++it) {
-        if (it->getId().compare(readerId, custom::CaseSensitivity::Insensitive) == 0) {
-            if (it->isActive() == active) return true;
-            it->setActive(active);
+    for (auto & reader : readers) {
+        if (reader.getId().compare(readerId, custom::CaseSensitivity::Insensitive) == 0) {
+            if (reader.isActive() == active) return true;
+            reader.setActive(active);
             changed = true;
             break;
         }

@@ -113,7 +113,7 @@ QString dialogStylesheet() {
     return stylesheet;
 }
 
-void applyDialogPalette(QWidget *widget) {
+void applyDialogPalette(const QWidget *widget) {
     Q_UNUSED(widget);
 }
 

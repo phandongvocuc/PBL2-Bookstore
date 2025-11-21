@@ -17,7 +17,7 @@ static int extractTrailingNumberCustom(const custom::CustomString &value, const 
     int result = 0;
     bool hasDigit = false;
     for (custom::CustomString::SizeType i = prefixLen; i < total; ++i) {
-        const unsigned char ch = static_cast<unsigned char>(data[i]);
+        const auto ch = static_cast<unsigned char>(data[i]);
         if (!std::isdigit(ch)) return -1;
         hasDigit = true;
         result = result * 10 + (ch - '0');

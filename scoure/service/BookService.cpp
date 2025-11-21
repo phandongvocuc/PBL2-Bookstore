@@ -2,7 +2,7 @@
 
 #include "BookStatus.h"
 
-using namespace std;  // project-wide request
+using namespace std;
 
 namespace pbl2::service {
 
@@ -12,15 +12,15 @@ custom::DynamicArray<model::Book> BookService::fetchAll() const { return ensureL
 
 custom::Optional<model::Book> BookService::findById(const custom::CustomString &bookId) const {
     const custom::CustomString trimmed = bookId.trimmed();
-    if (trimmed.isEmpty()) return custom::Optional<model::Book>();
+    if (trimmed.isEmpty()) return {};
     const auto books = ensureLoaded();
-    if (books.isEmpty()) return custom::Optional<model::Book>();
-    for (custom::DynamicArray<model::Book>::ConstIterator it = books.cbegin(); it != books.cend(); ++it) {
-        if (it->getId().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
-            return custom::Optional(*it);
+    if (books.isEmpty()) return {};
+    for (const auto & book : books) {
+        if (book.getId().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
+            return custom::Optional(book);
         }
     }
-    return custom::Optional<model::Book>();
+    return {};
 }
 
 bool BookService::addBook(const model::Book &book) const {
@@ -30,8 +30,8 @@ bool BookService::addBook(const model::Book &book) const {
 
     const auto target = copy.getId();
     bool exists = false;
-    for (custom::DynamicArray<model::Book>::ConstIterator it = books.cbegin(); it != books.cend(); ++it) {
-        if (it->getId().compare(target, custom::CaseSensitivity::Insensitive) == 0) {
+    for (const auto & book1 : books) {
+        if (book1.getId().compare(target, custom::CaseSensitivity::Insensitive) == 0) {
             exists = true;
             break;
         }
@@ -45,10 +45,10 @@ bool BookService::addBook(const model::Book &book) const {
 }
 
 bool BookService::updateBook(const model::Book &book) const {
-    auto books = ensureLoaded();
+    const auto books = ensureLoaded();
     bool updated = false;
-    for (custom::DynamicArray<model::Book>::Iterator it = books.begin(); it != books.end(); ++it) {
-        if (auto &existing = *it; existing.getId() == book.getId()) {
+    for (auto & existing : books) {
+        if (existing.getId() == book.getId()) {
             existing = book;
             normalizeAvailability(existing);
             updated = true;
@@ -64,7 +64,7 @@ bool BookService::removeBook(const custom::CustomString &bookId) const {
     const custom::CustomString trimmed = bookId.trimmed();
     if (trimmed.isEmpty()) return false;
     auto books = ensureLoaded();
-    const auto target = trimmed;
+    const auto& target = trimmed;
     bool removed = false;
     custom::DynamicArray<model::Book>::SizeType index = 0U;
     while (index < books.size()) {

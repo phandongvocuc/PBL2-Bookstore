@@ -9,17 +9,17 @@ public:
     DateTime() = default;
     DateTime(int year, int month, int day, int hour, int minute, int second, int millisecond = 0);
 
-    bool isValid() const;
+    [[nodiscard]] bool isValid() const;
 
-    int year() const { return year_; }
-    int month() const { return month_; }
-    int day() const { return day_; }
-    int hour() const { return hour_; }
-    int minute() const { return minute_; }
-    int second() const { return second_; }
-    int millisecond() const { return millisecond_; }
+    [[nodiscard]] int year() const { return year_; }
+    [[nodiscard]] int month() const { return month_; }
+    [[nodiscard]] int day() const { return day_; }
+    [[nodiscard]] int hour() const { return hour_; }
+    [[nodiscard]] int minute() const { return minute_; }
+    [[nodiscard]] int second() const { return second_; }
+    [[nodiscard]] int millisecond() const { return millisecond_; }
 
-    custom::CustomString toCompactTimestamp() const;
+    [[nodiscard]] custom::CustomString toCompactTimestamp() const;
     static DateTime nowUtc();
 
 private:

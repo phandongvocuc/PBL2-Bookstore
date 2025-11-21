@@ -1,7 +1,6 @@
 #include "BookDialog.h"
 #include "BookStatus.h"
 #include "QtBridge.h"
-#include <QAbstractSpinBox>
 #include <QComboBox>
 #include <QDateEdit>
 #include <QDate>
@@ -15,7 +14,7 @@
 #include <QSpinBox>
 #include <QVBoxLayout>
 
-using namespace std;  // project-wide request
+using namespace std;
 
 namespace pbl2::ui{
 namespace {

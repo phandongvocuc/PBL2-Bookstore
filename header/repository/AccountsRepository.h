@@ -11,7 +11,7 @@ class AccountsRepository {
 public:
     explicit AccountsRepository(const custom::CustomString &dataDir);
 
-    custom::DynamicArray<model::Account> loadAll() const;
+    [[nodiscard]] custom::DynamicArray<model::Account> loadAll() const;
     void saveAll(const custom::DynamicArray<model::Account> &accounts) const;
     static custom::CustomString hashPassword(const custom::CustomString &plainText);
 

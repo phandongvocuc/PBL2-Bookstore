@@ -12,7 +12,7 @@ class BooksRepository {
 public:
     explicit BooksRepository(const custom::CustomString &dataDir);
 
-    custom::DynamicArray<model::Book> loadAll() const;
+    [[nodiscard]] custom::DynamicArray<model::Book> loadAll() const;
     void saveAll(const custom::DynamicArray<model::Book> &books) const;
 
 private:

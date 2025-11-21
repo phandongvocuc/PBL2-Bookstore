@@ -12,7 +12,7 @@ class LoansRepository {
 public:
     explicit LoansRepository(const custom::CustomString &dataDir);
 
-    custom::DynamicArray<model::Loan> loadAll() const;
+    [[nodiscard]] custom::DynamicArray<model::Loan> loadAll() const;
     void saveAll(const custom::DynamicArray<model::Loan> &loans) const;
 
 private:

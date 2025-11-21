@@ -5,14 +5,14 @@ namespace pbl2::model {
 
 class SystemConfig {
 public:
-    int getMaxBorrowDays() const { return maxBorrowDays; }
-    void setMaxBorrowDays(int value) { maxBorrowDays = value; }
+    [[nodiscard]] int getMaxBorrowDays() const { return maxBorrowDays; }
+    void setMaxBorrowDays(const int value) { maxBorrowDays = value; }
 
-    int getFinePerDay() const { return finePerDay; }
-    void setFinePerDay(int value) { finePerDay = value; }
+    [[nodiscard]] int getFinePerDay() const { return finePerDay; }
+    void setFinePerDay(const int value) { finePerDay = value; }
 
-    int getMaxBooksPerReader() const { return maxBooksPerReader; }
-    void setMaxBooksPerReader(int value) { maxBooksPerReader = value; }
+    [[nodiscard]] int getMaxBooksPerReader() const { return maxBooksPerReader; }
+    void setMaxBooksPerReader(const int value) { maxBooksPerReader = value; }
 
 private:
     int maxBorrowDays{0};

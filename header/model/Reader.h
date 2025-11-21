@@ -6,35 +6,35 @@
 
 namespace pbl2::model {
 
-struct Reader : Person {
+struct Reader final : Person {
 public:
     ~Reader() override = default;
 
-    const custom::CustomString &getGender() const;
+    [[nodiscard]] const custom::CustomString &getGender() const;
     void setGender(const custom::CustomString &value);
 
-    const custom::CustomString &getEmail() const;
+    [[nodiscard]] const custom::CustomString &getEmail() const;
     void setEmail(const custom::CustomString &value);
 
-    const custom::CustomString &getAddress() const;
+    [[nodiscard]] const custom::CustomString &getAddress() const;
     void setAddress(const custom::CustomString &value);
 
-    const custom::CustomString &getPhone() const;
+    [[nodiscard]] const custom::CustomString &getPhone() const;
     void setPhone(const custom::CustomString &value);
 
-    const custom::CustomString &getIdentityCard() const;
+    [[nodiscard]] const custom::CustomString &getIdentityCard() const;
     void setIdentityCard(const custom::CustomString &value);
 
-    const core::Date &getCreatedDate() const;
+    [[nodiscard]] const core::Date &getCreatedDate() const;
     void setCreatedDate(const core::Date &value);
 
-    const core::Date &getExpiryDate() const;
+    [[nodiscard]] const core::Date &getExpiryDate() const;
     void setExpiryDate(const core::Date &value);
 
-    int getTotalBorrowed() const;
+    [[nodiscard]] int getTotalBorrowed() const;
     void setTotalBorrowed(int value);
 
-    const custom::CustomString &getNotes() const;
+    [[nodiscard]] const custom::CustomString &getNotes() const;
     void setNotes(const custom::CustomString &value);
 
 private:

@@ -23,8 +23,8 @@ bool ReportService::submitRequest(model::ReportRequest request) const {
     }
 
     bool exists = false;
-    for (custom::DynamicArray<model::ReportRequest>::ConstIterator it = requests.cbegin(); it != requests.cend(); ++it) {
-        if (it->getRequestId().compare(request.getRequestId(), custom::CaseSensitivity::Insensitive) == 0) {
+    for (const auto & it : requests) {
+        if (it.getRequestId().compare(request.getRequestId(), custom::CaseSensitivity::Insensitive) == 0) {
             exists = true;
             break;
         }
@@ -44,12 +44,12 @@ bool ReportService::submitRequest(model::ReportRequest request) const {
 }
 
 bool ReportService::updateStatus(const custom::CustomString &requestId, const custom::CustomString &status) const {
-    auto requests = ensureLoaded();
+    const auto requests = ensureLoaded();
     bool changed = false;
-    for (custom::DynamicArray<model::ReportRequest>::Iterator it = requests.begin(); it != requests.end(); ++it) {
-        if (it->getRequestId().compare(requestId, custom::CaseSensitivity::Insensitive) == 0) {
+    for (auto & request : requests) {
+        if (request.getRequestId().compare(requestId, custom::CaseSensitivity::Insensitive) == 0) {
             const custom::CustomString trimmed = status.trimmed();
-            it->setStatus(trimmed.isEmpty() ? it->getStatus() : trimmed.toUpper());
+            request.setStatus(trimmed.isEmpty() ? request.getStatus() : trimmed.toUpper());
             changed = true;
             break;
         }

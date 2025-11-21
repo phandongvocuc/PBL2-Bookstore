@@ -8,15 +8,15 @@ namespace pbl2::core::path {
 namespace {
 
 custom::CustomString fromStdString(const string &value) {
-    if (value.empty()) return custom::CustomString();
-    return custom::CustomString(value.c_str(), static_cast<custom::CustomString::SizeType>(value.size()));
+    if (value.empty()) return {};
+    return {value.c_str(), static_cast<custom::CustomString::SizeType>(value.size())};
 }
 
 }  // namespace
 
 filesystem::path toFilesystemPath(const custom::CustomString &value) {
-    if (value.isEmpty()) return filesystem::path();
-    return filesystem::path(value.cStr());
+    if (value.isEmpty()) return {};
+    return {value.cStr()};
 }
 
 custom::CustomString fromFilesystemPath(const filesystem::path &value) {

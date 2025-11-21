@@ -12,25 +12,25 @@ class Account final : public Person {
 public:
     ~Account() override = default;
 
-    const custom::CustomString &getAccountId() const;
+    [[nodiscard]] const custom::CustomString &getAccountId() const;
     void setAccountId(const custom::CustomString &value);
 
-    const custom::CustomString &getUsername() const;
+    [[nodiscard]] const custom::CustomString &getUsername() const;
     void setUsername(const custom::CustomString &value);
 
-    const custom::CustomString &getPasswordHash() const;
+    [[nodiscard]] const custom::CustomString &getPasswordHash() const;
     void setPasswordHash(const custom::CustomString &value);
 
-    const custom::CustomString &getRole() const;
+    [[nodiscard]] const custom::CustomString &getRole() const;
     void setRole(const custom::CustomString &value);
 
-    const custom::CustomString &getEmployeeId() const;
+    [[nodiscard]] const custom::CustomString &getEmployeeId() const;
     void setEmployeeId(const custom::CustomString &value);
 
-    const core::DateTime &getCreatedAt() const;
+    [[nodiscard]] const core::DateTime &getCreatedAt() const;
     void setCreatedAt(const core::DateTime &value);
 
-    const core::DateTime &getLastLogin() const;
+    [[nodiscard]] const core::DateTime &getLastLogin() const;
     void setLastLogin(const core::DateTime &value);
 
 private:

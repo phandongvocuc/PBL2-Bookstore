@@ -232,13 +232,11 @@ private:
     void updateStatsCards();
     void updateStatsCharts();
 
-    // void exportStatisticsPdf(); // Removed - no longer needed
-
     bool adminRole{false};
     bool staffRole{false};
     model::SystemConfig currentConfig;
 
-    void notifyEvent(const QString &message, EventSeverity severity = EventSeverity::Info, int durationMs = 2000);
+    void notifyEvent(const QString &message, EventSeverity severity = EventSeverity::Info, int durationMs = 2000) const;
     void showInfoDialog(const QString &title, const QString &message);
     void showWarningDialog(const QString &title, const QString &message);
     void showErrorDialog(const QString &title, const QString &message);

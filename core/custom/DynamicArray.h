@@ -87,11 +87,11 @@ public:
         _size = newSize;
     }
 
-    SizeType size() const {
+    [[nodiscard]] SizeType size() const {
         return _size;
     }
 
-    bool isEmpty() const {
+    [[nodiscard]] bool isEmpty() const {
         return _size == 0U;
     }
 
@@ -103,19 +103,11 @@ public:
         return _data;
     }
 
-    Iterator begin() {
+    Iterator begin() const {
         return _data;
     }
 
-    ConstIterator cbegin() const {
-        return _data;
-    }
-
-    Iterator end() {
-        return _data ? _data + _size : 0;
-    }
-
-    ConstIterator cend() const {
+    Iterator end() const {
         return _data ? _data + _size : 0;
     }
 

@@ -14,7 +14,7 @@
 #include <QSpinBox>
 #include <QVBoxLayout>
 
-using namespace std;  // project-wide request
+using namespace std;
 
 namespace pbl2::ui {
 
@@ -107,33 +107,33 @@ ReaderDialog::ReaderDialog(QWidget *parent) : QDialog(parent) {
 
 void ReaderDialog::setReader(const model::Reader &reader, bool editing) {
     editingMode = editing;
-    idEdit->setText(pbl2::bridge::toQString(reader.getId()));
+    idEdit->setText(bridge::toQString(reader.getId()));
     idEdit->setReadOnly(editing || forceIdReadOnly);
-    fullNameEdit->setText(pbl2::bridge::toQString(reader.getFullName()));
-    const QString genderText = pbl2::bridge::toQString(reader.getGender()).trimmed();
+    fullNameEdit->setText(bridge::toQString(reader.getFullName()));
+    const QString genderText = bridge::toQString(reader.getGender()).trimmed();
     if (!genderText.isEmpty()) {
         genderCombo->setCurrentText(genderText);
     } else {
         genderCombo->setCurrentIndex(-1);
         genderCombo->setEditText(QString());
     }
-    addressEdit->setText(pbl2::bridge::toQString(reader.getAddress()));
-    phoneEdit->setText(pbl2::bridge::toQString(reader.getPhone()));
-    emailEdit->setText(pbl2::bridge::toQString(reader.getEmail()));
-    identityCardEdit->setText(pbl2::bridge::toQString(reader.getIdentityCard()));
-    notesEdit->setText(pbl2::bridge::toQString(reader.getNotes()));
+    addressEdit->setText(bridge::toQString(reader.getAddress()));
+    phoneEdit->setText(bridge::toQString(reader.getPhone()));
+    emailEdit->setText(bridge::toQString(reader.getEmail()));
+    identityCardEdit->setText(bridge::toQString(reader.getIdentityCard()));
+    notesEdit->setText(bridge::toQString(reader.getNotes()));
     if (reader.getDob().isValid()) {
-        dobEdit->setDate(pbl2::bridge::toQDate(reader.getDob()));
+        dobEdit->setDate(bridge::toQDate(reader.getDob()));
     } else {
         dobEdit->setDate(QDate::currentDate());
     }
     if (reader.getCreatedDate().isValid()) {
-        createdDateEdit->setDate(pbl2::bridge::toQDate(reader.getCreatedDate()));
+        createdDateEdit->setDate(bridge::toQDate(reader.getCreatedDate()));
     } else {
         createdDateEdit->setDate(QDate::currentDate());
     }
     if (reader.getExpiryDate().isValid()) {
-        expiryDateEdit->setDate(pbl2::bridge::toQDate(reader.getExpiryDate()));
+        expiryDateEdit->setDate(bridge::toQDate(reader.getExpiryDate()));
     } else {
         expiryDateEdit->setDate(QDate::currentDate());
     }
@@ -150,17 +150,17 @@ void ReaderDialog::presetId(const QString &id, bool lockField) {
 
 model::Reader ReaderDialog::reader() const {
     model::Reader r;
-    r.setId(pbl2::bridge::toCustomString(idEdit->text().trimmed()));
-    r.setFullName(pbl2::bridge::toCustomString(fullNameEdit->text().trimmed()));
-    r.setGender(pbl2::bridge::toCustomString(genderCombo->currentText().trimmed()));
-    r.setAddress(pbl2::bridge::toCustomString(addressEdit->text().trimmed()));
-    r.setPhone(pbl2::bridge::toCustomString(phoneEdit->text().trimmed()));
-    r.setEmail(pbl2::bridge::toCustomString(emailEdit->text().trimmed()));
-    r.setIdentityCard(pbl2::bridge::toCustomString(identityCardEdit->text().trimmed()));
-    r.setNotes(pbl2::bridge::toCustomString(notesEdit->text().trimmed()));
-    r.setDob(pbl2::bridge::toCoreDate(dobEdit->date()));
-    r.setCreatedDate(pbl2::bridge::toCoreDate(createdDateEdit->date()));
-    r.setExpiryDate(pbl2::bridge::toCoreDate(expiryDateEdit->date()));
+    r.setId(bridge::toCustomString(idEdit->text().trimmed()));
+    r.setFullName(bridge::toCustomString(fullNameEdit->text().trimmed()));
+    r.setGender(bridge::toCustomString(genderCombo->currentText().trimmed()));
+    r.setAddress(bridge::toCustomString(addressEdit->text().trimmed()));
+    r.setPhone(bridge::toCustomString(phoneEdit->text().trimmed()));
+    r.setEmail(bridge::toCustomString(emailEdit->text().trimmed()));
+    r.setIdentityCard(bridge::toCustomString(identityCardEdit->text().trimmed()));
+    r.setNotes(bridge::toCustomString(notesEdit->text().trimmed()));
+    r.setDob(bridge::toCoreDate(dobEdit->date()));
+    r.setCreatedDate(bridge::toCoreDate(createdDateEdit->date()));
+    r.setExpiryDate(bridge::toCoreDate(expiryDateEdit->date()));
     r.setTotalBorrowed(totalBorrowedSpin->value());
     r.setActive(activeFlag);
     return r;

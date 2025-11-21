@@ -7,11 +7,11 @@ public:
     Date() = default;
     Date(int year, int month, int day);
 
-    int year() const { return year_; }
-    int month() const { return month_; }
-    int day() const { return day_; }
+    [[nodiscard]] int year() const { return year_; }
+    [[nodiscard]] int month() const { return month_; }
+    [[nodiscard]] int day() const { return day_; }
 
-    bool isValid() const;
+    [[nodiscard]] bool isValid() const;
 
 private:
     int year_{0};

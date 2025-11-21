@@ -10,25 +10,25 @@ custom::DynamicArray<model::Loan> LoanService::fetchAll() const { return ensureL
 
 custom::Optional<model::Loan> LoanService::findById(const custom::CustomString &loanId) const {
     const auto trimmed = loanId.trimmed();
-    if (trimmed.isEmpty()) return custom::Optional<model::Loan>();
+    if (trimmed.isEmpty()) return {};
     const auto loans = ensureLoaded();
-    if (loans.isEmpty()) return custom::Optional<model::Loan>();
-    for (custom::DynamicArray<model::Loan>::ConstIterator it = loans.cbegin(); it != loans.cend(); ++it) {
-        if (it->getLoanId().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
-            return custom::Optional(*it);
+    if (loans.isEmpty()) return {};
+    for (const auto & loan : loans) {
+        if (loan.getLoanId().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
+            return custom::Optional(loan);
         }
     }
-    return custom::Optional<model::Loan>();
+    return {};
 }
 
 bool LoanService::createLoan(const model::Loan &loan) const {
     if (!loan.getBorrowDate().isValid() || !loan.getDueDate().isValid()) return false;
     auto loans = ensureLoaded();
 
-    const model::Loan copy = loan;
+    const model::Loan& copy = loan;
     bool exists = false;
-    for (custom::DynamicArray<model::Loan>::ConstIterator it = loans.cbegin(); it != loans.cend(); ++it) {
-        if (it->getLoanId().compare(copy.getLoanId(), custom::CaseSensitivity::Insensitive) == 0) {
+    for (const auto & loan1 : loans) {
+        if (loan1.getLoanId().compare(copy.getLoanId(), custom::CaseSensitivity::Insensitive) == 0) {
             exists = true;
             break;
         }
@@ -41,11 +41,11 @@ bool LoanService::createLoan(const model::Loan &loan) const {
 }
 
 bool LoanService::updateLoan(const model::Loan &loan) const {
-    auto loans = ensureLoaded();
+    const auto loans = ensureLoaded();
     bool updated = false;
-    for (custom::DynamicArray<model::Loan>::Iterator it = loans.begin(); it != loans.end(); ++it) {
-        if (it->getLoanId().compare(loan.getLoanId(), custom::CaseSensitivity::Insensitive) == 0) {
-            *it = loan;
+    for (auto & it : loans) {
+        if (it.getLoanId().compare(loan.getLoanId(), custom::CaseSensitivity::Insensitive) == 0) {
+            it = loan;
             updated = true;
             break;
         }
@@ -56,14 +56,14 @@ bool LoanService::updateLoan(const model::Loan &loan) const {
 }
 
 bool LoanService::updateStatus(const custom::CustomString &loanId, const custom::CustomString &status, const core::Date &returnDate) const {
-    auto loans = ensureLoaded();
+    const auto loans = ensureLoaded();
     bool changed = false;
-    for (custom::DynamicArray<model::Loan>::Iterator it = loans.begin(); it != loans.end(); ++it) {
-        if (it->getLoanId().compare(loanId, custom::CaseSensitivity::Insensitive) == 0) {
+    for (auto & loan : loans) {
+        if (loan.getLoanId().compare(loanId, custom::CaseSensitivity::Insensitive) == 0) {
             if (const auto normalizedStatus = status.trimmed(); !normalizedStatus.isEmpty()) {
-                it->setStatus(normalizedStatus.toUpper());
+                loan.setStatus(normalizedStatus.toUpper());
             }
-            if (returnDate.isValid()) it->setReturnDate(returnDate);
+            if (returnDate.isValid()) loan.setReturnDate(returnDate);
             changed = true;
             break;
         }
@@ -75,11 +75,11 @@ bool LoanService::updateStatus(const custom::CustomString &loanId, const custom:
 
 bool LoanService::applyFine(const custom::CustomString &loanId, const int fine) const {
     if (fine < 0) return false;
-    auto loans = ensureLoaded();
+    const auto loans = ensureLoaded();
     bool updated = false;
-    for (custom::DynamicArray<model::Loan>::Iterator it = loans.begin(); it != loans.end(); ++it) {
-        if (it->getLoanId().compare(loanId, custom::CaseSensitivity::Insensitive) == 0) {
-            it->setFine(fine);
+    for (auto & loan : loans) {
+        if (loan.getLoanId().compare(loanId, custom::CaseSensitivity::Insensitive) == 0) {
+            loan.setFine(fine);
             updated = true;
             break;
         }

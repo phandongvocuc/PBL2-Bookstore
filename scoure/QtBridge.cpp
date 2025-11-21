@@ -5,13 +5,13 @@
 #include <QTimeZone>
 #include <QString>
 
-using namespace std;  // project-wide request
+using namespace std;
 
 namespace pbl2::bridge {
 
     custom::CustomString toCustomString(const QString &value) {
         const QByteArray bytes = value.toUtf8();
-        return custom::CustomString(bytes.constData(), static_cast<custom::CustomString::SizeType>(bytes.size()));
+        return {bytes.constData(), static_cast<custom::CustomString::SizeType>(bytes.size())};
     }
 
     QString toQString(const custom::CustomString &value) {
@@ -19,34 +19,34 @@ namespace pbl2::bridge {
     }
 
     core::Date toCoreDate(const QDate &value) {
-        if (!value.isValid()) return core::Date();
-        return core::Date(value.year(), value.month(), value.day());
+        if (!value.isValid()) return {};
+        return {value.year(), value.month(), value.day()};
     }
 
     QDate toQDate(const core::Date &value) {
-        if (!value.isValid()) return QDate();
-        return QDate(value.year(), value.month(), value.day());
+        if (!value.isValid()) return {};
+        return {value.year(), value.month(), value.day()};
     }
 
     core::DateTime toCoreDateTime(const QDateTime &value) {
-        if (!value.isValid()) return core::DateTime();
+        if (!value.isValid()) return {};
         const QDateTime utc = value.toUTC();
         const QDate date = utc.date();
         const QTime time = utc.time();
-        return core::DateTime(date.year(),
+        return {date.year(),
                               date.month(),
                               date.day(),
                               time.hour(),
                               time.minute(),
                               time.second(),
-                              time.msec());
+                              time.msec()};
     }
 
     QDateTime toQDateTime(const core::DateTime &value) {
-        if (!value.isValid()) return QDateTime();
+        if (!value.isValid()) return {};
         const QDate date(value.year(), value.month(), value.day());
         const QTime time(value.hour(), value.minute(), value.second(), value.millisecond());
-        return QDateTime(date, time, QTimeZone::utc());
+        return {date, time, QTimeZone::utc()};
     }
 
 }

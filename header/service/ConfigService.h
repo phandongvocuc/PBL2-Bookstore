@@ -11,8 +11,8 @@ class ConfigService {
 public:
     explicit ConfigService(const custom::CustomString &dataDir);
 
-    model::SystemConfig load() const;
-    bool save(const model::SystemConfig &config) const;
+    [[nodiscard]] model::SystemConfig load() const;
+    [[nodiscard]] bool save(const model::SystemConfig &config) const;
 
 private:
     repository::ConfigRepository repository;

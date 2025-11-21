@@ -12,7 +12,7 @@ class ReadersRepository {
 public:
     explicit ReadersRepository(const custom::CustomString &dataDir);
 
-    custom::DynamicArray<model::Reader> loadAll() const;
+    [[nodiscard]] custom::DynamicArray<model::Reader> loadAll() const;
     void saveAll(const custom::DynamicArray<model::Reader> &readers) const;
 
 private:

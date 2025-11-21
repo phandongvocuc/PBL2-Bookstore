@@ -41,7 +41,7 @@ bool DateTime::isValid() const {
 }
 
 custom::CustomString DateTime::toCompactTimestamp() const {
-    if (!isValid()) return custom::CustomString();
+    if (!isValid()) return {};
     char buffer[20];
     snprintf(buffer, sizeof(buffer), "%04d%02d%02d%02d%02d%02d%03d", year_, month_, day_, hour_, minute_, second_, millisecond_);
     return custom::CustomString(buffer);
@@ -60,13 +60,13 @@ DateTime DateTime::nowUtc() {
 #else
     gmtime_r(&seconds, &tmValue);
 #endif
-    return DateTime(tmValue.tm_year + 1900,
+    return {tmValue.tm_year + 1900,
                     tmValue.tm_mon + 1,
                     tmValue.tm_mday,
                     tmValue.tm_hour,
                     tmValue.tm_min,
                     tmValue.tm_sec,
-                    millisecondPart);
+                    millisecondPart};
 }
 
 }  // namespace pbl2::core

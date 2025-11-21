@@ -12,7 +12,7 @@
 #include <QLineEdit>
 #include <QVBoxLayout>
 
-using namespace std;  // project-wide request
+using namespace std;
 
 namespace pbl2::ui {
 

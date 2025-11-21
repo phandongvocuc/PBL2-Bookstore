@@ -1,5 +1,5 @@
 #include "model/Reader.h"
-using namespace std;  // project-wide request
+using namespace std;
 namespace pbl2::model {
 
 const custom::CustomString &Reader::getGender() const {
@@ -62,7 +62,7 @@ int Reader::getTotalBorrowed() const {
     return totalBorrowed;
 }
 
-void Reader::setTotalBorrowed(int value) {
+void Reader::setTotalBorrowed(const int value) {
     totalBorrowed = value;
 }
 

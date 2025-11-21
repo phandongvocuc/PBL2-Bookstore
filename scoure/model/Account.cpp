@@ -1,5 +1,5 @@
 #include "model/Account.h"
-using namespace std;  // project-wide request
+using namespace std;
 
 namespace pbl2::model {
 

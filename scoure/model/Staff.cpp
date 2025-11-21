@@ -1,5 +1,5 @@
 #include "model/Staff.h"
-using namespace std;  // project-wide request
+using namespace std;
 namespace pbl2::model {
 
 const custom::CustomString &Staff::getGender() const {

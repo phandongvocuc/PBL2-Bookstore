@@ -10,24 +10,24 @@ custom::DynamicArray<model::Staff> StaffService::fetchAll() const { return ensur
 
 custom::Optional<model::Staff> StaffService::findById(const custom::CustomString &staffId) const {
     const auto trimmed = staffId.trimmed();
-    if (trimmed.isEmpty()) return custom::Optional<model::Staff>();
+    if (trimmed.isEmpty()) return {};
     const auto staffs = ensureLoaded();
-    if (staffs.isEmpty()) return custom::Optional<model::Staff>();
-    for (custom::DynamicArray<model::Staff>::ConstIterator it = staffs.cbegin(); it != staffs.cend(); ++it) {
-        if (it->getId().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
-            return custom::Optional(*it);
+    if (staffs.isEmpty()) return {};
+    for (const auto & staff : staffs) {
+        if (staff.getId().compare(trimmed, custom::CaseSensitivity::Insensitive) == 0) {
+            return custom::Optional(staff);
         }
     }
-    return custom::Optional<model::Staff>();
+    return {};
 }
 
 bool StaffService::addStaff(const model::Staff &staff) const {
     auto staffs = ensureLoaded();
 
-    const model::Staff copy = staff;
+    const model::Staff& copy = staff;
     bool exists = false;
-    for (custom::DynamicArray<model::Staff>::ConstIterator it = staffs.cbegin(); it != staffs.cend(); ++it) {
-        if (it->getId().compare(copy.getId(), custom::CaseSensitivity::Insensitive) == 0) {
+    for (const auto & staff1 : staffs) {
+        if (staff1.getId().compare(copy.getId(), custom::CaseSensitivity::Insensitive) == 0) {
             exists = true;
             break;
         }
@@ -40,11 +40,11 @@ bool StaffService::addStaff(const model::Staff &staff) const {
 }
 
 bool StaffService::updateStaff(const model::Staff &staff) const {
-    auto staffs = ensureLoaded();
+    const auto staffs = ensureLoaded();
     bool updated = false;
-    for (custom::DynamicArray<model::Staff>::Iterator it = staffs.begin(); it != staffs.end(); ++it) {
-        if (it->getId().compare(staff.getId(), custom::CaseSensitivity::Insensitive) == 0) {
-            *it = staff;
+    for (auto & it : staffs) {
+        if (it.getId().compare(staff.getId(), custom::CaseSensitivity::Insensitive) == 0) {
+            it = staff;
             updated = true;
             break;
         }
@@ -55,12 +55,12 @@ bool StaffService::updateStaff(const model::Staff &staff) const {
 }
 
 bool StaffService::setStaffActive(const custom::CustomString &staffId, const bool active) const {
-    auto staffs = ensureLoaded();
+    const auto staffs = ensureLoaded();
     bool changed = false;
-    for (custom::DynamicArray<model::Staff>::Iterator it = staffs.begin(); it != staffs.end(); ++it) {
-        if (it->getId().compare(staffId, custom::CaseSensitivity::Insensitive) == 0) {
-            if (it->isActive() == active) return true;
-            it->setActive(active);
+    for (auto & staff : staffs) {
+        if (staff.getId().compare(staffId, custom::CaseSensitivity::Insensitive) == 0) {
+            if (staff.isActive() == active) return true;
+            staff.setActive(active);
             changed = true;
             break;
         }

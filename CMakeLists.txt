@@ -9,8 +9,6 @@ find_package(Qt6 6.2 COMPONENTS Widgets Charts REQUIRED)
 # Qt6 helper (>= 6.3)
 qt_standard_project_setup()
 
-# Qt helper (>= 6.3)
-qt_standard_project_setup()
 
 # Source files
 file(GLOB_RECURSE SOURCES "scoure/*.cpp" "core/*.cpp" "ui/*.cpp")
