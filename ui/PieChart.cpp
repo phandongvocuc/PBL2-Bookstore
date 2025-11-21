@@ -3,7 +3,7 @@
 #include <QColor>
 #include <QPainter>
 #include <QPaintEvent>
-#include <QtMath>
+
 
 using namespace std;  // project-wide request
 
