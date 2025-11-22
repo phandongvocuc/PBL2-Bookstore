@@ -975,12 +975,8 @@ void MainWindow::configureReportsTab() {
     }
 
     if (reportsList) {
-        connect(reportsList, &QListWidget::itemDoubleClicked, [this](QListWidgetItem *) {
-            handleViewReportDetails();
-        });
-        connect(reportsList, &QListWidget::itemActivated, [this](QListWidgetItem *) {
-            handleViewReportDetails();
-        });
+        // Chỉ dùng itemActivated để tránh gọi 2 lần (doubleClick + activated)
+        connect(reportsList, &QListWidget::itemActivated, this, &MainWindow::handleViewReportDetails);
     }
 
     if (reportFromFilter) {

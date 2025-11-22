@@ -106,10 +106,10 @@ BookDialog::BookDialog(QWidget *parent) : QDialog(parent) {
     form->addRow(tr("Nhà xuất bản"), publisherEdit);
     form->addRow(tr("Ngày phát hành"), publishDateEdit);
     form->addRow(tr("Năm xuất bản"), publishYearSpin);
-    quantitySpin->setReadOnly(true);
-    quantitySpin->setButtonSymbols(QAbstractSpinBox::NoButtons);
+    quantitySpin->setReadOnly(false);
+    quantitySpin->setButtonSymbols(QAbstractSpinBox::UpDownArrows);
 
-    form->addRow(tr("Số lượng (tự động)"), quantitySpin);
+    form->addRow(tr("Số lượng"), quantitySpin);
     form->addRow(tr("Tình trạng"), statusCombo);
     form->addRow(tr("Tóm tắt"), summaryEdit);
     formGroup->setLayout(form);
@@ -139,6 +139,13 @@ void BookDialog::setBook(const model::Book &book, const bool editing) {
     publishDateEdit->setDate(date.isValid() ? date : QDate::currentDate());
     publishYearSpin->setValue(book.getPublishYear());
     quantitySpin->setValue(book.getQuantity());
+    if (editing) {
+        quantitySpin->setReadOnly(true);
+        quantitySpin->setButtonSymbols(QAbstractSpinBox::NoButtons);
+    } else {
+        quantitySpin->setReadOnly(false);
+        quantitySpin->setButtonSymbols(QAbstractSpinBox::UpDownArrows);
+    }
     const custom::CustomString status = model::canonicalBookStatus(book.getStatus());
     for (int i = 0; i < statusCombo->count(); ++i) {
         if (const custom::CustomString option = bridge::toCustomString(statusCombo->itemData(i).toString()); option.compare(status, custom::CaseSensitivity::Sensitive) == 0) {
