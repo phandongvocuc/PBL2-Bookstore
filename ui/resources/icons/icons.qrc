@@ -8,7 +8,9 @@
         <file>home.png</file>
         <file>staff.png</file>
         <file>t.png</file>
+        <file>logobook.png</file>
         <file>account.png</file>
         <file>setting.png</file>
+        <file>logomain.png</file>
     </qresource>
 </RCC>

@@ -1053,11 +1053,8 @@ void MainWindow::configureAccountsTab() {
 }
 
 void MainWindow::configureStatsTab() {
-    // Find widgets - try both direct and through scroll content
+    // Find widgets directly in statsTab
     const QWidget *searchWidget = ui->statsTab;
-    if (const auto scrollContent = ui->statsTab->findChild<QWidget *>(QStringLiteral("statsScrollContent"))) {
-        searchWidget = scrollContent;
-    }
     
     timePeriodCombo = searchWidget->findChild<QComboBox *>(QStringLiteral("timePeriodCombo"));
     const auto customStartDateEdit = searchWidget->findChild<QDateEdit *>(QStringLiteral("customStartDateEdit"));
@@ -1197,14 +1194,16 @@ void MainWindow::configureStatsTab() {
         connect(applyFilterButton, &QPushButton::clicked, this, &MainWindow::applyStatsFilter);
     }
 
-    // Place the StatsWidget inside the scroll area's content,
-    // directly under the "Bo loc" group.
-    if (ui->statsScrollContent && !statsWidget) {
-        statsWidget = new StatsWidget(ui->statsScrollContent);
+    // Place the StatsWidget directly under the filter group inside statsTabLayout
+    if (!statsWidget && ui->statsTab) {
+        statsWidget = new StatsWidget(ui->statsTab);
 
-        auto *contentLayout = qobject_cast<QVBoxLayout *>(ui->statsScrollContent->layout());
+        auto *contentLayout = qobject_cast<QVBoxLayout *>(ui->statsTab->findChild<QVBoxLayout *>(QStringLiteral("statsTabLayout")));
+        if (!contentLayout && ui->statsTabLayout) {
+            contentLayout = ui->statsTabLayout;
+        }
         if (!contentLayout) {
-            contentLayout = new QVBoxLayout(ui->statsScrollContent);
+            contentLayout = new QVBoxLayout(ui->statsTab);
             contentLayout->setContentsMargins(12, 12, 12, 12);
             contentLayout->setSpacing(10);
         }
@@ -2260,9 +2259,6 @@ void MainWindow::applyStatsFilter() {
     QString selectedGenre;
     if (!genreFilterCombo) {
         const QWidget *searchWidget = ui->statsTab;
-        if (const auto scrollContent = ui->statsTab->findChild<QWidget *>(QStringLiteral("statsScrollContent"))) {
-            searchWidget = scrollContent;
-        }
         genreFilterCombo = searchWidget->findChild<QComboBox *>(QStringLiteral("genreFilterCombo"));
     }
     if (genreFilterCombo) selectedGenre = genreFilterCombo->currentText();
@@ -2273,9 +2269,6 @@ void MainWindow::applyStatsFilter() {
     QDate endDate = today;
     // Lấy 2 QDateEdit custom nếu có
     const QWidget *searchWidget = ui->statsTab;
-    if (const auto scrollContent = ui->statsTab->findChild<QWidget *>(QStringLiteral("statsScrollContent"))) {
-        searchWidget = scrollContent;
-    }
     const auto *customStartDateEdit = searchWidget->findChild<QDateEdit *>(QStringLiteral("customStartDateEdit"));
     const auto *customEndDateEdit = searchWidget->findChild<QDateEdit *>(QStringLiteral("customEndDateEdit"));
 
