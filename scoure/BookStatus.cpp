@@ -16,32 +16,32 @@ custom::CustomString normalizedUpper(const custom::CustomString &status) {
 
 custom::CustomString canonicalBookStatus(const custom::CustomString &status) {
     const custom::CustomString upper = normalizedUpper(status);
-    if (equals(upper, "AVAILABLE") || equals(upper, "CON")) {
-        return custom::CustomStringLiteral("CON");
+    if (equals(upper, "AVAILABLE") || equals(upper, "CÒN")) {
+        return custom::CustomStringLiteral("CÒN");
     }
-    if (equals(upper, "OUT") || equals(upper, "OUT_OF_STOCK") || equals(upper, "BORROWED") || equals(upper, "HET")) {
-        return custom::CustomStringLiteral("HET");
+    if (equals(upper, "OUT") || equals(upper, "OUT_OF_STOCK") || equals(upper, "BORROWED") || equals(upper, "HẾT")) {
+        return custom::CustomStringLiteral("HẾT");
     }
-    if (equals(upper, "LOST") || equals(upper, "MAT")) {
-        return custom::CustomStringLiteral("MAT");
+    if (equals(upper, "LOST") || equals(upper, "MẤT")) {
+        return custom::CustomStringLiteral("MẤT");
     }
-    if (equals(upper, "DAMAGED") || equals(upper, "HU") || equals(upper, "HONG")) {
-        return custom::CustomStringLiteral("HONG");
+    if (equals(upper, "DAMAGED") || equals(upper, "HƯ") || equals(upper, "HỎNG")) {
+        return custom::CustomStringLiteral("HỎNG");
     }
     if (upper.isEmpty()) {
-        return custom::CustomStringLiteral("CON");
+        return custom::CustomStringLiteral("CÒN");
     }
     return upper;
 }
 
 custom::CustomString availabilityStatusForQuantity(const int quantity) {
-    return quantity > 0 ? custom::CustomStringLiteral("CON") : custom::CustomStringLiteral("HET");
+    return quantity > 0 ? custom::CustomStringLiteral("CÒN") : custom::CustomStringLiteral("HẾT");
 }
 
 bool isAvailabilityStatus(const custom::CustomString &status) {
     const custom::CustomString canonical = canonicalBookStatus(status);
-    return canonical.compare(custom::CustomStringLiteral("CON")) == 0 ||
-           canonical.compare(custom::CustomStringLiteral("HET")) == 0;
+    return canonical.compare(custom::CustomStringLiteral("CÒN")) == 0 ||
+           canonical.compare(custom::CustomStringLiteral("HẾT")) == 0;
 }
 
 }  // namespace pbl2::model

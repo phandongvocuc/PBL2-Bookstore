@@ -23,13 +23,13 @@ public:
 
     void setReader(const model::Reader &reader, bool editing);
     void presetId(const QString &id, bool lockField = true);
-    model::Reader reader() const;
+    [[nodiscard]] model::Reader reader() const;
 
 protected:
     void accept() override;
 
 private:
-    bool validateInputs() const;
+    [[nodiscard]] bool validateInputs() const;
     void showError(const QString &message) const;
 
     QLineEdit *idEdit{nullptr};

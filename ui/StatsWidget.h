@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QWidget>
 #include <QLabel>
 #include <QFrame>
 #include <QListWidget>
@@ -10,26 +9,26 @@
 
 namespace pbl2::ui {
 
-class StatsWidget : public QWidget {
+class StatsWidget final : public QWidget {
     Q_OBJECT
 
 public:
     explicit StatsWidget(QWidget *parent = nullptr);
 
     void updateStats(int totalBooks, int totalReaders, int totalLoans,
-                     int overdueLoans, qint64 totalFines);
+                     int overdueLoans, qint64 totalFines) const;
     
-    void updateTopBooksChart(const custom::Map<QString, int> &bookBorrowCounts);
+    void updateTopBooksChart(const custom::Map<QString, int> &bookBorrowCounts) const;
     
-    void updateCategoryChart(const custom::Map<QString, int> &categoryBorrowCounts);
+    void updateCategoryChart(const custom::Map<QString, int> &categoryBorrowCounts) const;
 
-    void updateMonthlyChart(const custom::Vector<int> &monthlyBorrowCounts);
+    void updateMonthlyChart(const custom::Vector<int> &monthlyBorrowCounts) const;
 
-    void updatePieChart(int cardFees, int fines);
+    void updatePieChart(int cardFees, int fines) const;
     
-    void updateLoansList(const custom::Vector<QPair<QString, QString>> &loans);
+    void updateLoansList(const custom::Vector<QPair<QString, QString>> &loans) const;
     
-    void updateActiveReadersList(const custom::Vector<QString> &readers);
+    void updateActiveReadersList(const custom::Vector<QString> &readers) const;
 
 private:
     void setupUi();

@@ -45,10 +45,10 @@ namespace pbl2::ui {
         : QDialog(parent),
           readers(readers),
           books(books) {
-        setWindowTitle(tr("Phieu muon tra"));
+        setWindowTitle(tr("Phiếu mượn trả"));
         setModal(true);
         setWindowIcon(QIcon(":/ui/resources/icons/loan.png"));
-        QFont font("Segoe UI", 11);
+        const QFont font("Segoe UI", 11);
         setFont(font);
         // Dùng chung style đơn giản với Thong tin ban doc
         setStyleSheet("QDialog { background: #f8fafc; border-radius: 12px; } "
@@ -89,19 +89,19 @@ namespace pbl2::ui {
         errorLabel->setAlignment(Qt::AlignCenter);
         errorLabel->setVisible(false);
 
-        auto *formGroup = new QGroupBox(tr("Chi tiet phieu muon"), this);
+        auto *formGroup = new QGroupBox(tr("Chi tiết phiếu mượn"), this);
         auto *form = new QFormLayout;
         form->setContentsMargins(12, 12, 12, 12);
         form->setHorizontalSpacing(12);
         form->setVerticalSpacing(10);
         form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
         form->setLabelAlignment(Qt::AlignRight | Qt::AlignVCenter);
-        form->addRow(tr("Ma phieu"), loanIdEdit);
-        form->addRow(tr("Ban doc"), readerCombo);
-        form->addRow(tr("Sach"), bookCombo);
-        form->addRow(tr("Nhan vien lap phieu"), staffEdit);
-        form->addRow(tr("Ngay muon"), borrowDateEdit);
-        form->addRow(tr("Ngay tra han"), dueDateEdit);
+        form->addRow(tr("Mã phiếu"), loanIdEdit);
+        form->addRow(tr("Bạn đọc"), readerCombo);
+        form->addRow(tr("Sách"), bookCombo);
+        form->addRow(tr("Nhân viên lập phiếu"), staffEdit);
+        form->addRow(tr("Ngày mượn"), borrowDateEdit);
+        form->addRow(tr("Ngày trả hạn"), dueDateEdit);
         formGroup->setLayout(form);
 
         buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
@@ -156,7 +156,7 @@ namespace pbl2::ui {
     void LoanDialog::accept() {
         errorLabel->setVisible(false);
         if (!validateInputs()) {
-            showError(tr("Vui long kiem tra lai cac truong bat buoc."));
+            showError(tr("Vui lòng kiểm tra các trường bắt buộc."));
             return;
         }
         QDialog::accept();

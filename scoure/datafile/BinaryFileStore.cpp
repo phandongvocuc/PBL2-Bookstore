@@ -143,8 +143,7 @@ core::DateTime BinaryFileStore::unpackDateTime(const DateTimeRecord &record) {
 void BinaryFileStore::assignText(char *destination, size_t capacity, const CustomString &value) {
     if (!destination || capacity == 0U) return;
     memset(destination, 0, capacity);
-    const size_t copyCount = value.length() >= capacity ? capacity - 1U : value.length();
-    if (copyCount > 0U) {
+    if (const size_t copyCount = value.length() >= capacity ? capacity - 1U : value.length(); copyCount > 0U) {
         memcpy(destination, value.cStr(), copyCount);
     }
 }

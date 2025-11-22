@@ -14,14 +14,14 @@ namespace {
 
 QString formatDate(const QDate &value) {
     if (!value.isValid()) {
-        return QObject::tr("Khong ro");
+        return QObject::tr("Không rõ");
     }
     return value.toString(Qt::ISODate);
 }
 
 QString formatDateTime(const QDateTime &value) {
     if (!value.isValid()) {
-        return QObject::tr("Khong ro");
+        return QObject::tr("Không rõ");
     }
     return value.toString(QStringLiteral("yyyy-MM-dd hh:mm"));
 }
@@ -47,7 +47,7 @@ ReportDetailsDialog::ReportDetailsDialog(const model::ReportRequest &report,
                                          const QString &statusText,
                                          QWidget *parent)
     : QDialog(parent) {
-    setWindowTitle(tr("Chi tiet bao cao"));
+    setWindowTitle(tr("Chi tiết báo cáo"));
     setModal(true);
     setMinimumSize(640, 560);
     setWindowIcon(QIcon(":/ui/resources/icons/report.png"));
@@ -89,19 +89,19 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
     form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
     form->setLabelAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-    form->addRow(makeCaption(tr("Ma yeu cau"), this), makeValueLabel(displayOrFallback(requestId, tr("Khong ro")), this));
-    form->addRow(makeCaption(tr("Nhan vien"), this), makeValueLabel(displayOrFallback(staff, tr("Khong ro")), this));
-    form->addRow(makeCaption(tr("Tu ngay"), this), makeValueLabel(formatDate(bridge::toQDate(report.getFromDate())), this));
-    form->addRow(makeCaption(tr("Den ngay"), this), makeValueLabel(formatDate(bridge::toQDate(report.getToDate())), this));
-    form->addRow(makeCaption(tr("Trang thai"), this), makeValueLabel(displayOrFallback(statusText, tr("Khong ro")), this));
-    form->addRow(makeCaption(tr("Ngay tao"), this), makeValueLabel(formatDateTime(bridge::toQDateTime(report.getCreatedAt())), this));
-    form->addRow(makeCaption(tr("So phieu xu ly"), this), makeValueLabel(QString::number(report.getHandledLoans()), this));
-    form->addRow(makeCaption(tr("Sach mat/hu"), this), makeValueLabel(QString::number(report.getLostOrDamaged()), this));
-    form->addRow(makeCaption(tr("Doc gia qua han"), this), makeValueLabel(QString::number(report.getOverdueReaders()), this));
+    form->addRow(makeCaption(tr("Mã yêu cầu"), this), makeValueLabel(displayOrFallback(requestId, tr("Không rõ")), this));
+    form->addRow(makeCaption(tr("Nhân viên"), this), makeValueLabel(displayOrFallback(staff, tr("Không rõ")), this));
+    form->addRow(makeCaption(tr("Từ ngày"), this), makeValueLabel(formatDate(bridge::toQDate(report.getFromDate())), this));
+    form->addRow(makeCaption(tr("Đến ngày"), this), makeValueLabel(formatDate(bridge::toQDate(report.getToDate())), this));
+    form->addRow(makeCaption(tr("Trạng thái"), this), makeValueLabel(displayOrFallback(statusText, tr("Không rõ")), this));
+    form->addRow(makeCaption(tr("Ngày tạo"), this), makeValueLabel(formatDateTime(bridge::toQDateTime(report.getCreatedAt())), this));
+    form->addRow(makeCaption(tr("Số phiếu xử lý"), this), makeValueLabel(QString::number(report.getHandledLoans()), this));
+    form->addRow(makeCaption(tr("Sách mất/hư"), this), makeValueLabel(QString::number(report.getLostOrDamaged()), this));
+    form->addRow(makeCaption(tr("Độc giả quá hạn"), this), makeValueLabel(QString::number(report.getOverdueReaders()), this));
 
-    auto *notesLabel = new QLabel(tr("Ghi chu"), this);
+    auto *notesLabel = new QLabel(tr("Ghi chú"), this);
     auto *notesViewer = new QPlainTextEdit(this);
-    notesViewer->setPlainText(notes.isEmpty() ? tr("(Khong co ghi chu)") : notes);
+    notesViewer->setPlainText(notes.isEmpty() ? tr("(Không có ghi chú)") : notes);
     notesViewer->setReadOnly(true);
     notesViewer->setMinimumHeight(140);
 

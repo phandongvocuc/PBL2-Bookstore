@@ -17,7 +17,7 @@ using namespace std;
 namespace pbl2::ui {
 
 AccountDialog::AccountDialog(QWidget *parent) : QDialog(parent) {
-    setWindowTitle(tr("Thong tin tai khoan"));
+    setWindowTitle(tr("Thông tin tài khoản"));
     setModal(true);
     setWindowIcon(QIcon(":/ui/resources/icons/account.png"));
     const QFont font("Segoe UI", 11);
@@ -42,28 +42,28 @@ AccountDialog::AccountDialog(QWidget *parent) : QDialog(parent) {
 
     staffCombo = new QComboBox(this);
     staffCombo->setEditable(false);
-    staffCombo->addItem(tr("(Chua lien ket)"), QString());
+    staffCombo->addItem(tr("(Chưa liên kết)"), QString());
 
-    activeCheck = new QCheckBox(tr("Dang hoat dong"), this);
+    activeCheck = new QCheckBox(tr("Đang hoạt động"), this);
     activeCheck->setChecked(true);
 
     errorLabel = new QLabel(this);
     errorLabel->setAlignment(Qt::AlignCenter);
     errorLabel->setVisible(false);
 
-    auto *formGroup = new QGroupBox(tr("Thong tin tai khoan"), this);
+    auto *formGroup = new QGroupBox(tr("Thông tin tài khoản"), this);
     auto *form = new QFormLayout();
     form->setContentsMargins(12, 12, 12, 12);
     form->setHorizontalSpacing(12);
     form->setVerticalSpacing(10);
     form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
     form->setLabelAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    form->addRow(tr("Ten dang nhap"), usernameEdit);
-    form->addRow(tr("Mat khau"), passwordEdit);
-    form->addRow(tr("Nhap lai mat khau"), confirmEdit);
-    form->addRow(tr("Quyen"), roleCombo);
-    form->addRow(tr("Nhan vien"), staffCombo);
-    form->addRow(tr("Trang thai"), activeCheck);
+    form->addRow(tr("Tên đăng nhập"), usernameEdit);
+    form->addRow(tr("Mật khẩu"), passwordEdit);
+    form->addRow(tr("Nhập lại mật khẩu"), confirmEdit);
+    form->addRow(tr("Quyền"), roleCombo);
+    form->addRow(tr("Nhân viên"), staffCombo);
+    form->addRow(tr("Trạng thái"), activeCheck);
     formGroup->setLayout(form);
 
     buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
@@ -79,26 +79,26 @@ AccountDialog::AccountDialog(QWidget *parent) : QDialog(parent) {
     setMinimumSize(640, 520);
 }
 
-custom::CustomString AccountDialog::username() const { return pbl2::bridge::toCustomString(usernameEdit->text().trimmed()); }
+custom::CustomString AccountDialog::username() const { return bridge::toCustomString(usernameEdit->text().trimmed()); }
 
-custom::CustomString AccountDialog::password() const { return pbl2::bridge::toCustomString(passwordEdit->text()); }
+custom::CustomString AccountDialog::password() const { return bridge::toCustomString(passwordEdit->text()); }
 
-custom::CustomString AccountDialog::role() const { return pbl2::bridge::toCustomString(roleCombo->currentText()); }
+custom::CustomString AccountDialog::role() const { return bridge::toCustomString(roleCombo->currentText()); }
 
 bool AccountDialog::isActive() const { return activeCheck->isChecked(); }
 
 bool AccountDialog::validateInputs() const {
     if (usernameEdit->text().trimmed().isEmpty()) {
-    showError(pbl2::bridge::toCustomString(tr("Ten dang nhap khong duoc de trong.")));
+    showError(bridge::toCustomString(tr("Tên đăng nhập không được để trống.")));
         return false;
     }
     if (!editingMode || !passwordEdit->text().isEmpty() || !confirmEdit->text().isEmpty()) {
         if (passwordEdit->text().length() < 4) {
-            showError(pbl2::bridge::toCustomString(tr("Mat khau phai co it nhat 4 ky tu.")));
+            showError(bridge::toCustomString(tr("Mật khẩu phải có ít nhất bốn ký tự.")));
             return false;
         }
         if (passwordEdit->text() != confirmEdit->text()) {
-            showError(pbl2::bridge::toCustomString(tr("Mat khau nhap lai khong trung khop.")));
+            showError(bridge::toCustomString(tr("Mật khẩu nhập lại không trùng khớp.")));
             return false;
         }
     }
@@ -106,7 +106,7 @@ bool AccountDialog::validateInputs() const {
 }
 
 void AccountDialog::showError(const custom::CustomString &message) const {
-    errorLabel->setText(pbl2::bridge::toQString(message));
+    errorLabel->setText(bridge::toQString(message));
     errorLabel->setVisible(true);
 }
 
@@ -118,18 +118,18 @@ void AccountDialog::accept() {
 
 void AccountDialog::setStaffList(const custom::Vector<model::Staff> &staffs) const {
     // Clear except first placeholder
-    const custom::CustomString currentSel = pbl2::bridge::toCustomString(staffCombo->currentData().toString());
+    const custom::CustomString currentSel = bridge::toCustomString(staffCombo->currentData().toString());
     staffCombo->clear();
-    staffCombo->addItem(tr("(Chua lien ket)"), QString());
+    staffCombo->addItem(tr("(Chưa liên kết)"), QString());
     for (const auto &s : staffs) {
-        const QString id = pbl2::bridge::toQString(s.getId());
-        const QString name = pbl2::bridge::toQString(s.getFullName());
+        const QString id = bridge::toQString(s.getId());
+        const QString name = bridge::toQString(s.getFullName());
         const QString display = QStringLiteral("%1 - %2").arg(id, name);
         staffCombo->addItem(display, id);
     }
     // Try reselect
     for (int i = 0; i < staffCombo->count(); ++i) {
-        if (pbl2::bridge::toCustomString(staffCombo->itemData(i).toString()).compare(currentSel, custom::CaseSensitivity::Insensitive) == 0) {
+        if (bridge::toCustomString(staffCombo->itemData(i).toString()).compare(currentSel, custom::CaseSensitivity::Insensitive) == 0) {
             staffCombo->setCurrentIndex(i);
             break;
         }
@@ -137,7 +137,7 @@ void AccountDialog::setStaffList(const custom::Vector<model::Staff> &staffs) con
 }
 
 custom::CustomString AccountDialog::staffId() const {
-    return pbl2::bridge::toCustomString(staffCombo->currentData().toString());
+    return bridge::toCustomString(staffCombo->currentData().toString());
 }
 
 }  // namespace ui

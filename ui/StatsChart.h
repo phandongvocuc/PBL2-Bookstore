@@ -49,7 +49,7 @@ private:
     void drawStackedBarChart(QPainter &painter, const QRect &plotArea) const;
     void drawLineChart(QPainter &painter, const QRect &plotArea) const;
     void drawLegend(QPainter &painter, const QRect &plotArea) const;
-    double findMaxValue() const;
+    [[nodiscard]] double findMaxValue() const;
 };
 
 }  // namespace pbl2::ui

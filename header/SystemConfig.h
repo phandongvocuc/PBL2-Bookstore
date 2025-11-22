@@ -1,6 +1,5 @@
 #pragma once
 
-
 namespace pbl2::model {
 
 class SystemConfig {

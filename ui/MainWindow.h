@@ -127,10 +127,10 @@ private:
     void handleLogout();
 
     static custom::Optional<int> currentRow(const QListWidget *list);
-    QString nextBookId() const;
-    QString nextReaderId() const;
-    QString nextStaffId() const;
-    QString nextLoanId() const;
+    [[nodiscard]] QString nextBookId() const;
+    [[nodiscard]] QString nextReaderId() const;
+    [[nodiscard]] QString nextStaffId() const;
+    [[nodiscard]] QString nextLoanId() const;
     std::unique_ptr<Ui::MainWindow> ui;
 
     QTabWidget *tabs{nullptr};

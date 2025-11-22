@@ -24,22 +24,22 @@ QString cleanId(const QString &value) {
     return id.replace(' ', '_');
 }
 
-QStringList defaultGenres() {
+    QStringList defaultGenres() {
     return {
-        QStringLiteral("Tat ca"),
-        QStringLiteral("Truyen tranh"),
-        QStringLiteral("Khoa hoc"),
-        QStringLiteral("Ky nang mem"),
-        QStringLiteral("Ky nang song"),
-        QStringLiteral("Van hoc"),
-        QStringLiteral("Lich su"),
-        QStringLiteral("Khoa hoc vien tuong"),
-        QStringLiteral("Kinh te"),
-        QStringLiteral("Tieu thuyet"),
-        QStringLiteral("Cong nghe"),
-        QStringLiteral("Tam ly"),
-        QStringLiteral("Ngon tinh"),
-        QStringLiteral("Khac")
+        QStringLiteral("Tất cả"),
+        QStringLiteral("Truyện tranh"),
+        QStringLiteral("Khoa học"),
+        QStringLiteral("Kỹ năng mềm"),
+        QStringLiteral("Kỹ năng sống"),
+        QStringLiteral("Văn học"),
+        QStringLiteral("Lịch sử"),
+        QStringLiteral("Khoa học viễn tưởng"),
+        QStringLiteral("Kinh tế"),
+        QStringLiteral("Tiểu thuyết"),
+        QStringLiteral("Công nghệ"),
+        QStringLiteral("Tâm lý"),
+        QStringLiteral("Ngôn tình"),
+        QStringLiteral("Khác")
     };
 }
 
@@ -47,10 +47,10 @@ QStringList defaultGenres() {
 
 
 BookDialog::BookDialog(QWidget *parent) : QDialog(parent) {
-    setWindowTitle(tr("Thong tin sach"));
+    setWindowTitle(tr("Thông tin sách"));
     setModal(true);
     setWindowIcon(QIcon(":/ui/resources/icons/book.png"));
-    QFont font("Segoe UI", 11);
+    const QFont font("Segoe UI", 11);
     setFont(font);
     // Dùng chung style đơn giản với Thong tin ban doc
     setStyleSheet("QDialog { background: #f8fafc; border-radius: 12px; } "
@@ -81,37 +81,37 @@ BookDialog::BookDialog(QWidget *parent) : QDialog(parent) {
     quantitySpin->setRange(0, 100000);
 
     statusCombo = new QComboBox(this);
-    statusCombo->addItem(tr("CON"), QStringLiteral("CON"));
-    statusCombo->addItem(tr("HET"), QStringLiteral("HET"));
+    statusCombo->addItem(tr("CÒN"), QStringLiteral("CÒN"));
+    statusCombo->addItem(tr("HẾT"), QStringLiteral("HẾT"));
 
 
     summaryEdit = new QPlainTextEdit(this);
-    summaryEdit->setPlaceholderText(tr("Mo ta ngan hoac ghi chu..."));
+    summaryEdit->setPlaceholderText(tr("Mô tả ngắn hoặc ghi chú về cuốn sách..."));
 
     errorLabel = new QLabel(this);
     errorLabel->setAlignment(Qt::AlignCenter);
     errorLabel->setVisible(false);
 
-    auto *formGroup = new QGroupBox(tr("Thong tin sach"), this);
+    auto *formGroup = new QGroupBox(tr("Thông tin sách"), this);
     auto *form = new QFormLayout;
     form->setContentsMargins(12, 12, 12, 12);
     form->setHorizontalSpacing(12);
     form->setVerticalSpacing(10);
     form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
     form->setLabelAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    form->addRow(tr("Ma sach"), idEdit);
-    form->addRow(tr("Tieu de"), titleEdit);
-    form->addRow(tr("Tac gia"), authorEdit);
-    form->addRow(tr("The loai"), genreCombo);
-    form->addRow(tr("Nha xuat ban"), publisherEdit);
-    form->addRow(tr("Ngay phat hanh"), publishDateEdit);
-    form->addRow(tr("Nam xuat ban"), publishYearSpin);
+    form->addRow(tr("Mã sách"), idEdit);
+    form->addRow(tr("Tiêu đề"), titleEdit);
+    form->addRow(tr("Tác giả"), authorEdit);
+    form->addRow(tr("Thể loại"), genreCombo);
+    form->addRow(tr("Nhà xuất bản"), publisherEdit);
+    form->addRow(tr("Ngày phát hành"), publishDateEdit);
+    form->addRow(tr("Năm xuất bản"), publishYearSpin);
     quantitySpin->setReadOnly(true);
     quantitySpin->setButtonSymbols(QAbstractSpinBox::NoButtons);
 
-    form->addRow(tr("So luong (tu dong)"), quantitySpin);
-    form->addRow(tr("Tinh trang"), statusCombo);
-    form->addRow(tr("Tom tat"), summaryEdit);
+    form->addRow(tr("Số lượng (tự động)"), quantitySpin);
+    form->addRow(tr("Tình trạng"), statusCombo);
+    form->addRow(tr("Tóm tắt"), summaryEdit);
     formGroup->setLayout(form);
 
     buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
@@ -127,7 +127,7 @@ BookDialog::BookDialog(QWidget *parent) : QDialog(parent) {
     setMinimumSize(640, 600);
 }
 
-void BookDialog::setBook(const model::Book &book, bool editing) {
+void BookDialog::setBook(const model::Book &book, const bool editing) {
     editingMode = editing;
     idEdit->setText(bridge::toQString(book.getId()));
     idEdit->setReadOnly(editing || forceIdReadOnly);
@@ -141,8 +141,7 @@ void BookDialog::setBook(const model::Book &book, bool editing) {
     quantitySpin->setValue(book.getQuantity());
     const custom::CustomString status = model::canonicalBookStatus(book.getStatus());
     for (int i = 0; i < statusCombo->count(); ++i) {
-        const custom::CustomString option = bridge::toCustomString(statusCombo->itemData(i).toString());
-        if (option.compare(status, custom::CaseSensitivity::Sensitive) == 0) {
+        if (const custom::CustomString option = bridge::toCustomString(statusCombo->itemData(i).toString()); option.compare(status, custom::CaseSensitivity::Sensitive) == 0) {
             statusCombo->setCurrentIndex(i);
             break;
         }
@@ -150,7 +149,7 @@ void BookDialog::setBook(const model::Book &book, bool editing) {
     summaryEdit->setPlainText(bridge::toQString(book.getSummary()));
 }
 
-void BookDialog::presetId(const QString &id, bool lockField) {
+void BookDialog::presetId(const QString &id, const bool lockField) {
     forceIdReadOnly = lockField;
     idEdit->setText(cleanId(id));
     idEdit->setReadOnly(editingMode || forceIdReadOnly);
@@ -167,22 +166,22 @@ model::Book BookDialog::book() const {
     b.setPublishYear(publishYearSpin->value());
     b.setQuantity(quantitySpin->value());
     const auto statusValue = model::canonicalBookStatus(bridge::toCustomString(statusCombo->currentData().toString()));
-    b.setStatus(statusValue.isEmpty() ? custom::CustomStringLiteral("CON") : statusValue);
+    b.setStatus(statusValue.isEmpty() ? custom::CustomStringLiteral("CÒN") : statusValue);
     b.setSummary(bridge::toCustomString(summaryEdit->toPlainText().trimmed()));
     return b;
 }
 
-bool BookDialog::validateInputs() const {
+    bool BookDialog::validateInputs() const {
     if (idEdit->text().trimmed().isEmpty()) {
-        showError(tr("Ma sach khong duoc de trong."));
+        showError(tr("Mã sách không được để trống."));
         return false;
     }
     if (titleEdit->text().trimmed().isEmpty()) {
-        showError(tr("Tieu de khong duoc de trong."));
+        showError(tr("Tiêu đề không được để trống."));
         return false;
     }
     if (authorEdit->text().trimmed().isEmpty()) {
-        showError(tr("Tac gia khong duoc de trong."));
+        showError(tr("Tác giả không được để trống."));
         return false;
     }
     return true;

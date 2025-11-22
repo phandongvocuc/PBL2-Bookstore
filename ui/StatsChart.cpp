@@ -11,7 +11,7 @@ StatsChart::StatsChart(QWidget *parent) : QWidget(parent) {
     setMinimumHeight(180);
 }
 
-void StatsChart::setMode(Mode mode) {
+void StatsChart::setMode(const Mode mode) {
     if (mode_ == mode) return;
     mode_ = mode;
     update();
@@ -51,7 +51,7 @@ void StatsChart::setAxisLabels(const QString &xLabel, const QString &yLabel) {
     if (changed) update();
 }
 
-void StatsChart::setShowLegend(bool show) {
+void StatsChart::setShowLegend(const bool show) {
     if (showLegend_ == show) return;
     showLegend_ = show;
     update();
@@ -70,11 +70,11 @@ void StatsChart::paintEvent(QPaintEvent *event) {
         return;
     }
 
-    const int leftMargin = 60;
-    const int rightMargin = 24;
+    constexpr int leftMargin = 60;
+    constexpr int rightMargin = 24;
     const int topMargin = title_.isEmpty() ? 16 : 40;
-    const int bottomMargin = 40;
-    QRect plotArea = rect().adjusted(leftMargin, topMargin, -rightMargin, -bottomMargin);
+    constexpr int bottomMargin = 40;
+    const QRect plotArea = rect().adjusted(leftMargin, topMargin, -rightMargin, -bottomMargin);
     if (plotArea.width() <= 0 || plotArea.height() <= 0) return;
 
     drawAxes(painter, plotArea);
@@ -112,7 +112,7 @@ void StatsChart::drawTitle(QPainter &painter, const QRect &area) const {
     painter.setPen(QColor(0x1F, 0x29, 0x37));
 
     // Add some padding and center the title
-    QRect titleRect = area.adjusted(0, 8, 0, 0);
+    const QRect titleRect = area.adjusted(0, 8, 0, 0);
     painter.drawText(titleRect, Qt::AlignCenter, title_);
 }
 
@@ -189,7 +189,7 @@ void StatsChart::drawBarChart(QPainter &painter, const QRect &plotArea) const {
 
     // Draw bars with gradient and shadow effect
     // Nếu chỉ có 1 series và nhiều thể loại, tô mỗi cột 1 màu để phân biệt
-    static custom::Vector<QColor> defaultColors = {
+    static custom::Vector defaultColors = {
         QColor(0xEF5350), QColor(0xAB47BC), QColor(0x42A5F5), QColor(0x26A69A),
         QColor(0xFFB300), QColor(0x8D6E63), QColor(0x5C6BC0), QColor(0x00897B),
         QColor(0x8BC34A), QColor(0xFF7043), QColor(0x5E35B1), QColor(0x00838F)
@@ -287,8 +287,7 @@ void StatsChart::drawBarChart(QPainter &painter, const QRect &plotArea) const {
             const double baseX = plotArea.left() + cat * groupWidth;
             for (int si = 0; si < seriesCount; ++si) {
                 if (cat >= series_[si].values.size()) continue;
-                const double value = series_[si].values[cat];
-                if (value > 0) {
+                if (const double value = series_[si].values[cat]; value > 0) {
                     const double ratio = value / maxVal;
                     const double barHeight = ratio * plotArea.height();
                     const double x = baseX + si * barWidth + (groupWidth - seriesCount * barWidth) / 2.0;
@@ -321,9 +320,9 @@ void StatsChart::drawStackedBarChart(QPainter &painter, const QRect &plotArea) c
         double accumulatedHeight = 0.0;
         const double baseX = plotArea.left() + cat * groupWidth + (groupWidth - barWidth) / 2.0;
 
-        for (int si = 0; si < series_.size(); ++si) {
-            if (cat >= series_[si].values.size()) continue;
-            const double value = series_[si].values[cat];
+        for (const auto & serie : series_) {
+            if (cat >= serie.values.size()) continue;
+            const double value = serie.values[cat];
             const double ratio = value / maxVal;
             const double segmentHeight = ratio * plotArea.height();
 
@@ -334,7 +333,7 @@ void StatsChart::drawStackedBarChart(QPainter &painter, const QRect &plotArea) c
 
             // Create gradient for each segment
             QLinearGradient gradient(segment.topLeft(), segment.bottomLeft());
-            QColor baseColor = series_[si].color.isValid() ? series_[si].color : palette().highlight().color();
+            QColor baseColor = serie.color.isValid() ? serie.color : palette().highlight().color();
             gradient.setColorAt(0, baseColor.lighter(120));
             gradient.setColorAt(1, baseColor.darker(110));
 
@@ -400,23 +399,22 @@ void StatsChart::drawLineChart(QPainter &painter, const QRect &plotArea) const {
 void StatsChart::drawLegend(QPainter &painter, const QRect &plotArea) const {
     // Luôn vẽ legend, kể cả khi chỉ có 1 series
 
-    const int legendHeight = 18;
-    const int legendSpacing = 4;
-    const int boxSize = 12;
+    constexpr int legendHeight = 18;
+    constexpr int legendSpacing = 4;
 
     // Calculate legend position (top-right)
-    int totalHeight = series_.size() * (legendHeight + legendSpacing) - legendSpacing;
-    int x = plotArea.right() - 160;
+    const int totalHeight = series_.size() * (legendHeight + legendSpacing) - legendSpacing;
+    const int x = plotArea.right() - 160;
     int y = plotArea.top() + 10;
 
     // Draw legend background
-    QRect legendBg(x - 8, y - 4, 150, totalHeight + 8);
+    const QRect legendBg(x - 8, y - 4, 150, totalHeight + 8);
     painter.fillRect(legendBg, QColor(255, 255, 255, 200));
     painter.setPen(QPen(QColor(0xE5, 0xE7, 0xEB), 1));
     painter.drawRect(legendBg);
 
-    for (int i = 0; i < series_.size(); ++i) {
-        const auto &series = series_[i];
+    for (const auto & series : series_) {
+        constexpr int boxSize = 12;
         QColor color = series.color.isValid() ? series.color : palette().highlight().color();
 
         // Draw color box with gradient

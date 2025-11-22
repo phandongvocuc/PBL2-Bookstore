@@ -9,7 +9,6 @@
 #include <QFrame>
 #include <QListWidget>
 #include <QScrollArea>
-#include <QVBoxLayout>
 #include <QSizePolicy>
 #include <algorithm>
 
@@ -22,7 +21,7 @@ StatsWidget::StatsWidget(QWidget *parent) : QWidget(parent) {
 void StatsWidget::setupUi() {
     setStyleSheet("background-color: #f8fafc;");
 
-    auto applyShadow = [](QWidget *w, qreal blur = 18.0, const QPointF &offset = QPointF(0, 4)) {
+    auto applyShadow = [](QWidget *w, const qreal blur = 18.0, const QPointF &offset = QPointF(0, 4)) {
         auto *shadow = new QGraphicsDropShadowEffect(w);
         shadow->setBlurRadius(blur);
         shadow->setColor(QColor(0, 0, 0, 35));
@@ -31,7 +30,7 @@ void StatsWidget::setupUi() {
     };
 
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setSpacing(14);
+    mainLayout->setSpacing(64);
     mainLayout->setContentsMargins(18, 14, 18, 14);
 
     auto *titleRow = new QHBoxLayout();
@@ -53,30 +52,30 @@ void StatsWidget::setupUi() {
     auto *scrollContent = new QWidget();
     auto *contentLayout = new QVBoxLayout(scrollContent);
     contentLayout->setSpacing(14);
-    contentLayout->setContentsMargins(4, 4, 4, 4);
+    contentLayout->setContentsMargins(10, 10, 10, 10);
 
-    const QString panelStyle = QStringLiteral(
+    const auto panelStyle = QStringLiteral(
         "QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; }");
 
     // Summary cards row
     auto *cardsRow = new QHBoxLayout();
-    cardsRow->setSpacing(10);
+    cardsRow->setSpacing(20);
 
     auto *booksCard = createStatsCard(tr("Tổng số sách"), QString());
     totalBooksValue = booksCard->findChild<QLabel *>("valueLabel");
-    cardsRow->addWidget(booksCard, 1);
+    cardsRow->addWidget(booksCard, 5);
 
     auto *readersCard = createStatsCard(tr("Tổng số độc giả"), QString());
     totalReadersValue = readersCard->findChild<QLabel *>("valueLabel");
-    cardsRow->addWidget(readersCard, 1);
+    cardsRow->addWidget(readersCard, 5);
 
     auto *loansCard = createStatsCard(tr("Tổng số phiếu mượn"), QString());
     totalLoansValue = loansCard->findChild<QLabel *>("valueLabel");
-    cardsRow->addWidget(loansCard, 1);
+    cardsRow->addWidget(loansCard, 5);
 
     auto *finesCard = createStatsCard(tr("Tổng tiền phạt"), QString());
     totalFinesValue = finesCard->findChild<QLabel *>("valueLabel");
-    cardsRow->addWidget(finesCard, 1);
+    cardsRow->addWidget(finesCard, 5);
 
     contentLayout->addLayout(cardsRow);
 
@@ -208,7 +207,7 @@ QFrame *StatsWidget::createStatsCard(const QString &title, const QString &icon) 
     card->setStyleSheet(
         "QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px; }"
         "QLabel { background: transparent; border: none; }");
-    card->setMinimumSize(170, 95);
+    card->setMinimumSize(270, 195);
     card->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     auto *shadow = new QGraphicsDropShadowEffect(card);
     shadow->setBlurRadius(16);
@@ -251,8 +250,8 @@ QFrame *StatsWidget::createStatsCard(const QString &title, const QString &icon) 
     return card;
 }
 
-void StatsWidget::updateStats(int totalBooks, int totalReaders, int totalLoans, int overdueLoans, qint64 totalFines) {
-    QLocale locale(QLocale::Vietnamese, QLocale::Vietnam);
+void StatsWidget::updateStats(const int totalBooks, const int totalReaders, const int totalLoans, const int overdueLoans, const qint64 totalFines) const {
+    const QLocale locale(QLocale::Vietnamese, QLocale::Vietnam);
     if (totalBooksValue) totalBooksValue->setText(locale.toString(totalBooks));
     if (totalReadersValue) totalReadersValue->setText(locale.toString(totalReaders));
     if (totalLoansValue) totalLoansValue->setText(locale.toString(totalLoans));
@@ -264,20 +263,20 @@ void StatsWidget::updateStats(int totalBooks, int totalReaders, int totalLoans, 
     if (overdueReadersLabel) overdueReadersLabel->setText(tr("Số người đang trễ: %1 người").arg(locale.toString(qMax(0, overdueLoans / 2 + 1))));
 }
 
-void StatsWidget::updateTopBooksChart(const custom::Map<QString, int> &bookBorrowCounts) {
+void StatsWidget::updateTopBooksChart(const custom::Map<QString, int> &bookBorrowCounts) const {
     if (!topBooksChart) return;
 
     QList<QPair<QString, int>> sortedBooks;
     for (auto it = bookBorrowCounts.constBegin(); it != bookBorrowCounts.constEnd(); ++it) {
         sortedBooks.append(qMakePair(it.key(), it.value()));
     }
-    std::sort(sortedBooks.begin(), sortedBooks.end(), [](const QPair<QString, int> &a, const QPair<QString, int> &b) {
+    ranges::sort(sortedBooks, [](const QPair<QString, int> &a, const QPair<QString, int> &b) {
         return a.second > b.second;
     });
 
     QStringList categories;
     custom::Vector<double> values;
-    int count = qMin(6, sortedBooks.size());
+    const int count = qMin(6, sortedBooks.size());
     for (int i = 0; i < count; ++i) {
         categories.append(sortedBooks[i].first);
         values.append(sortedBooks[i].second);
@@ -293,22 +292,22 @@ void StatsWidget::updateTopBooksChart(const custom::Map<QString, int> &bookBorro
     topBooksChart->setMode(StatsChart::Mode::Bar);
 }
 
-void StatsWidget::updateCategoryChart(const custom::Map<QString, int> &categoryBorrowCounts) {
+void StatsWidget::updateCategoryChart(const custom::Map<QString, int> &categoryBorrowCounts) const {
     if (!categoryChart) return;
 
     QList<QPair<QString, int>> items;
     for (auto it = categoryBorrowCounts.constBegin(); it != categoryBorrowCounts.constEnd(); ++it) {
         items.append(qMakePair(it.key(), it.value()));
     }
-    std::sort(items.begin(), items.end(), [](const QPair<QString, int> &a, const QPair<QString, int> &b) {
+    ranges::sort(items, [](const QPair<QString, int> &a, const QPair<QString, int> &b) {
         return a.second > b.second;
     });
 
     QStringList categories;
     custom::Vector<double> values;
-    for (const auto &item : items) {
-        categories.append(item.first);
-        values.append(item.second);
+    for (const auto &[fst, snd] : items) {
+        categories.append(fst);
+        values.append(snd);
     }
 
     StatsChart::Series series;
@@ -321,14 +320,14 @@ void StatsWidget::updateCategoryChart(const custom::Map<QString, int> &categoryB
     categoryChart->setMode(StatsChart::Mode::Bar);
 }
 
-void StatsWidget::updateMonthlyChart(const custom::Vector<int> &monthlyBorrowCounts) {
+void StatsWidget::updateMonthlyChart(const custom::Vector<int> &monthlyBorrowCounts) const {
     if (!monthlyChart) return;
 
     QStringList categories;
     custom::Vector<double> values;
     const int size = monthlyBorrowCounts.size();
     for (int i = 0; i < size; ++i) {
-        categories.append(tr("Tháng %1").arg(i + 1));
+        categories.append(tr("T%1").arg(i + 1));
         values.append(monthlyBorrowCounts[i]);
     }
 
@@ -342,7 +341,7 @@ void StatsWidget::updateMonthlyChart(const custom::Vector<int> &monthlyBorrowCou
     monthlyChart->setMode(StatsChart::Mode::Bar);
 }
 
-void StatsWidget::updatePieChart(int cardFees, int fines) {
+void StatsWidget::updatePieChart(int cardFees, int fines) const {
     if (!revenuePieChart) return;
 
     custom::Vector<QPair<QString, int>> segments;
@@ -352,18 +351,18 @@ void StatsWidget::updatePieChart(int cardFees, int fines) {
     revenuePieChart->setSegments(segments);
 }
 
-void StatsWidget::updateLoansList(const custom::Vector<QPair<QString, QString>> &loans) {
+void StatsWidget::updateLoansList(const custom::Vector<QPair<QString, QString>> &loans) const {
     if (!recentLoansList) return;
 
     recentLoansList->clear();
-    for (const auto &loan : loans) {
-        auto *item = new QListWidgetItem(loan.first, recentLoansList);
-        item->setData(Qt::UserRole, loan.second);
+    for (const auto &[fst, snd] : loans) {
+        auto *item = new QListWidgetItem(fst, recentLoansList);
+        item->setData(Qt::UserRole, snd);
         recentLoansList->addItem(item);
     }
 }
 
-void StatsWidget::updateActiveReadersList(const custom::Vector<QString> &readers) {
+void StatsWidget::updateActiveReadersList(const custom::Vector<QString> &readers) const {
     if (!activeReadersList) return;
 
     activeReadersList->clear();

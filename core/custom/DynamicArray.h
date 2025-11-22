@@ -4,7 +4,6 @@
 using namespace std;
 namespace custom {
 
-// Manual dynamic array supporting automatic growth without relying on STL containers.
 template <typename T>
 class DynamicArray {
 public:

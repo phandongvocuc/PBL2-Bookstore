@@ -18,7 +18,9 @@ qt_add_resources(ICON_RESOURCES
     ui/resources/icons/icons.qrc
 )
 
-add_executable(pbl2_book ${SOURCES} ${HEADERS} ${ICON_RESOURCES})
+add_executable(pbl2_book ${SOURCES} ${HEADERS} ${ICON_RESOURCES}
+        header/service/BaseService.h
+        scoure/service/BaseService.cpp)
 
 # Ensure the target uses C++20 (in addition to the global setting)
 if (TARGET pbl2_book)

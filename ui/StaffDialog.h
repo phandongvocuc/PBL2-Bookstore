@@ -21,13 +21,13 @@ public:
 
     void setStaff(const model::Staff &staff, bool editing);
     void presetId(const QString &id, bool lockField = true);
-    model::Staff staff() const;
+    [[nodiscard]] model::Staff staff() const;
 
 protected:
     void accept() override;
 
 private:
-    bool validateInputs() const;
+    [[nodiscard]] bool validateInputs() const;
     void showError(const QString &message) const;
 
     QLineEdit *idEdit{nullptr};

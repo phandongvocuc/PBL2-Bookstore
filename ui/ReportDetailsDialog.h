@@ -9,7 +9,7 @@ class QFormLayout;
 
 namespace pbl2::ui {
 
-class ReportDetailsDialog : public QDialog {
+class ReportDetailsDialog final : public QDialog {
     Q_OBJECT
 
 public:

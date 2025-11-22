@@ -19,7 +19,7 @@ using namespace std;
 namespace pbl2::ui {
 
 ReaderDialog::ReaderDialog(QWidget *parent) : QDialog(parent) {
-    setWindowTitle(tr("Thong tin ban doc"));
+    setWindowTitle(tr("Thôn tin bạn đọc"));
     setModal(true);
     setWindowIcon(QIcon(":/ui/resources/icons/reader.png"));
     const QFont font("Segoe UI", 11);
@@ -37,7 +37,7 @@ ReaderDialog::ReaderDialog(QWidget *parent) : QDialog(parent) {
     fullNameEdit = new QLineEdit(this);
     genderCombo = new QComboBox(this);
     genderCombo->setEditable(true);
-    genderCombo->addItems({tr("chon"), tr("Nam"), tr("Nu"), tr("Khac")});
+    genderCombo->addItems({tr("chọn"), tr("Nam"), tr("Nữ"), tr("Khác")});
     genderCombo->setCurrentIndex(-1);
     genderCombo->setEditText(QString());
     addressEdit = new QLineEdit(this);
@@ -59,9 +59,9 @@ ReaderDialog::ReaderDialog(QWidget *parent) : QDialog(parent) {
     expiryDateEdit->setDate(QDate::currentDate());
     totalBorrowedSpin = new QSpinBox(this);
     totalBorrowedSpin->setRange(0, 100000);
-    activeCheck = new QCheckBox(tr("Dang hoat dong"), this);
+    activeCheck = new QCheckBox(tr("Đang hoạt động"), this);
     activeCheck->setChecked(true);
-    connect(activeCheck, &QCheckBox::toggled, this, [this](bool checked) {
+    connect(activeCheck, &QCheckBox::toggled, this, [this](const bool checked) {
         activeFlag = checked;
     });
     activeFlag = true;
@@ -70,26 +70,26 @@ ReaderDialog::ReaderDialog(QWidget *parent) : QDialog(parent) {
     errorLabel->setAlignment(Qt::AlignCenter);
     errorLabel->setVisible(false);
 
-    auto *formGroup = new QGroupBox(tr("Thong tin ban doc"), this);
+    auto *formGroup = new QGroupBox(tr("Thông tin bạn đọc"), this);
     auto *form = new QFormLayout;
     form->setContentsMargins(12, 12, 12, 12);
     form->setHorizontalSpacing(12);
     form->setVerticalSpacing(10);
     form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
     form->setLabelAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    form->addRow(tr("Ma ban doc"), idEdit);
-    form->addRow(tr("Ho ten"), fullNameEdit);
-    form->addRow(tr("Gioi tinh"), genderCombo);
-    form->addRow(tr("Dia chi"), addressEdit);
-    form->addRow(tr("So dien thoai"), phoneEdit);
+    form->addRow(tr("Mã bạn đọc"), idEdit);
+    form->addRow(tr("Họ tên"), fullNameEdit);
+    form->addRow(tr("Giới tính"), genderCombo);
+    form->addRow(tr("Địa chỉ"), addressEdit);
+    form->addRow(tr("Số điện thoại"), phoneEdit);
     form->addRow(tr("Email"), emailEdit);
-    form->addRow(tr("So CCCD"), identityCardEdit);
-    form->addRow(tr("Ghi chu"), notesEdit);
-    form->addRow(tr("Ngay sinh"), dobEdit);
-    form->addRow(tr("Ngay dang ky"), createdDateEdit);
-    form->addRow(tr("Ngay het han"), expiryDateEdit);
-    form->addRow(tr("So lan muon"), totalBorrowedSpin);
-    form->addRow(tr("Trang thai"), activeCheck);
+    form->addRow(tr("Số CCCD"), identityCardEdit);
+    form->addRow(tr("Ghi chú"), notesEdit);
+    form->addRow(tr("Ngày sinh"), dobEdit);
+    form->addRow(tr("Ngày đăng ký"), createdDateEdit);
+    form->addRow(tr("Ngày hết hạn"), expiryDateEdit);
+    form->addRow(tr("Số lần mượn"), totalBorrowedSpin);
+    form->addRow(tr("Trạng thái"), activeCheck);
     formGroup->setLayout(form);
 
     buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
@@ -105,13 +105,12 @@ ReaderDialog::ReaderDialog(QWidget *parent) : QDialog(parent) {
     setMinimumSize(640, 600);
 }
 
-void ReaderDialog::setReader(const model::Reader &reader, bool editing) {
+void ReaderDialog::setReader(const model::Reader &reader, const bool editing) {
     editingMode = editing;
     idEdit->setText(bridge::toQString(reader.getId()));
     idEdit->setReadOnly(editing || forceIdReadOnly);
     fullNameEdit->setText(bridge::toQString(reader.getFullName()));
-    const QString genderText = bridge::toQString(reader.getGender()).trimmed();
-    if (!genderText.isEmpty()) {
+    if (const QString genderText = bridge::toQString(reader.getGender()).trimmed(); !genderText.isEmpty()) {
         genderCombo->setCurrentText(genderText);
     } else {
         genderCombo->setCurrentIndex(-1);
@@ -142,7 +141,7 @@ void ReaderDialog::setReader(const model::Reader &reader, bool editing) {
     activeCheck->setChecked(activeFlag);
 }
 
-void ReaderDialog::presetId(const QString &id, bool lockField) {
+void ReaderDialog::presetId(const QString &id, const bool lockField) {
     forceIdReadOnly = lockField;
     idEdit->setText(id.trimmed());
     idEdit->setReadOnly(editingMode || forceIdReadOnly);
@@ -168,11 +167,11 @@ model::Reader ReaderDialog::reader() const {
 
 bool ReaderDialog::validateInputs() const {
     if (idEdit->text().trimmed().isEmpty()) {
-        showError(tr("Ma ban doc khong duoc de trong."));
+        showError(tr("Mã bạn đọc không được để trống."));
         return false;
     }
     if (fullNameEdit->text().trimmed().isEmpty()) {
-        showError(tr("Ho ten khong duoc de trong."));
+        showError(tr("Họ tên không được để trống."));
         return false;
     }
     return true;

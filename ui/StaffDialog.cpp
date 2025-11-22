@@ -18,7 +18,7 @@ using namespace std;  // project-wide request
 namespace pbl2::ui {
 
 StaffDialog::StaffDialog(QWidget *parent) : QDialog(parent) {
-    setWindowTitle(tr("Thong tin nhan vien"));
+    setWindowTitle(tr("Thông tin nhân viên"));
     setModal(true);
     setWindowIcon(QIcon(":/ui/resources/icons/staff.png"));
     const QFont font("Segoe UI", 11);
@@ -54,7 +54,7 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
     fullNameEdit = new QLineEdit(this);
     genderCombo = new QComboBox(this);
     genderCombo->setEditable(true);
-    genderCombo->addItems({tr("chon"), tr("Nam"), tr("Nu"), tr("Khac")});
+    genderCombo->addItems({tr("Chọn"), tr("Nam"), tr("Nữ"), tr("Khác")});
     genderCombo->setCurrentIndex(-1);
     genderCombo->setEditText(QString());
     addressEdit = new QLineEdit(this);
@@ -62,7 +62,7 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
     emailEdit = new QLineEdit(this);
     positionCombo = new QComboBox(this);
     positionCombo->setEditable(true);
-    positionCombo->addItems({tr("chon"),tr("Thu thu"), tr("Quan ly"), tr("Nhan vien"), tr("Tro ly"), tr("Khac")});
+    positionCombo->addItems({tr("Chọn"), tr("Thủ thư"), tr("Quản lý"), tr("Nhân viên"), tr("Trợ lý"), tr("Khác")});
     positionCombo->setCurrentIndex(-1);
     positionCombo->setEditText(QString());
     notesEdit = new QLineEdit(this);
@@ -75,7 +75,7 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
     hireDateEdit->setDisplayFormat(QStringLiteral("dd/MM/yyyy"));
     hireDateEdit->setDate(QDate::currentDate());
 
-    activeCheck = new QCheckBox(tr("Dang hoat dong"), this);
+    activeCheck = new QCheckBox(tr("Đang hoạt động"), this);
     activeCheck->setChecked(true);
     connect(activeCheck, &QCheckBox::toggled, this, [this](bool checked) {
         activeFlag = checked;
@@ -86,24 +86,24 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
     errorLabel->setVisible(false);
     
 
-    auto *formGroup = new QGroupBox(tr("Thong tin nhan vien"), this);
+    auto *formGroup = new QGroupBox(tr("Thông tin nhân viên"), this);
     auto *form = new QFormLayout;
     form->setContentsMargins(12, 12, 12, 12);
     form->setHorizontalSpacing(12);
     form->setVerticalSpacing(10);
     form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
     form->setLabelAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    form->addRow(tr("Ma nhan vien"), idEdit);
-    form->addRow(tr("Ho ten"), fullNameEdit);
-    form->addRow(tr("Gioi tinh"), genderCombo);
-    form->addRow(tr("Dia chi"), addressEdit);
-    form->addRow(tr("So dien thoai"), phoneEdit);
+    form->addRow(tr("Mã nhân viên"), idEdit);
+    form->addRow(tr("Họ tên"), fullNameEdit);
+    form->addRow(tr("Giới tính"), genderCombo);
+    form->addRow(tr("Địa chỉ"), addressEdit);
+    form->addRow(tr("Số điện thoại"), phoneEdit);
     form->addRow(tr("Email"), emailEdit);
-    form->addRow(tr("Chuc vu"), positionCombo);
-    form->addRow(tr("Ghi chu"), notesEdit);
-    form->addRow(tr("Ngay sinh"), dobEdit);
-    form->addRow(tr("Ngay vao lam"), hireDateEdit);
-    form->addRow(tr("Trang thai"), activeCheck);
+    form->addRow(tr("Chức vụ"), positionCombo);
+    form->addRow(tr("Ghi chú"), notesEdit);
+    form->addRow(tr("Ngày sinh"), dobEdit);
+    form->addRow(tr("Ngày vào làm"), hireDateEdit);
+    form->addRow(tr("Trạng thái"), activeCheck);
     formGroup->setLayout(form);
 
     buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
@@ -121,21 +121,19 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
 
 void StaffDialog::setStaff(const model::Staff &staff, bool editing) {
     editingMode = editing;
-    idEdit->setText(pbl2::bridge::toQString(staff.getId()));
+    idEdit->setText(bridge::toQString(staff.getId()));
     idEdit->setReadOnly(editing || forceIdReadOnly);
-    fullNameEdit->setText(pbl2::bridge::toQString(staff.getFullName()));
-    const QString genderText = pbl2::bridge::toQString(staff.getGender()).trimmed();
-    if (!genderText.isEmpty()) {
+    fullNameEdit->setText(bridge::toQString(staff.getFullName()));
+    if (const QString genderText = bridge::toQString(staff.getGender()).trimmed(); !genderText.isEmpty()) {
         genderCombo->setCurrentText(genderText);
     } else {
         genderCombo->setCurrentIndex(-1);
         genderCombo->setEditText(QString());
     }
-    addressEdit->setText(pbl2::bridge::toQString(staff.getAddress()));
-    phoneEdit->setText(pbl2::bridge::toQString(staff.getPhone()));
-    emailEdit->setText(pbl2::bridge::toQString(staff.getEmail()));
-    const QString positionText = pbl2::bridge::toQString(staff.getPosition()).trimmed();
-    if (!positionText.isEmpty()) {
+    addressEdit->setText(bridge::toQString(staff.getAddress()));
+    phoneEdit->setText(bridge::toQString(staff.getPhone()));
+    emailEdit->setText(bridge::toQString(staff.getEmail()));
+    if (const QString positionText = bridge::toQString(staff.getPosition()).trimmed(); !positionText.isEmpty()) {
         if (positionCombo->findText(positionText, Qt::MatchFixedString | Qt::MatchCaseSensitive) == -1) {
             positionCombo->addItem(positionText);
         }
@@ -144,14 +142,14 @@ void StaffDialog::setStaff(const model::Staff &staff, bool editing) {
         positionCombo->setCurrentIndex(-1);
         positionCombo->setEditText(QString());
     }
-    notesEdit->setText(pbl2::bridge::toQString(staff.getNotes()));
+    notesEdit->setText(bridge::toQString(staff.getNotes()));
     if (staff.getDob().isValid()) {
-        dobEdit->setDate(pbl2::bridge::toQDate(staff.getDob()));
+        dobEdit->setDate(bridge::toQDate(staff.getDob()));
     } else {
         dobEdit->setDate(QDate::currentDate());
     }
     if (staff.getHireDate().isValid()) {
-        hireDateEdit->setDate(pbl2::bridge::toQDate(staff.getHireDate()));
+        hireDateEdit->setDate(bridge::toQDate(staff.getHireDate()));
     } else {
         hireDateEdit->setDate(QDate::currentDate());
     }
@@ -167,27 +165,27 @@ void StaffDialog::presetId(const QString &id, bool lockField) {
 
 model::Staff StaffDialog::staff() const {
     model::Staff s;
-    s.setId(pbl2::bridge::toCustomString(idEdit->text().trimmed()));
-    s.setFullName(pbl2::bridge::toCustomString(fullNameEdit->text().trimmed()));
-    s.setGender(pbl2::bridge::toCustomString(genderCombo->currentText().trimmed()));
-    s.setAddress(pbl2::bridge::toCustomString(addressEdit->text().trimmed()));
-    s.setPhone(pbl2::bridge::toCustomString(phoneEdit->text().trimmed()));
-    s.setEmail(pbl2::bridge::toCustomString(emailEdit->text().trimmed()));
-    s.setPosition(pbl2::bridge::toCustomString(positionCombo->currentText().trimmed()));
-    s.setNotes(pbl2::bridge::toCustomString(notesEdit->text().trimmed()));
-    s.setDob(pbl2::bridge::toCoreDate(dobEdit->date()));
-    s.setHireDate(pbl2::bridge::toCoreDate(hireDateEdit->date()));
+    s.setId(bridge::toCustomString(idEdit->text().trimmed()));
+    s.setFullName(bridge::toCustomString(fullNameEdit->text().trimmed()));
+    s.setGender(bridge::toCustomString(genderCombo->currentText().trimmed()));
+    s.setAddress(bridge::toCustomString(addressEdit->text().trimmed()));
+    s.setPhone(bridge::toCustomString(phoneEdit->text().trimmed()));
+    s.setEmail(bridge::toCustomString(emailEdit->text().trimmed()));
+    s.setPosition(bridge::toCustomString(positionCombo->currentText().trimmed()));
+    s.setNotes(bridge::toCustomString(notesEdit->text().trimmed()));
+    s.setDob(bridge::toCoreDate(dobEdit->date()));
+    s.setHireDate(bridge::toCoreDate(hireDateEdit->date()));
     s.setActive(activeFlag);
     return s;
 }
 
 bool StaffDialog::validateInputs() const {
     if (idEdit->text().trimmed().isEmpty()) {
-        showError(tr("Ma nhan vien khong duoc de trong."));
+        showError(tr("Mã nhân viên không được để trống"));
         return false;
     }
     if (fullNameEdit->text().trimmed().isEmpty()) {
-        showError(tr("Ho ten khong duoc de trong."));
+        showError(tr("Họ tên không được để trống."));
         return false;
     }
     return true;

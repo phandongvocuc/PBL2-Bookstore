@@ -13,14 +13,13 @@
 
 #include "QtBridge.h"
 
-using namespace std;  // project-wide request
+using namespace std;
 
 namespace {
 
 QString generateRequestId(const QString &staff) {
     return QStringLiteral("REQ-%1-%2")
-        .arg(staff.toUpper())
-        .arg(QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMddhhmmss")));
+        .arg(staff.toUpper(), QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMddhhmmss")));
 }
 
 }
@@ -29,7 +28,7 @@ namespace pbl2::ui {
 
     ReportRequestDialog::ReportRequestDialog(const QString &staffUsername, QWidget *parent)
         : QDialog(parent), staffUsername(staffUsername) {
-        setWindowTitle(tr("Lap bao cao tong hop"));
+        setWindowTitle(tr("Lập báo cáo tổng hợp"));
         setModal(true);
         setWindowIcon(QIcon(":/ui/resources/icons/report.png"));
         setStyleSheet(R"(
@@ -85,26 +84,26 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
         overdueSpin->setRange(0, 100000);
 
         notesEdit = new QPlainTextEdit(this);
-        notesEdit->setPlaceholderText(tr("Mo ta cac vu viec mat, hong, yeu cau xoa sach..."));
+        notesEdit->setPlaceholderText(tr("Mô tả các vụ việc mất/hỏng sách, yêu cầu xóa sách..."));
 
         errorLabel = new QLabel(this);
         errorLabel->setAlignment(Qt::AlignCenter);
         errorLabel->setVisible(false);
 
-        auto *formGroup = new QGroupBox(tr("Thong tin bao cao"), this);
+        auto *formGroup = new QGroupBox(tr("Thông tin báo cáo"), this);
         auto *form = new QFormLayout;
         form->setContentsMargins(12, 12, 12, 12);
         form->setHorizontalSpacing(12);
         form->setVerticalSpacing(10);
         form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
         form->setLabelAlignment(Qt::AlignRight | Qt::AlignVCenter);
-        form->addRow(tr("Ma yeu cau"), requestIdEdit);
-        form->addRow(tr("Tu ngay"), fromDateEdit);
-        form->addRow(tr("Den ngay"), toDateEdit);
-        form->addRow(tr("So phieu xu ly"), handledSpin);
-        form->addRow(tr("So sach mat/hong"), lostSpin);
-        form->addRow(tr("Doc gia qua han"), overdueSpin);
-        form->addRow(tr("Ghi chu"), notesEdit);
+        form->addRow(tr("Mã yêu cầu"), requestIdEdit);
+        form->addRow(tr("Từ ngày"), fromDateEdit);
+        form->addRow(tr("Đến ngày"), toDateEdit);
+        form->addRow(tr("Số phiếu xử lý"), handledSpin);
+        form->addRow(tr("Số sách mất/hỏng"), lostSpin);
+        form->addRow(tr("Độc giả quá hạn"), overdueSpin);
+        form->addRow(tr("Ghi chú"), notesEdit);
         formGroup->setLayout(form);
 
         buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
@@ -122,11 +121,11 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
 
     bool ReportRequestDialog::validateInputs() const {
         if (requestIdEdit->text().trimmed().isEmpty()) {
-            showError(tr("Ma yeu cau khong duoc de trong."));
+            showError(tr("Mã yêu cầu không được để trống."));
             return false;
         }
         if (toDateEdit->date() < fromDateEdit->date()) {
-            showError(tr("Ngay ket thuc phai lon hon ngay bat dau."));
+            showError(tr("Ngày kết thúc phải lớn hơn ngày bắt đầu."));
             return false;
         }
         return true;

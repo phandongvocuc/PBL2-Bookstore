@@ -20,13 +20,13 @@ class ReportRequestDialog final : public QDialog {
 public:
     explicit ReportRequestDialog(const QString &staffUsername, QWidget *parent = nullptr);
 
-    model::ReportRequest reportRequest() const;
+    [[nodiscard]] model::ReportRequest reportRequest() const;
 
 protected:
     void accept() override;
 
 private:
-    bool validateInputs() const;
+    [[nodiscard]] bool validateInputs() const;
     void showError(const QString &message) const;
 
     QString staffUsername;

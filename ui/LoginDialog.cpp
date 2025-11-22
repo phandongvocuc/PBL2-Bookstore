@@ -19,7 +19,7 @@ LoginDialog::LoginDialog(service::AccountService &accountService, QWidget *paren
     setMinimumSize(400, 280);
 
     // Modern font and light background
-    QFont font("Arial", 30);
+    const QFont font("Times New Roman", 18);
     setFont(font);
 
    ui->setupUi(this);
@@ -67,7 +67,7 @@ void LoginDialog::onExitClicked() {
 
 void LoginDialog::attemptLogin() {
     if (!usernameEdit || !passwordEdit || !roleComboBox) {
-        showError(tr("Khong khoi tao duoc giao dien dang nhap."));
+        showError(tr("Không khởi tạo được giao diện đăng nhập"));
         return;
     }
     const QString username = usernameEdit->text().trimmed();
@@ -75,31 +75,30 @@ void LoginDialog::attemptLogin() {
     const QString selectedRole = roleComboBox->currentText().trimmed();
 
     if (username.isEmpty() || password.isEmpty() || selectedRole.isEmpty()) {
-        showError(tr("Vui long nhap du thong tin."));
+        showError(tr("Vui lòng nhập đủ thông tin."));
         return;
     }
 
-    const auto customUsername = pbl2::bridge::toCustomString(username);
+    const auto customUsername = bridge::toCustomString(username);
     const auto accountOpt = accountService.findByUsername(customUsername);
     if (!accountOpt.has_value()) {
-        showError(tr("Khong tim thay tai khoan."));
+        showError(tr("Không tìm thấy tài khoản."));
         return;
     }
 
     if (!accountOpt.value().isActive()) {
-        showError(tr("Tai khoan dang bi khoa."));
+        showError(tr("Tài khoản đã bị khóa."));
         return;
     }
 
-    const auto authenticated = accountService.authenticate(pbl2::bridge::toCustomString(username), pbl2::bridge::toCustomString(password));
+    const auto authenticated = accountService.authenticate(bridge::toCustomString(username), bridge::toCustomString(password));
     if (!authenticated.has_value()) {
-        showError(tr("Mat khau khong dung."));
+        showError(tr("Mật khẩu không đúng."));
         return;
     }
 
     // Kiểm tra vai trò được chọn
-    const QString userRole = pbl2::bridge::toQString(authenticated.value().getRole()).trimmed();
-    if (userRole.compare(selectedRole, Qt::CaseInsensitive) != 0) {
+    if (const QString userRole = bridge::toQString(authenticated.value().getRole()).trimmed(); userRole.compare(selectedRole, Qt::CaseInsensitive) != 0) {
         showError(tr("Vai trò không đúng. Vui lòng chọn đúng vai trò."));
         return;
     }
