@@ -3,7 +3,7 @@
 #include <QWidget>
 #include <QStringList>
 #include <QColor>
-#include "core/custom/QtContainers.h"
+#include "../core/CustomContainers.h"
 
 namespace pbl2::ui {
 
@@ -15,7 +15,7 @@ public:
 
     struct Series {
         QString name;
-        custom::Vector<double> values;
+        core::Vector<double> values;
         QColor color;
     };
 
@@ -24,7 +24,7 @@ public:
     void setMode(Mode mode);
     void setTitle(const QString &title);
     void setCategories(const QStringList &categories);
-    void setSeries(const custom::Vector<Series> &series);
+    void setSeries(const core::Vector<Series> &series);
     void setValueSuffix(const QString &suffix);
     void setAxisLabels(const QString &xLabel, const QString &yLabel);
     void setShowLegend(bool show);
@@ -37,7 +37,7 @@ private:
     QString title_;
     QString valueSuffix_;
     QStringList categories_;
-    custom::Vector<Series> series_;
+    core::Vector<Series> series_;
     QString xAxisLabel_{QStringLiteral("Ngày/Tháng")};
     QString yAxisLabel_{QStringLiteral("Sách")};
     bool showLegend_{true};

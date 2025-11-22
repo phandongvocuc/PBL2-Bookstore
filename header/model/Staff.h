@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/Date.h"
-#include "core/custom/CustomString.h"
+#include "../../core/CustomString.h"
 
 #include "Person.h"
 
@@ -13,16 +13,16 @@ namespace pbl2::model {
         [[nodiscard]] const core::Date &getHireDate() const;
         void setHireDate(const core::Date &value);
 
-        [[nodiscard]] const custom::CustomString &getPosition() const;
-        void setPosition(const custom::CustomString &value);
+        [[nodiscard]] const core::CustomString &getPosition() const;
+        void setPosition(const core::CustomString &value);
 
-        [[nodiscard]] const custom::CustomString &getNotes() const;
-        void setNotes(const custom::CustomString &value);
+        [[nodiscard]] const core::CustomString &getNotes() const;
+        void setNotes(const core::CustomString &value);
 
     private:
         core::Date hireDate;
-        custom::CustomString position;
-        custom::CustomString notes;
+        core::CustomString position;
+        core::CustomString notes;
     };
 
 }  // namespace pbl2::model

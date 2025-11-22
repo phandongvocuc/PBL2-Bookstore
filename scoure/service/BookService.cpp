@@ -3,14 +3,14 @@
 
 namespace pbl2::service {
 
-    BookService::BookService(const custom::CustomString &dataDir)
+    BookService::BookService(const core::CustomString &dataDir)
         : BaseService(dataDir) {}
 
-    custom::DynamicArray<model::Book> BookService::fetchAll() const {
+    core::DynamicArray<model::Book> BookService::fetchAll() const {
         return BaseService::fetchAll();
     }
 
-    custom::Optional<model::Book> BookService::findById(const custom::CustomString &bookId) const {
+    core::Optional<model::Book> BookService::findById(const core::CustomString &bookId) const {
         return BaseService::findById(bookId);
     }
 
@@ -22,11 +22,11 @@ namespace pbl2::service {
         return updateItem(book);
     }
 
-    bool BookService::removeBook(const custom::CustomString &bookId) const {
+    bool BookService::removeBook(const core::CustomString &bookId) const {
         return removeItem(bookId);
     }
 
-    custom::DynamicArray<model::Book> BookService::ensureLoaded() const {
+    core::DynamicArray<model::Book> BookService::ensureLoaded() const {
         auto books = repository.loadAll();
         bool normalized = false;
         for (auto &book : books) {
@@ -38,7 +38,7 @@ namespace pbl2::service {
         return books;
     }
 
-    void BookService::persist(const custom::DynamicArray<model::Book> &items) const {
+    void BookService::persist(const core::DynamicArray<model::Book> &items) const {
         repository.saveAll(items);
     }
 

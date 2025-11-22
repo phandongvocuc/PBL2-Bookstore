@@ -2,14 +2,14 @@
 
 namespace pbl2::service {
 
-    StaffService::StaffService(const custom::CustomString &dataDir)
+    StaffService::StaffService(const core::CustomString &dataDir)
         : BaseService(dataDir) {}
 
-    custom::DynamicArray<model::Staff> StaffService::fetchAll() const {
+    core::DynamicArray<model::Staff> StaffService::fetchAll() const {
         return BaseService::fetchAll();
     }
 
-    custom::Optional<model::Staff> StaffService::findById(const custom::CustomString &staffId) const {
+    core::Optional<model::Staff> StaffService::findById(const core::CustomString &staffId) const {
         return BaseService::findById(staffId);
     }
 
@@ -21,11 +21,11 @@ namespace pbl2::service {
         return updateItem(staff);
     }
 
-    bool StaffService::setStaffActive(const custom::CustomString &staffId, bool active) const {
+    bool StaffService::setStaffActive(const core::CustomString &staffId, bool active) const {
         const auto staffs = ensureLoaded();
         bool changed = false;
         for (auto &staff : staffs) {
-            if (staff.getId().compare(staffId, custom::CaseSensitivity::Insensitive) == 0) {
+            if (staff.getId().compare(staffId, core::CaseSensitivity::Insensitive) == 0) {
                 if (staff.isActive() == active) return true;
                 staff.setActive(active);
                 changed = true;
@@ -37,15 +37,15 @@ namespace pbl2::service {
         return true;
     }
 
-    bool StaffService::removeStaff(const custom::CustomString &staffId) const {
+    bool StaffService::removeStaff(const core::CustomString &staffId) const {
         return removeItem(staffId);
     }
 
-    custom::DynamicArray<model::Staff> StaffService::ensureLoaded() const {
+    core::DynamicArray<model::Staff> StaffService::ensureLoaded() const {
         return repository.loadAll();
     }
 
-    void StaffService::persist(const custom::DynamicArray<model::Staff> &staffs) const {
+    void StaffService::persist(const core::DynamicArray<model::Staff> &staffs) const {
         repository.saveAll(staffs);
     }
 

@@ -1,8 +1,8 @@
 #include "AccountDialog.h"
 
 #include "QtBridge.h"
-#include "core/custom/CaseSensitivity.h"
-#include "core/custom/CustomString.h"
+#include "../core/CaseSensitivity.h"
+#include "../core/CustomString.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
@@ -79,11 +79,11 @@ AccountDialog::AccountDialog(QWidget *parent) : QDialog(parent) {
     setMinimumSize(640, 520);
 }
 
-custom::CustomString AccountDialog::username() const { return bridge::toCustomString(usernameEdit->text().trimmed()); }
+core::CustomString AccountDialog::username() const { return bridge::toCustomString(usernameEdit->text().trimmed()); }
 
-custom::CustomString AccountDialog::password() const { return bridge::toCustomString(passwordEdit->text()); }
+core::CustomString AccountDialog::password() const { return bridge::toCustomString(passwordEdit->text()); }
 
-custom::CustomString AccountDialog::role() const { return bridge::toCustomString(roleCombo->currentText()); }
+core::CustomString AccountDialog::role() const { return bridge::toCustomString(roleCombo->currentText()); }
 
 bool AccountDialog::isActive() const { return activeCheck->isChecked(); }
 
@@ -105,7 +105,7 @@ bool AccountDialog::validateInputs() const {
     return true;
 }
 
-void AccountDialog::showError(const custom::CustomString &message) const {
+void AccountDialog::showError(const core::CustomString &message) const {
     errorLabel->setText(bridge::toQString(message));
     errorLabel->setVisible(true);
 }
@@ -116,9 +116,9 @@ void AccountDialog::accept() {
     QDialog::accept();
 }
 
-void AccountDialog::setStaffList(const custom::Vector<model::Staff> &staffs) const {
+void AccountDialog::setStaffList(const core::Vector<model::Staff> &staffs) const {
     // Clear except first placeholder
-    const custom::CustomString currentSel = bridge::toCustomString(staffCombo->currentData().toString());
+    const core::CustomString currentSel = bridge::toCustomString(staffCombo->currentData().toString());
     staffCombo->clear();
     staffCombo->addItem(tr("(Chưa liên kết)"), QString());
     for (const auto &s : staffs) {
@@ -129,14 +129,14 @@ void AccountDialog::setStaffList(const custom::Vector<model::Staff> &staffs) con
     }
     // Try reselect
     for (int i = 0; i < staffCombo->count(); ++i) {
-        if (bridge::toCustomString(staffCombo->itemData(i).toString()).compare(currentSel, custom::CaseSensitivity::Insensitive) == 0) {
+        if (bridge::toCustomString(staffCombo->itemData(i).toString()).compare(currentSel, core::CaseSensitivity::Insensitive) == 0) {
             staffCombo->setCurrentIndex(i);
             break;
         }
     }
 }
 
-custom::CustomString AccountDialog::staffId() const {
+core::CustomString AccountDialog::staffId() const {
     return bridge::toCustomString(staffCombo->currentData().toString());
 }
 

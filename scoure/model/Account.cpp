@@ -3,43 +3,43 @@ using namespace std;
 
 namespace pbl2::model {
 
-const custom::CustomString &Account::getAccountId() const {
+const core::CustomString &Account::getAccountId() const {
     return getId();
 }
 
-void Account::setAccountId(const custom::CustomString &value) {
+void Account::setAccountId(const core::CustomString &value) {
     setId(value);
 }
 
-const custom::CustomString &Account::getUsername() const {
+const core::CustomString &Account::getUsername() const {
     return username;
 }
 
-void Account::setUsername(const custom::CustomString &value) {
+void Account::setUsername(const core::CustomString &value) {
     username = value;
 }
 
-const custom::CustomString &Account::getPasswordHash() const {
+const core::CustomString &Account::getPasswordHash() const {
     return passwordHash;
 }
 
-void Account::setPasswordHash(const custom::CustomString &value) {
+void Account::setPasswordHash(const core::CustomString &value) {
     passwordHash = value;
 }
 
-const custom::CustomString &Account::getRole() const {
+const core::CustomString &Account::getRole() const {
     return role;
 }
 
-void Account::setRole(const custom::CustomString &value) {
+void Account::setRole(const core::CustomString &value) {
     role = value;
 }
 
-const custom::CustomString &Account::getEmployeeId() const {
+const core::CustomString &Account::getEmployeeId() const {
     return employeeId;
 }
 
-void Account::setEmployeeId(const custom::CustomString &value) {
+void Account::setEmployeeId(const core::CustomString &value) {
     employeeId = value;
 }
 

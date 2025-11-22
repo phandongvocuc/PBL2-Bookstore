@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/Date.h"
-#include "core/custom/CustomString.h"
+#include "../../core/CustomString.h"
 #include "Person.h"
 
 namespace pbl2::model {
@@ -10,8 +10,8 @@ namespace pbl2::model {
     public:
         ~Reader() override = default;
 
-        [[nodiscard]] const custom::CustomString &getIdentityCard() const;
-        void setIdentityCard(const custom::CustomString &value);
+        [[nodiscard]] const core::CustomString &getIdentityCard() const;
+        void setIdentityCard(const core::CustomString &value);
 
         [[nodiscard]] const core::Date &getCreatedDate() const;
         void setCreatedDate(const core::Date &value);
@@ -22,15 +22,15 @@ namespace pbl2::model {
         [[nodiscard]] int getTotalBorrowed() const;
         void setTotalBorrowed(int value);
 
-        [[nodiscard]] const custom::CustomString &getNotes() const;
-        void setNotes(const custom::CustomString &value);
+        [[nodiscard]] const core::CustomString &getNotes() const;
+        void setNotes(const core::CustomString &value);
 
     private:
-        custom::CustomString identityCard;
+        core::CustomString identityCard;
         core::Date createdDate;
         core::Date expiryDate;
         int totalBorrowed{0};
-        custom::CustomString notes;
+        core::CustomString notes;
     };
 
 }  // namespace model

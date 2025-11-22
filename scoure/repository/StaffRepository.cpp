@@ -7,14 +7,14 @@ using namespace std;
 
 namespace pbl2::repository {
 
-StaffRepository::StaffRepository(const custom::CustomString &dataDir)
-	: dataPath(core::path::join(dataDir, custom::CustomStringLiteral("staffs.bin"))) {}
+StaffRepository::StaffRepository(const core::CustomString &dataDir)
+	: dataPath(core::path::join(dataDir, core::CustomStringLiteral("staffs.bin"))) {}
 
-custom::DynamicArray<model::Staff> StaffRepository::loadAll() const {
+core::DynamicArray<model::Staff> StaffRepository::loadAll() const {
 	return serialization::BinaryFileStore::readStaff(dataPath);
 }
 
-void StaffRepository::saveAll(const custom::DynamicArray<model::Staff> &staffs) const {
+void StaffRepository::saveAll(const core::DynamicArray<model::Staff> &staffs) const {
 	serialization::BinaryFileStore::writeStaff(staffs, dataPath);
 }
 

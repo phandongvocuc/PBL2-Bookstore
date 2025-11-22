@@ -13,7 +13,7 @@
 #include <QVBoxLayout>
 
 #include "QtBridge.h"
-#include "core/custom/QtContainers.h"
+#include "../core/CustomContainers.h"
 
 using namespace std;
 
@@ -29,7 +29,7 @@ QString generateRequestId(const QString &staff) {
 namespace pbl2::ui {
 
     ReportRequestDialog::ReportRequestDialog(const QString &staffUsername,
-                                             const custom::Vector<custom::CustomString> &knownBookIds,
+                                             const core::Vector<core::CustomString> &knownBookIds,
                                              QWidget *parent)
         : QDialog(parent), staffUsername(staffUsername), knownBookIds(knownBookIds) {
         for (auto &id : this->knownBookIds) {
@@ -137,8 +137,8 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
         refreshAffectedCountPreview();
     }
 
-    custom::Vector<QString> ReportRequestDialog::splitTokens(const QString &normalized) const {
-        custom::Vector<QString> tokens;
+    core::Vector<QString> ReportRequestDialog::splitTokens(const QString &normalized) const {
+        core::Vector<QString> tokens;
         QString current;
         for (const QChar ch : normalized) {
             if (ch == QChar(';')) {
@@ -164,8 +164,8 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
         return false;
     }
 
-    custom::Vector<ReportRequestDialog::AffectedBookEntry> ReportRequestDialog::parseAffectedBooks(custom::Vector<QString> *errors) const {
-        custom::Vector<AffectedBookEntry> aggregated;
+    core::Vector<ReportRequestDialog::AffectedBookEntry> ReportRequestDialog::parseAffectedBooks(core::Vector<QString> *errors) const {
+        core::Vector<AffectedBookEntry> aggregated;
         const QString raw = affectedBooksEdit ? affectedBooksEdit->toPlainText() : QString();
         QString normalized = raw;
         normalized.replace('\n', ';');
@@ -232,7 +232,7 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
             showError(tr("Ngày kết thúc phải lớn hơn ngày bắt đầu."));
             return false;
         }
-        custom::Vector<QString> errors;
+        core::Vector<QString> errors;
         const auto affected = parseAffectedBooks(&errors);
         if (!errors.isEmpty()) {
             QString merged;
@@ -282,7 +282,7 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
         req.setOverdueReaders(overdueSpin->value());
         req.setAffectedBooks(bridge::toCustomString(serialized));
         req.setNotes(bridge::toCustomString(notesEdit->toPlainText().trimmed()));
-        req.setStatus(custom::CustomStringLiteral("PENDING"));
+        req.setStatus(core::CustomStringLiteral("PENDING"));
         req.setCreatedAt(core::DateTime::nowUtc());
         return req;
     }

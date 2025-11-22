@@ -2,7 +2,7 @@
 
 namespace pbl2::service {
 
-ConfigService::ConfigService(const custom::CustomString &dataDir) : repository(dataDir) {}
+ConfigService::ConfigService(const core::CustomString &dataDir) : repository(dataDir) {}
 
 model::SystemConfig ConfigService::load() const { return repository.load(); }
 

@@ -2,11 +2,11 @@
 using namespace std;
 namespace pbl2::model {
 
-    const custom::CustomString &Reader::getIdentityCard() const {
+    const core::CustomString &Reader::getIdentityCard() const {
         return identityCard;
     }
 
-    void Reader::setIdentityCard(const custom::CustomString &value) {
+    void Reader::setIdentityCard(const core::CustomString &value) {
         identityCard = value;
     }
 
@@ -34,11 +34,11 @@ namespace pbl2::model {
         totalBorrowed = value;
     }
 
-    const custom::CustomString &Reader::getNotes() const {
+    const core::CustomString &Reader::getNotes() const {
         return notes;
     }
 
-    void Reader::setNotes(const custom::CustomString &value) {
+    void Reader::setNotes(const core::CustomString &value) {
         notes = value;
     }
 

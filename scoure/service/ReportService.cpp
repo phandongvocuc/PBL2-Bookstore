@@ -3,10 +3,10 @@
 
 namespace pbl2::service {
 
-    ReportService::ReportService(const custom::CustomString &dataDir)
+    ReportService::ReportService(const core::CustomString &dataDir)
         : BaseService(dataDir) {}
 
-    custom::DynamicArray<model::ReportRequest> ReportService::fetchAll() const {
+    core::DynamicArray<model::ReportRequest> ReportService::fetchAll() const {
         return BaseService::fetchAll();
     }
 
@@ -15,8 +15,8 @@ namespace pbl2::service {
 
         if (request.getRequestId().trimmed().isEmpty()) {
             const auto now = core::DateTime::nowUtc();
-            const custom::CustomString timestamp = now.toCompactTimestamp();
-            custom::CustomString id(custom::CustomStringLiteral("RR-"));
+            const core::CustomString timestamp = now.toCompactTimestamp();
+            core::CustomString id(core::CustomStringLiteral("RR-"));
             id.append(timestamp);
             request.setRequestId(id);
             request.setCreatedAt(now);
@@ -31,18 +31,18 @@ namespace pbl2::service {
             request.setCreatedAt(core::DateTime::nowUtc());
         }
         if (request.getStatus().trimmed().isEmpty()) {
-            request.setStatus(custom::CustomStringLiteral("PENDING"));
+            request.setStatus(core::CustomStringLiteral("PENDING"));
         }
 
         return addItem(request);
     }
 
-    bool ReportService::updateStatus(const custom::CustomString &requestId, const custom::CustomString &status) const {
+    bool ReportService::updateStatus(const core::CustomString &requestId, const core::CustomString &status) const {
         const auto requests = ensureLoaded();
         bool changed = false;
         for (auto &request : requests) {
-            if (request.getRequestId().compare(requestId, custom::CaseSensitivity::Insensitive) == 0) {
-                const custom::CustomString trimmed = status.trimmed();
+            if (request.getRequestId().compare(requestId, core::CaseSensitivity::Insensitive) == 0) {
+                const core::CustomString trimmed = status.trimmed();
                 request.setStatus(trimmed.isEmpty() ? request.getStatus() : trimmed.toUpper());
                 changed = true;
                 break;
@@ -53,11 +53,11 @@ namespace pbl2::service {
         return true;
     }
 
-    custom::DynamicArray<model::ReportRequest> ReportService::ensureLoaded() const {
+    core::DynamicArray<model::ReportRequest> ReportService::ensureLoaded() const {
         return repository.loadAll();
     }
 
-    void ReportService::persist(const custom::DynamicArray<model::ReportRequest> &requests) const {
+    void ReportService::persist(const core::DynamicArray<model::ReportRequest> &requests) const {
         repository.saveAll(requests);
     }
 

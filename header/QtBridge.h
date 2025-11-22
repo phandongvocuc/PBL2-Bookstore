@@ -6,12 +6,12 @@
 #include <QDateTime>
 #include <QString>
 
-#include "core/custom/CustomString.h"
+#include "../core/CustomString.h"
 
 namespace pbl2::bridge {
 
-custom::CustomString toCustomString(const QString &value);
-QString toQString(const custom::CustomString &value);
+core::CustomString toCustomString(const QString &value);
+QString toQString(const core::CustomString &value);
 
 core::Date toCoreDate(const QDate &value);
 QDate toQDate(const core::Date &value);

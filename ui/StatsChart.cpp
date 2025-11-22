@@ -28,7 +28,7 @@ void StatsChart::setCategories(const QStringList &categories) {
     update();
 }
 
-void StatsChart::setSeries(const custom::Vector<Series> &series) {
+void StatsChart::setSeries(const core::Vector<Series> &series) {
     series_ = series;
     update();
 }
@@ -189,11 +189,22 @@ void StatsChart::drawBarChart(QPainter &painter, const QRect &plotArea) const {
 
     // Draw bars with gradient and shadow effect
     // Nếu chỉ có 1 series và nhiều thể loại, tô mỗi cột 1 màu để phân biệt
-    static custom::Vector defaultColors = {
-        QColor(0xEF5350), QColor(0xAB47BC), QColor(0x42A5F5), QColor(0x26A69A),
-        QColor(0xFFB300), QColor(0x8D6E63), QColor(0x5C6BC0), QColor(0x00897B),
-        QColor(0x8BC34A), QColor(0xFF7043), QColor(0x5E35B1), QColor(0x00838F)
-    };
+    static core::Vector defaultColors = []() {
+        core::Vector<QColor> colors;
+        colors.append(QColor(0xEF5350));
+        colors.append(QColor(0xAB47BC));
+        colors.append(QColor(0x42A5F5));
+        colors.append(QColor(0x26A69A));
+        colors.append(QColor(0xFFB300));
+        colors.append(QColor(0x8D6E63));
+        colors.append(QColor(0x5C6BC0));
+        colors.append(QColor(0x00897B));
+        colors.append(QColor(0x8BC34A));
+        colors.append(QColor(0xFF7043));
+        colors.append(QColor(0x5E35B1));
+        colors.append(QColor(0x00838F));
+        return colors;
+    }();
     // Vẽ từng cột cho từng ngày, mỗi màu là 1 thể loại
     for (int cat = 0; cat < categoryCount; ++cat) {
         double baseX = plotArea.left() + cat * groupWidth;

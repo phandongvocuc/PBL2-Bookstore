@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/DateTime.h"
-#include "core/custom/CustomString.h"
+#include "../../core/CustomString.h"
 
 #include "Person.h"
 using namespace std;
@@ -12,20 +12,20 @@ class Account final : public Person {
 public:
     ~Account() override = default;
 
-    [[nodiscard]] const custom::CustomString &getAccountId() const;
-    void setAccountId(const custom::CustomString &value);
+    [[nodiscard]] const core::CustomString &getAccountId() const;
+    void setAccountId(const core::CustomString &value);
 
-    [[nodiscard]] const custom::CustomString &getUsername() const;
-    void setUsername(const custom::CustomString &value);
+    [[nodiscard]] const core::CustomString &getUsername() const;
+    void setUsername(const core::CustomString &value);
 
-    [[nodiscard]] const custom::CustomString &getPasswordHash() const;
-    void setPasswordHash(const custom::CustomString &value);
+    [[nodiscard]] const core::CustomString &getPasswordHash() const;
+    void setPasswordHash(const core::CustomString &value);
 
-    [[nodiscard]] const custom::CustomString &getRole() const;
-    void setRole(const custom::CustomString &value);
+    [[nodiscard]] const core::CustomString &getRole() const;
+    void setRole(const core::CustomString &value);
 
-    [[nodiscard]] const custom::CustomString &getEmployeeId() const;
-    void setEmployeeId(const custom::CustomString &value);
+    [[nodiscard]] const core::CustomString &getEmployeeId() const;
+    void setEmployeeId(const core::CustomString &value);
 
     [[nodiscard]] const core::DateTime &getCreatedAt() const;
     void setCreatedAt(const core::DateTime &value);
@@ -34,10 +34,10 @@ public:
     void setLastLogin(const core::DateTime &value);
 
 private:
-    custom::CustomString username;
-    custom::CustomString passwordHash;
-    custom::CustomString role;
-    custom::CustomString employeeId;
+    core::CustomString username;
+    core::CustomString passwordHash;
+    core::CustomString role;
+    core::CustomString employeeId;
     core::DateTime createdAt;
     core::DateTime lastLogin;
 };

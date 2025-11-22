@@ -3,8 +3,8 @@
 #include <QDialog>
 #include <QString>
 
-#include "core/custom/CustomString.h"
-#include "core/custom/QtContainers.h"
+#include "../core/CustomString.h"
+#include "../core/CustomContainers.h"
 #include "model/ReportRequest.h"
 
 class QDateEdit;
@@ -21,7 +21,7 @@ class ReportRequestDialog final : public QDialog {
 
 public:
     explicit ReportRequestDialog(const QString &staffUsername,
-                                 const custom::Vector<custom::CustomString> &knownBookIds,
+                                 const core::Vector<core::CustomString> &knownBookIds,
                                  QWidget *parent = nullptr);
 
     [[nodiscard]] model::ReportRequest reportRequest() const;
@@ -35,15 +35,15 @@ private:
         int count{0};
     };
 
-    [[nodiscard]] custom::Vector<AffectedBookEntry> parseAffectedBooks(custom::Vector<QString> *errors = nullptr) const;
-    [[nodiscard]] custom::Vector<QString> splitTokens(const QString &normalized) const;
+    [[nodiscard]] core::Vector<AffectedBookEntry> parseAffectedBooks(core::Vector<QString> *errors = nullptr) const;
+    [[nodiscard]] core::Vector<QString> splitTokens(const QString &normalized) const;
     [[nodiscard]] bool isKnownBookId(const QString &idUpper) const;
     void refreshAffectedCountPreview() const;
     [[nodiscard]] bool validateInputs() const;
     void showError(const QString &message) const;
 
     QString staffUsername;
-    custom::Vector<custom::CustomString> knownBookIds;
+    core::Vector<core::CustomString> knownBookIds;
     QLineEdit *requestIdEdit{nullptr};
     QDateEdit *fromDateEdit{nullptr};
     QDateEdit *toDateEdit{nullptr};

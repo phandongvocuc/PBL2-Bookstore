@@ -4,19 +4,19 @@ using namespace std;
 
 namespace pbl2::model {
 
-    const custom::CustomString &Person::getId() const {
+    const core::CustomString &Person::getId() const {
         return id;
     }
 
-    void Person::setId(const custom::CustomString &value) {
+    void Person::setId(const core::CustomString &value) {
         id = value;
     }
 
-    const custom::CustomString &Person::getFullName() const {
+    const core::CustomString &Person::getFullName() const {
         return fullName;
     }
 
-    void Person::setFullName(const custom::CustomString &value) {
+    void Person::setFullName(const core::CustomString &value) {
         fullName = value;
     }
 
@@ -36,35 +36,35 @@ namespace pbl2::model {
         active = value;
     }
 
-    const custom::CustomString &Person::getGender() const {
+    const core::CustomString &Person::getGender() const {
         return gender;
     }
 
-    void Person::setGender(const custom::CustomString &value) {
+    void Person::setGender(const core::CustomString &value) {
         gender = value;
     }
 
-    const custom::CustomString &Person::getEmail() const {
+    const core::CustomString &Person::getEmail() const {
         return email;
     }
 
-    void Person::setEmail(const custom::CustomString &value) {
+    void Person::setEmail(const core::CustomString &value) {
         email = value;
     }
 
-    const custom::CustomString &Person::getAddress() const {
+    const core::CustomString &Person::getAddress() const {
         return address;
     }
 
-    void Person::setAddress(const custom::CustomString &value) {
+    void Person::setAddress(const core::CustomString &value) {
         address = value;
     }
 
-    const custom::CustomString &Person::getPhone() const {
+    const core::CustomString &Person::getPhone() const {
         return phone;
     }
 
-    void Person::setPhone(const custom::CustomString &value) {
+    void Person::setPhone(const core::CustomString &value) {
         phone = value;
     }
 

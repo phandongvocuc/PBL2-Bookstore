@@ -263,19 +263,19 @@ void StatsWidget::updateStats(const int totalBooks, const int totalReaders, cons
     if (overdueReadersLabel) overdueReadersLabel->setText(tr("Số người đang trễ: %1 người").arg(locale.toString(qMax(0, overdueLoans / 2 + 1))));
 }
 
-void StatsWidget::updateTopBooksChart(const custom::Map<QString, int> &bookBorrowCounts) const {
+void StatsWidget::updateTopBooksChart(const core::Map<QString, int> &bookBorrowCounts) const {
     if (!topBooksChart) return;
 
     QList<QPair<QString, int>> sortedBooks;
     for (auto it = bookBorrowCounts.constBegin(); it != bookBorrowCounts.constEnd(); ++it) {
         sortedBooks.append(qMakePair(it.key(), it.value()));
     }
-    ranges::sort(sortedBooks, [](const QPair<QString, int> &a, const QPair<QString, int> &b) {
+    std::ranges::sort(sortedBooks, [](const QPair<QString, int> &a, const QPair<QString, int> &b) {
         return a.second > b.second;
     });
 
     QStringList categories;
-    custom::Vector<double> values;
+    core::Vector<double> values;
     const int count = qMin(6, sortedBooks.size());
     for (int i = 0; i < count; ++i) {
         categories.append(sortedBooks[i].first);
@@ -287,24 +287,26 @@ void StatsWidget::updateTopBooksChart(const custom::Map<QString, int> &bookBorro
     series.values = values;
     series.color = QColor(0x3b, 0x82, 0xf6);
 
+    core::Vector<StatsChart::Series> seriesVec;
+    seriesVec.append(series);
     topBooksChart->setCategories(categories);
-    topBooksChart->setSeries({series});
+    topBooksChart->setSeries(seriesVec);
     topBooksChart->setMode(StatsChart::Mode::Bar);
 }
 
-void StatsWidget::updateCategoryChart(const custom::Map<QString, int> &categoryBorrowCounts) const {
+void StatsWidget::updateCategoryChart(const core::Map<QString, int> &categoryBorrowCounts) const {
     if (!categoryChart) return;
 
     QList<QPair<QString, int>> items;
     for (auto it = categoryBorrowCounts.constBegin(); it != categoryBorrowCounts.constEnd(); ++it) {
         items.append(qMakePair(it.key(), it.value()));
     }
-    ranges::sort(items, [](const QPair<QString, int> &a, const QPair<QString, int> &b) {
+    std::ranges::sort(items, [](const QPair<QString, int> &a, const QPair<QString, int> &b) {
         return a.second > b.second;
     });
 
     QStringList categories;
-    custom::Vector<double> values;
+    core::Vector<double> values;
     for (const auto &[fst, snd] : items) {
         categories.append(fst);
         values.append(snd);
@@ -315,16 +317,18 @@ void StatsWidget::updateCategoryChart(const custom::Map<QString, int> &categoryB
     series.values = values;
     series.color = QColor(0x3b, 0x82, 0xf6);
 
+    core::Vector<StatsChart::Series> seriesVec;
+    seriesVec.append(series);
     categoryChart->setCategories(categories);
-    categoryChart->setSeries({series});
+    categoryChart->setSeries(seriesVec);
     categoryChart->setMode(StatsChart::Mode::Bar);
 }
 
-void StatsWidget::updateMonthlyChart(const custom::Vector<int> &monthlyBorrowCounts) const {
+void StatsWidget::updateMonthlyChart(const core::Vector<int> &monthlyBorrowCounts) const {
     if (!monthlyChart) return;
 
     QStringList categories;
-    custom::Vector<double> values;
+    core::Vector<double> values;
     const int size = monthlyBorrowCounts.size();
     for (int i = 0; i < size; ++i) {
         categories.append(tr("T%1").arg(i + 1));
@@ -336,22 +340,24 @@ void StatsWidget::updateMonthlyChart(const custom::Vector<int> &monthlyBorrowCou
     series.values = values;
     series.color = QColor(0x3b, 0x82, 0xf6);
 
+    core::Vector<StatsChart::Series> seriesVec;
+    seriesVec.append(series);
     monthlyChart->setCategories(categories);
-    monthlyChart->setSeries({series});
+    monthlyChart->setSeries(seriesVec);
     monthlyChart->setMode(StatsChart::Mode::Bar);
 }
 
 void StatsWidget::updatePieChart(int cardFees, int fines) const {
     if (!revenuePieChart) return;
 
-    custom::Vector<QPair<QString, int>> segments;
+    core::Vector<QPair<QString, int>> segments;
     segments.append(qMakePair(tr("Làm thẻ"), cardFees));
     segments.append(qMakePair(tr("Tiền phạt"), fines));
 
     revenuePieChart->setSegments(segments);
 }
 
-void StatsWidget::updateLoansList(const custom::Vector<QPair<QString, QString>> &loans) const {
+void StatsWidget::updateLoansList(const core::Vector<QPair<QString, QString>> &loans) const {
     if (!recentLoansList) return;
 
     recentLoansList->clear();
@@ -362,7 +368,7 @@ void StatsWidget::updateLoansList(const custom::Vector<QPair<QString, QString>> 
     }
 }
 
-void StatsWidget::updateActiveReadersList(const custom::Vector<QString> &readers) const {
+void StatsWidget::updateActiveReadersList(const core::Vector<QString> &readers) const {
     if (!activeReadersList) return;
 
     activeReadersList->clear();

@@ -8,8 +8,8 @@ using namespace std;
 
 namespace pbl2::util {
 
-custom::CustomString locateDataDir() {
-    static custom::CustomString cached;
+core::CustomString locateDataDir() {
+    static core::CustomString cached;
     if (!cached.isEmpty()) return cached;
 
     namespace fs = filesystem;

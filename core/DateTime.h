@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/custom/CustomString.h"
+#include "CustomString.h"
 
 namespace pbl2::core {
 
@@ -19,7 +19,7 @@ public:
     [[nodiscard]] int second() const { return second_; }
     [[nodiscard]] int millisecond() const { return millisecond_; }
 
-    [[nodiscard]] custom::CustomString toCompactTimestamp() const;
+    [[nodiscard]] core::CustomString toCompactTimestamp() const;
     static DateTime nowUtc();
 
 private:

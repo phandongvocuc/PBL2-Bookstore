@@ -37,8 +37,8 @@ QString displayBook(const Book &book) {
 
 namespace pbl2::ui {
 
-    LoanDialog::LoanDialog(const custom::Vector<Reader> &readers,
-                           const custom::Vector<Book> &books,
+    LoanDialog::LoanDialog(const core::Vector<Reader> &readers,
+                           const core::Vector<Book> &books,
                            const int maxBorrowDays,
                            const QString &staffUsername,
                            QWidget *parent)
