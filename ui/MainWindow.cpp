@@ -305,6 +305,8 @@ public:
         }
 
         opt.text.clear();
+        opt.icon = QIcon();  // tránh vẽ icon mặc định, chúng ta tự vẽ bên dưới
+        opt.decorationSize = QSize();
         if (opt.widget) {
             opt.widget->style()->drawControl(QStyle::CE_ItemViewItem, &opt, painter, opt.widget);
         } else {
@@ -314,7 +316,15 @@ public:
         painter->save();
         painter->setRenderHint(QPainter::Antialiasing, true);
 
-        const QRect contentRect = baseTextRect.adjusted(8, 6, -8, -6);
+        const int padding = 12;
+        const QRect contentRect = opt.rect.adjusted(padding, padding, -padding, -padding);
+        const QIcon icon = qvariant_cast<QIcon>(index.data(Qt::DecorationRole));
+        const int iconSide = opt.decorationSize.isValid() ? opt.decorationSize.width() : 22;
+        QRect iconRect(contentRect.left(),
+                       contentRect.center().y() - iconSide / 2,
+                       iconSide,
+                       iconSide);
+
         QFont titleFont = opt.font;
         if (titleFont.pointSizeF() > 0) {
             titleFont.setPointSizeF(titleFont.pointSizeF() + 1.0);
@@ -346,17 +356,11 @@ public:
 
         painter->setPen(titleColor);
         painter->setFont(titleFont);
-        const QFontMetrics titleMetrics(titleFont);
-        const QRect titleRect = titleMetrics.boundingRect(contentRect, Qt::TextSingleLine, title);
-        painter->drawText(contentRect, Qt::TextSingleLine, title);
-
-        if (!description.isEmpty()) {
-            painter->setPen(descriptionColor);
-            painter->setFont(descriptionFont);
-            QRect detailRect = contentRect;
-            detailRect.setY(detailRect.y() + titleRect.height() + 6);
-            painter->drawText(detailRect, Qt::TextWordWrap | Qt::AlignLeft, description);
+        if (!icon.isNull()) {
+            icon.paint(painter, iconRect);
         }
+        QRect textRect = contentRect.adjusted(iconSide + 10, 0, 0, 0);
+        painter->drawText(textRect, Qt::AlignVCenter | Qt::AlignLeft, title);
 
         painter->restore();
     }
@@ -367,10 +371,6 @@ public:
 
         const QStringList lines = opt.text.split('\n', Qt::KeepEmptyParts);
         const QString title = lines.value(0);
-        QString description;
-        if (lines.size() > 1) {
-            description = lines.mid(1).join(QStringLiteral(" ")).trimmed();
-        }
 
         QFont titleFont = opt.font;
         if (titleFont.pointSizeF() > 0) {
@@ -380,15 +380,7 @@ public:
         }
         titleFont.setBold(true);
 
-        QFont descriptionFont = opt.font;
-        if (descriptionFont.pointSizeF() > 0) {
-            descriptionFont.setPointSizeF(max(descriptionFont.pointSizeF() - 0.5, 7.5));
-        } else if (descriptionFont.pointSize() > 0) {
-            descriptionFont.setPointSize(max(descriptionFont.pointSize() - 1, 7));
-        }
-        descriptionFont.setBold(false);
-
-    int measuredWidth = option.rect.width();
+        int measuredWidth = option.rect.width();
         if (measuredWidth <= 0 && opt.widget) {
             measuredWidth = opt.widget->width();
         }
@@ -403,19 +395,14 @@ public:
             const int h = max(72, opt.decorationSize.height() + 12);
             return {w, h};
         }
-        const int iconWidth = opt.decorationSize.width();
-        const int availableWidth = max(180, measuredWidth - iconWidth - 60);
+        const int iconWidth = opt.decorationSize.isValid() ? opt.decorationSize.width() : 22;
+        const int availableWidth = max(160, measuredWidth - iconWidth - 80);
         const QFontMetrics titleMetrics(titleFont);
         const QRect titleRect = titleMetrics.boundingRect(0, 0, availableWidth, 0, Qt::TextSingleLine, title);
 
-        int totalHeight = 24 + titleRect.height();
-        if (!description.isEmpty()) {
-            const QFontMetrics descriptionMetrics(descriptionFont);
-            const QRect descriptionRect = descriptionMetrics.boundingRect(0, 0, availableWidth, 0, Qt::TextWordWrap, description);
-            totalHeight += 6 + descriptionRect.height();
-        }
-
-        return {measuredWidth, max(totalHeight, 72)};
+        const int padding = 24;
+        const int rowHeight = max(56, iconWidth + padding);
+        return {measuredWidth, max(rowHeight, titleRect.height() + padding)};
     }
 };
 
@@ -661,11 +648,12 @@ void MainWindow::setupUi() {
         navigationList->setSelectionMode(QAbstractItemView::SingleSelection);
         navigationList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         navigationList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    navigationList->setWordWrap(true);
-    navigationList->setUniformItemSizes(false);
-    navigationList->setSpacing(8);
-    navigationList->setTextElideMode(Qt::ElideNone);
-    navigationList->setItemDelegate(new NavigationListDelegate(navigationList));
+        navigationList->setWordWrap(false);  // giữ text một dòng để icon & chữ thẳng hàng
+        navigationList->setUniformItemSizes(true);
+        navigationList->setSpacing(4);
+        navigationList->setTextElideMode(Qt::ElideNone);
+        navigationList->setIconSize(QSize(22, 22));
+        navigationList->setItemDelegate(new NavigationListDelegate(navigationList));
         connect(navigationList, &QListWidget::currentRowChanged, this, &MainWindow::handleNavigationSelection);
     }
 
@@ -835,7 +823,7 @@ void MainWindow::configureBooksTab() {
 
     if (bookStatusFilter) {
         bookStatusFilter->clear();
-        bookStatusFilter->addItem(tr("Tat ca tinh trang"), QStringLiteral("ALL"));
+        bookStatusFilter->addItem(tr("Tất cả tình trạng"), QStringLiteral("ALL"));
         bookStatusFilter->addItem(tr("CÒN"), QStringLiteral("CÒN"));
         bookStatusFilter->addItem(tr("HẾT"), QStringLiteral("HẾT"));
     }
@@ -1878,12 +1866,12 @@ void MainWindow::handleViewReportDetails() {
         }
     }
     if (!selectedReport) {
-        showWarningDialog(tr("Không tìm thấy"), tr("Khong tim thay bao cao da chon."));
+        showWarningDialog(tr("Không tìm thấy"), tr("Không tìm thấy báo cáo đã chọn."));
         return;
     }
 
     const QString statusText = reportStatusText(toQString(selectedReport->getStatus()));
-    ReportDetailsDialog dialog(*selectedReport, statusText, this);
+    ReportDetailsDialog dialog(*selectedReport, statusText, booksCache, this);
     dialog.exec();
 }
 
@@ -3274,6 +3262,10 @@ void MainWindow::handleLossOrDamage(const QString &status) {
     req.setHandledLoans(1);
     req.setLostOrDamaged(1);
     req.setOverdueReaders(0);
+    const QString affectedId = toQString(loanOpt->getBookId()).trimmed();
+    if (!affectedId.isEmpty()) {
+        req.setAffectedBooks(toCustomString(QStringLiteral("%1:1").arg(affectedId)));
+    }
     const QString statusLabel = status == QStringLiteral("LOST") ? tr("Mất sách") : tr("Hư hỏng");
     req.setNotes(toCustomString(
         tr("%1 - phiếu %2 - lý do: %3 - tiền đề xuất: %4 VND")
@@ -3286,7 +3278,7 @@ void MainWindow::handleLossOrDamage(const QString &status) {
     }
 
     reloadData();
-    notifyEvent(tr("Da ghi nhan %1.").arg(statusLabel.toLower()), EventSeverity::Success, 3000);
+    notifyEvent(tr("Đã ghi nhận %1.").arg(statusLabel.toLower()), EventSeverity::Success, 3000);
 
     // Disable thao tác lại trên item vừa thao tác (nếu có)
     if (loansList && row.has_value()) {
@@ -3298,7 +3290,12 @@ void MainWindow::handleLossOrDamage(const QString &status) {
 
 void MainWindow::handleSubmitReport() {
     if (!staffRole) return;
-    ReportRequestDialog dialog(toQString(currentAccount.getUsername()), this);
+    custom::Vector<custom::CustomString> bookIds;
+    bookIds.reserve(booksCache.size());
+    for (const auto &book : booksCache) {
+        bookIds.append(book.getId());
+    }
+    ReportRequestDialog dialog(toQString(currentAccount.getUsername()), bookIds, this);
     if (dialog.exec() != QDialog::Accepted) return;
     if (!reportService.submitRequest(dialog.reportRequest())) {
         showWarningDialog(tr("Không thành công"), tr("Không thể gửi báo cáo."));
@@ -3389,31 +3386,36 @@ void MainWindow::setupNavigationMenu() {
         const QString tabText = tabs->tabText(i);
         QString iconName;
         QString description;
-        if (const QString normalized = tabText.trimmed().toLower(); normalized.contains(QStringLiteral("trang chu"))) {
+        if (const QString normalized = tabText.trimmed().toLower();
+            normalized.contains(QStringLiteral("trang chu")) || normalized.contains(QStringLiteral("trang chủ"))) {
             iconName = QStringLiteral("home");
             description = tr("");
-        } else if (normalized.contains(QStringLiteral("sach"))) {
+        } else if (normalized.contains(QStringLiteral("sach")) || normalized.contains(QStringLiteral("sách"))) {
             iconName = QStringLiteral("book");
             description = tr("");
-        } else if (normalized.contains(QStringLiteral("doc gia"))) {
+        } else if (normalized.contains(QStringLiteral("doc gia")) || normalized.contains(QStringLiteral("độc giả"))) {
             iconName = QStringLiteral("reader");
             description = tr("");
-        } else if (normalized.contains(QStringLiteral("phieu")) || normalized.contains(QStringLiteral("muon"))) {
+        } else if (normalized.contains(QStringLiteral("phieu")) || normalized.contains(QStringLiteral("phiếu")) ||
+                   normalized.contains(QStringLiteral("muon")) || normalized.contains(QStringLiteral("mượn"))) {
             iconName = QStringLiteral("loan");
             description = tr("");
-        } else if (normalized.contains(QStringLiteral("bao cao"))) {
+        } else if (normalized.contains(QStringLiteral("bao cao")) || normalized.contains(QStringLiteral("báo cáo"))) {
             iconName = QStringLiteral("report");
             description = tr("");
-        } else if (normalized.contains(QStringLiteral("thong ke")) || normalized.contains(QStringLiteral("tong quan"))) {
+        } else if (normalized.contains(QStringLiteral("thong ke")) || normalized.contains(QStringLiteral("thống kê")) ||
+                   normalized.contains(QStringLiteral("tong quan")) || normalized.contains(QStringLiteral("tổng quan"))) {
             iconName = QStringLiteral("t");
             description = tr("");
-        } else if (normalized.contains(QStringLiteral("nhan vien"))) {
+        } else if (normalized.contains(QStringLiteral("nhan vien")) || normalized.contains(QStringLiteral("nhân viên"))) {
             iconName = QStringLiteral("staff");
             description = tr("");
-        } else if (normalized.contains(QStringLiteral("tai khoan"))) {
+        } else if (normalized.contains(QStringLiteral("tai khoan")) || normalized.contains(QStringLiteral("tài khoản"))) {
             iconName = QStringLiteral("account");
             description = tr("");
-        } else if (normalized.contains(QStringLiteral("cau hinh")) || normalized.contains(QStringLiteral("thiet lap")) || normalized.contains(QStringLiteral("cai dat"))) {
+        } else if (normalized.contains(QStringLiteral("cau hinh")) || normalized.contains(QStringLiteral("cấu hình")) ||
+                   normalized.contains(QStringLiteral("thiet lap")) || normalized.contains(QStringLiteral("thiết lập")) ||
+                   normalized.contains(QStringLiteral("cai dat")) || normalized.contains(QStringLiteral("cài đặt"))) {
             iconName = QStringLiteral("setting");
             description = tr("");
         } else {
@@ -3434,8 +3436,8 @@ void MainWindow::setupNavigationMenu() {
         if (const QString iconPath = resolveIconPath(iconName); !iconPath.isEmpty()) {
             item->setIcon(QIcon(iconPath));
         }
-        const QSize itemSize = item->sizeHint();
-        item->setSizeHint(QSize(itemSize.width(), max(itemSize.height(), 72)));
+        item->setTextAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+        item->setSizeHint(QSize(220, 56));
     }
 
     navigationList->setIconSize(QSize(22, 22));

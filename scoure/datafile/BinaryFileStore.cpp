@@ -14,6 +14,20 @@ struct FileHeader {
     uint32_t count;
 };
 
+// Legacy report record without affectedBooks (pre-affectedBooks addition)
+struct LegacyReportRequestRecord {
+    char requestId[32];
+    char staffUsername[64];
+    DateRecord fromDate;
+    DateRecord toDate;
+    int32_t handledLoans;
+    int32_t lostOrDamaged;
+    int32_t overdueReaders;
+    char notes[256];
+    char status[32];
+    DateTimeRecord createdAt;
+};
+
 template <typename R>
 bool writefile(const CustomString& path, const DynamicArray<R>& records) {
     FILE* file = fopen(path.cStr(), "wb");
@@ -315,6 +329,7 @@ ReportRequestRecord BinaryFileStore::packReportRequest(const model::ReportReques
     record.handledLoans = value.getHandledLoans();
     record.lostOrDamaged = value.getLostOrDamaged();
     record.overdueReaders = value.getOverdueReaders();
+    assignText(record.affectedBooks, sizeof(record.affectedBooks), value.getAffectedBooks());
     assignText(record.notes, sizeof(record.notes), value.getNotes());
     assignText(record.status, sizeof(record.status), value.getStatus());
     record.createdAt = packDateTime(value.getCreatedAt());
@@ -330,6 +345,7 @@ model::ReportRequest BinaryFileStore::unpackReportRequest(const ReportRequestRec
     value.setHandledLoans(record.handledLoans);
     value.setLostOrDamaged(record.lostOrDamaged);
     value.setOverdueReaders(record.overdueReaders);
+    value.setAffectedBooks(CustomString(record.affectedBooks));
     value.setNotes(CustomString(record.notes));
     value.setStatus(CustomString(record.status));
     value.setCreatedAt(unpackDateTime(record.createdAt));
@@ -397,7 +413,35 @@ bool BinaryFileStore::writeReports(const DynamicArray<model::ReportRequest> &ite
 }
 
 DynamicArray<model::ReportRequest> BinaryFileStore::readReports(const CustomString &path) {
-    return readCollection<model::ReportRequest, ReportRequestRecord>(path, unpackReportRequest);
+    // Try reading new format (with affectedBooks)
+    DynamicArray<model::ReportRequest> current = readCollection<model::ReportRequest, ReportRequestRecord>(path, unpackReportRequest);
+    if (!current.isEmpty()) {
+        return current;
+    }
+
+    // Fallback: legacy format without affectedBooks
+    DynamicArray<LegacyReportRequestRecord> legacyRecords;
+    if (!readfile(path, legacyRecords)) {
+        return {};
+    }
+    DynamicArray<model::ReportRequest> models(legacyRecords.size());
+    for (size_t i = 0; i < legacyRecords.size(); ++i) {
+        const auto &record = legacyRecords[i];
+        model::ReportRequest value;
+        value.setRequestId(CustomString(record.requestId));
+        value.setStaffUsername(CustomString(record.staffUsername));
+        value.setFromDate(unpackDate(record.fromDate));
+        value.setToDate(unpackDate(record.toDate));
+        value.setHandledLoans(record.handledLoans);
+        value.setLostOrDamaged(record.lostOrDamaged);
+        value.setOverdueReaders(record.overdueReaders);
+        value.setAffectedBooks(custom::CustomStringLiteral(""));  // Legacy records không lưu sách cụ thể
+        value.setNotes(CustomString(record.notes));
+        value.setStatus(CustomString(record.status));
+        value.setCreatedAt(unpackDateTime(record.createdAt));
+        models[i] = value;
+    }
+    return models;
 }
 
 bool BinaryFileStore::writeConfig(const model::SystemConfig &item, const CustomString &path) {

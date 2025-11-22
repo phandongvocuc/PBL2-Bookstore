@@ -345,8 +345,8 @@ void StatsWidget::updatePieChart(int cardFees, int fines) const {
     if (!revenuePieChart) return;
 
     custom::Vector<QPair<QString, int>> segments;
-    segments.append(qMakePair(tr("Lam the"), cardFees));
-    segments.append(qMakePair(tr("Tien phat"), fines));
+    segments.append(qMakePair(tr("Làm thẻ"), cardFees));
+    segments.append(qMakePair(tr("Tiền phạt"), fines));
 
     revenuePieChart->setSegments(segments);
 }

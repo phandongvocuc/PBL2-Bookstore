@@ -29,6 +29,9 @@ public:
     [[nodiscard]] int getOverdueReaders() const;
     void setOverdueReaders(int value);
 
+    [[nodiscard]] const custom::CustomString &getAffectedBooks() const;
+    void setAffectedBooks(const custom::CustomString &value);
+
     [[nodiscard]] const custom::CustomString &getNotes() const;
     void setNotes(const custom::CustomString &value);
 
@@ -46,11 +49,11 @@ private:
     int handledLoans{0};
     int lostOrDamaged{0};
     int overdueReaders{0};
+    custom::CustomString affectedBooks;
     custom::CustomString notes;
     custom::CustomString status;
     core::DateTime createdAt;
 };
 
 }  // namespace model
-
 

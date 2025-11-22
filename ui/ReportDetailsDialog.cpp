@@ -7,6 +7,10 @@
 #include <QVBoxLayout>
 
 #include "QtBridge.h"
+#include "core/custom/QtContainers.h"
+
+using namespace pbl2;
+using namespace pbl2::bridge;
 
 using namespace std;
 
@@ -39,12 +43,72 @@ QLabel *makeValueLabel(const QString &text, QWidget *parent) {
     return label;
 }
 
+struct AffectedBookRow {
+    QString id;
+    QString title;
+    int count{0};
+};
+
+custom::Vector<AffectedBookRow> parseAffectedBooks(const QString &raw, const custom::Vector<model::Book> &books) {
+    custom::Vector<AffectedBookRow> rows;
+    QString normalized = raw;
+    normalized.replace('\n', ';');
+    normalized.replace(',', ';');
+    QString current;
+
+    auto appendEntry = [&](const QString &token) {
+        if (token.isEmpty()) return;
+        const int sep = token.indexOf(':');
+        const QString id = (sep >= 0 ? token.left(sep) : token).trimmed();
+        const QString countStr = sep >= 0 ? token.mid(sep + 1).trimmed() : QStringLiteral("1");
+        bool ok = true;
+        const int count = countStr.isEmpty() ? 1 : countStr.toInt(&ok);
+        if (!ok || count <= 0 || id.isEmpty()) return;
+
+        const QString canonicalId = id.toUpper();
+        int existing = -1;
+        for (int i = 0; i < rows.size(); ++i) {
+            if (rows[i].id.compare(canonicalId, Qt::CaseInsensitive) == 0) {
+                existing = i;
+                break;
+            }
+        }
+        if (existing >= 0) {
+            rows[existing].count += count;
+            return;
+        }
+        AffectedBookRow row;
+        row.id = canonicalId;
+        row.count = count;
+        for (const auto &book : books) {
+            if (toQString(book.getId()).compare(canonicalId, Qt::CaseInsensitive) == 0) {
+                row.title = toQString(book.getTitle());
+                break;
+            }
+        }
+        rows.append(row);
+    };
+
+    for (const QChar ch : normalized) {
+        if (ch == QChar(';')) {
+            const QString trimmed = current.trimmed();
+            appendEntry(trimmed);
+            current.clear();
+        } else {
+            current.append(ch);
+        }
+    }
+    appendEntry(current.trimmed());
+    return rows;
+}
+
 }  // namespace
 
 namespace pbl2::ui {
 
 ReportDetailsDialog::ReportDetailsDialog(const model::ReportRequest &report,
                                          const QString &statusText,
+                                         const custom::Vector<model::Book> &books,
                                          QWidget *parent)
     : QDialog(parent) {
     setWindowTitle(tr("Chi tiết báo cáo"));
@@ -98,6 +162,20 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
     form->addRow(makeCaption(tr("Số phiếu xử lý"), this), makeValueLabel(QString::number(report.getHandledLoans()), this));
     form->addRow(makeCaption(tr("Sách mất/hư"), this), makeValueLabel(QString::number(report.getLostOrDamaged()), this));
     form->addRow(makeCaption(tr("Độc giả quá hạn"), this), makeValueLabel(QString::number(report.getOverdueReaders()), this));
+
+    const auto affectedRows = parseAffectedBooks(bridge::toQString(report.getAffectedBooks()), books);
+    QString affectedText;
+    for (int i = 0; i < affectedRows.size(); ++i) {
+        const auto &row = affectedRows[i];
+        const QString title = row.title.trimmed();
+        const QString name = title.isEmpty() ? row.id : QStringLiteral("%1 (%2)").arg(title, row.id);
+        if (!affectedText.isEmpty()) affectedText.append('\n');
+        affectedText.append(QStringLiteral("• %1 x%2").arg(name, QString::number(row.count)));
+    }
+    if (affectedText.isEmpty()) {
+        affectedText = tr("(Không có sách được liên kết)");
+    }
+    form->addRow(makeCaption(tr("Chi tiết sách"), this), makeValueLabel(affectedText, this));
 
     auto *notesLabel = new QLabel(tr("Ghi chú"), this);
     auto *notesViewer = new QPlainTextEdit(this);

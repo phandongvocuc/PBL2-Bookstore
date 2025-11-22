@@ -110,6 +110,7 @@ struct ReportRequestRecord {
     int32_t handledLoans;
     int32_t lostOrDamaged;
     int32_t overdueReaders;
+    char affectedBooks[512];
     char notes[256];
     char status[32];
     DateTimeRecord createdAt;
