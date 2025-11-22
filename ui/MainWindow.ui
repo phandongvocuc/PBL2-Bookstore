@@ -17,7 +17,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>HE THONG CHO THUE TRUYEN VA SACH PBL2</string>
+   <string>HỆ THỐNG CHO THUÊ TRUYỆN VÀ SÁCH PBL2</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="centralLayout">
@@ -75,20 +75,95 @@
           </font>
          </property>
          <property name="text">
-          <string>Dieu huong</string>
+          <string>Điều hướng</string>
          </property>
-         <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
         <widget class="QListWidget" name="navigationList">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>220</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>400</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="lineWidth">
+          <number>0</number>
+         </property>
+         <property name="verticalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="movement">
+          <enum>QListView::Static</enum>
+         </property>
+         <property name="flow">
+          <enum>QListView::TopToBottom</enum>
+         </property>
+         <property name="isWrapping" stdset="0">
+          <bool>false</bool>
+         </property>
+         <property name="resizeMode">
+          <enum>QListView::Adjust</enum>
+         </property>
+         <property name="layoutMode">
+          <enum>QListView::Batched</enum>
+         </property>
+         <property name="spacing">
+          <number>8</number>
+         </property>
+         <property name="batchSize">
+          <number>1000</number>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>22</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="textElideMode">
+          <enum>Qt::ElideNone</enum>
+         </property>
+         <property name="verticalScrollMode">
+          <enum>QAbstractItemView::ScrollPerPixel</enum>
+         </property>
+         <property name="horizontalScrollMode">
+          <enum>QAbstractItemView::ScrollPerPixel</enum>
+         </property>
+         <property name="itemAlignment">
+          <set>Qt::AlignVCenter</set>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::SingleSelection</enum>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -101,7 +176,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Tai lai</string>
+          <string>Tải lại</string>
          </property>
         </widget>
        </item>
@@ -114,7 +189,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Dang xuat</string>
+          <string>Đăng xuất</string>
          </property>
         </widget>
        </item>
@@ -128,8 +203,17 @@
       </property>
       <widget class="QWidget" name="homeTab">
        <attribute name="title">
-        <string>Trang chu</string>
+        <string>Trang chủ</string>
        </attribute>
+       <property name="styleSheet">
+        <string notr="true">QWidget#homeTab {
+    background-color: #090e18ff;
+    border-image: url(:/icons/logobook.png) 0 0 0 0 stretch stretch;
+    background-image: url(:/icons/logobook.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}</string>
+       </property>
        <layout class="QVBoxLayout" name="homeTabLayout">
         <property name="spacing">
          <number>12</number>
@@ -155,14 +239,14 @@
            </font>
           </property>
           <property name="text">
-           <string>Chao mung tro lai he thong quan ly thu vien</string>
+           <string>Chào mừng trở lại hệ thống quản lý thư viện</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QLabel" name="homeHintLabel">
           <property name="text">
-           <string>Su dung cac tab ben duoi hoac menu ben trai de di chuyen giua cac khu vuc. Tat ca thong tin moi nhat ve sach, ban doc va phieu muon se duoc cap nhat sau moi lan tai lai.</string>
+           <string>Sử dụng các tab bên dưới hoặc menu bên trái để di chuyển giữa các khu vực. Tất cả thông tin mới nhất về sách, bạn đọc và phiếu mượn sẽ được cập nhật sau mỗi lần tải lại.</string>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
@@ -186,8 +270,17 @@
       </widget>
       <widget class="QWidget" name="booksTab">
        <attribute name="title">
-        <string>Sach</string>
+        <string>Sách</string>
        </attribute>
+       <property name="styleSheet">
+        <string notr="true">QWidget#booksTab {
+    background-color: #090e18ff;
+    border-image: url(:/icons/logobook.png) 0 0 0 0 stretch stretch;
+    background-image: url(:/icons/logobook.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}</string>
+       </property>
        <layout class="QVBoxLayout" name="booksTabLayout">
         <property name="spacing">
          <number>12</number>
@@ -207,7 +300,7 @@
         <item>
          <widget class="QGroupBox" name="booksFilterGroup">
           <property name="title">
-           <string>Bo loc</string>
+           <string>Bộ lọc</string>
           </property>
           <layout class="QVBoxLayout" name="booksFilterLayout">
            <property name="spacing">
@@ -233,7 +326,7 @@
              <item>
               <widget class="QLineEdit" name="bookSearchEdit">
                <property name="placeholderText">
-                <string>Tim theo tieu de, tac gia, the loai hoac nha xuat ban</string>
+                <string>Tìm theo tiêu đề, tác giả, thể loại hoặc nhà xuất bản</string>
                </property>
               </widget>
              </item>
@@ -243,7 +336,7 @@
              <item>
               <widget class="QPushButton" name="bookFilterButton">
                <property name="text">
-                <string>Loc</string>
+                <string>Lọc</string>
                </property>
               </widget>
              </item>
@@ -258,7 +351,7 @@
         <item>
          <widget class="QGroupBox" name="booksActionsGroup">
           <property name="title">
-           <string>Tac vu</string>
+           <string>Tác vụ</string>
           </property>
           <layout class="QHBoxLayout" name="booksActionsLayout">
            <property name="spacing">
@@ -279,28 +372,28 @@
            <item>
             <widget class="QPushButton" name="addBookButton">
              <property name="text">
-              <string>Them sach</string>
+              <string>Thêm sách</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="editBookButton">
              <property name="text">
-              <string>Cap nhat</string>
+              <string>Cập nhật</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="deleteBookButton">
              <property name="text">
-              <string>Xoa sach</string>
+              <string>Xóa sách</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="restockBookButton">
              <property name="text">
-              <string>Nhap hang</string>
+              <string>Nhập hàng</string>
              </property>
             </widget>
            </item>
@@ -324,8 +417,17 @@
       </widget>
       <widget class="QWidget" name="readersTab">
        <attribute name="title">
-        <string>Doc gia</string>
+        <string>Độc giả</string>
        </attribute>
+       <property name="styleSheet">
+        <string notr="true">QWidget#readersTab {
+    background-color: #090e18ff;
+    border-image: url(:/icons/logobook.png) 0 0 0 0 stretch stretch;
+    background-image: url(:/icons/logobook.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}</string>
+       </property>
        <layout class="QVBoxLayout" name="readersTabLayout">
         <property name="spacing">
          <number>12</number>
@@ -345,7 +447,7 @@
         <item>
          <widget class="QGroupBox" name="readersFilterGroup">
           <property name="title">
-           <string>Bo loc</string>
+           <string>Bộ lọc</string>
           </property>
           <layout class="QHBoxLayout" name="readersFilterLayout">
            <property name="spacing">
@@ -366,7 +468,7 @@
            <item>
             <widget class="QLineEdit" name="readerSearchEdit">
              <property name="placeholderText">
-              <string>Tim doc gia theo ten, ma doc gia, email hoac so dien thoai</string>
+              <string>Tìm độc giả theo tên, mã độc giả, email hoặc số điện thoại</string>
              </property>
             </widget>
            </item>
@@ -376,7 +478,7 @@
            <item>
             <widget class="QPushButton" name="readerFilterButton">
              <property name="text">
-              <string>Loc</string>
+              <string>Lọc</string>
              </property>
             </widget>
            </item>
@@ -389,7 +491,7 @@
         <item>
          <widget class="QGroupBox" name="readersActionsGroup">
           <property name="title">
-           <string>Tac vu</string>
+           <string>Tác vụ</string>
           </property>
           <layout class="QHBoxLayout" name="readersActionsLayout">
            <property name="spacing">
@@ -410,28 +512,28 @@
            <item>
             <widget class="QPushButton" name="addReaderButton">
              <property name="text">
-              <string>Them doc gia</string>
+              <string>Thêm độc giả</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="editReaderButton">
              <property name="text">
-              <string>Cap nhat</string>
+              <string>Cập nhật</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="toggleReaderStatusButton">
              <property name="text">
-              <string>Tam khoa / Mo khoa</string>
+              <string>Tạm khóa / Mở khóa</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="deleteReaderButton">
              <property name="text">
-              <string>Xoa</string>
+              <string>Xóa</string>
              </property>
             </widget>
            </item>
@@ -455,8 +557,17 @@
       </widget>
       <widget class="QWidget" name="loansTab">
        <attribute name="title">
-        <string>Muon tra</string>
+        <string>Mượn trả</string>
        </attribute>
+       <property name="styleSheet">
+        <string notr="true">QWidget#loansTab {
+    background-color: #090e18ff;
+    border-image: url(:/icons/logobook.png) 0 0 0 0 stretch stretch;
+    background-image: url(:/icons/logobook.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}</string>
+       </property>
        <layout class="QVBoxLayout" name="loansTabLayout">
         <property name="spacing">
          <number>12</number>
@@ -476,7 +587,7 @@
         <item>
          <widget class="QGroupBox" name="loansFilterGroup">
           <property name="title">
-           <string>Bo loc</string>
+           <string>Bộ lọc</string>
           </property>
           <layout class="QGridLayout" name="loansFilterLayout">
            <property name="leftMargin">
@@ -497,7 +608,7 @@
            <item row="0" column="0">
             <widget class="QLineEdit" name="loanSearchEdit">
              <property name="placeholderText">
-              <string>Tim theo ma muon, ma doc gia hoac ma sach</string>
+              <string>Tìm theo mã mượn, mã độc giả hoặc mã sách</string>
              </property>
             </widget>
            </item>
@@ -507,7 +618,7 @@
            <item row="0" column="2">
             <widget class="QPushButton" name="loanFilterButton">
              <property name="text">
-              <string>Loc</string>
+              <string>Lọc</string>
              </property>
             </widget>
            </item>
@@ -520,7 +631,7 @@
         <item>
          <widget class="QGroupBox" name="loansActionsGroup">
           <property name="title">
-           <string>Tac vu</string>
+           <string>Tác vụ</string>
           </property>
           <layout class="QHBoxLayout" name="loansActionsLayout">
            <property name="spacing">
@@ -541,42 +652,42 @@
            <item>
             <widget class="QPushButton" name="newLoanButton">
              <property name="text">
-              <string>Lap phieu muon</string>
+              <string>Lập phiếu mượn</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="returnLoanButton">
              <property name="text">
-              <string>Danh dau da tra</string>
+              <string>Đánh dấu đã trả</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="extendLoanButton">
              <property name="text">
-              <string>Gia han</string>
+              <string>Gia hạn</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="lostLoanButton">
              <property name="text">
-              <string>Mat sach</string>
+              <string>Mất sách</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="damageLoanButton">
              <property name="text">
-              <string>Hu hong</string>
+              <string>Hư hỏng</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="deleteLoanButton">
              <property name="text">
-              <string>Huy phieu</string>
+              <string>Hủy phiếu</string>
              </property>
             </widget>
            </item>
@@ -600,8 +711,17 @@
       </widget>
       <widget class="QWidget" name="reportsTab">
        <attribute name="title">
-        <string>Bao cao</string>
+        <string>Báo cáo</string>
        </attribute>
+       <property name="styleSheet">
+        <string notr="true">QWidget#reportsTab {
+    background-color: #090e18ff;
+    border-image: url(:/icons/logobook.png) 0 0 0 0 stretch stretch;
+    background-image: url(:/icons/logobook.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}</string>
+       </property>
        <layout class="QVBoxLayout" name="reportsTabLayout">
         <property name="spacing">
          <number>12</number>
@@ -621,7 +741,7 @@
         <item>
          <widget class="QGroupBox" name="reportsFilterGroup">
           <property name="title">
-           <string>Bo loc</string>
+           <string>Bộ lọc</string>
           </property>
           <layout class="QGridLayout" name="reportsFilterLayout">
            <property name="leftMargin">
@@ -642,7 +762,7 @@
            <item row="0" column="0">
             <widget class="QLineEdit" name="reportStaffFilter">
              <property name="placeholderText">
-              <string>Tim theo nhan vien xu ly</string>
+              <string>Tìm theo nhân viên xử lý</string>
              </property>
             </widget>
            </item>
@@ -663,14 +783,14 @@
            <item row="0" column="3">
             <widget class="QPushButton" name="reportApplyButton">
              <property name="text">
-              <string>Ap dung</string>
+              <string>Áp dụng</string>
              </property>
             </widget>
            </item>
            <item row="0" column="4">
             <widget class="QPushButton" name="reportClearButton">
              <property name="text">
-              <string>Xoa loc</string>
+              <string>Xóa loc</string>
              </property>
             </widget>
            </item>
@@ -683,7 +803,7 @@
         <item>
          <widget class="QGroupBox" name="reportsActionsGroup">
           <property name="title">
-           <string>Tac vu</string>
+           <string>Tác vụ</string>
           </property>
           <layout class="QHBoxLayout" name="reportsActionsLayout">
            <property name="spacing">
@@ -704,21 +824,21 @@
            <item>
             <widget class="QPushButton" name="submitReportButton">
              <property name="text">
-              <string>Lap yeu cau</string>
+              <string>Lập yêu cầu</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="approveReportButton">
              <property name="text">
-              <string>Duyet</string>
+              <string>Duyệt</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="rejectReportButton">
              <property name="text">
-              <string>Tu choi</string>
+              <string>Từ chối</string>
              </property>
             </widget>
            </item>
@@ -742,8 +862,17 @@
       </widget>
       <widget class="QWidget" name="statsTab">
        <attribute name="title">
-        <string>Thong ke</string>
+        <string>Thống kê</string>
        </attribute>
+       <property name="styleSheet">
+        <string notr="true">QWidget#statsTab {
+    background-color: #c9cdd5ff;
+    border-image: url(:/icons/logobook.png) 0 0 0 0 stretch stretch;
+    background-image: url(:/icons/logobook.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}</string>
+       </property>
        <layout class="QVBoxLayout" name="statsTabOuterLayout">
         <property name="spacing">
          <number>0</number>
@@ -751,139 +880,130 @@
         <property name="leftMargin">
          <number>0</number>
         </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="QScrollArea" name="statsScrollArea">
-          <property name="frameShape">
-           <enum>QFrame::Shape::NoFrame</enum>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+         <layout class="QVBoxLayout" name="statsTabLayout">
+          <property name="spacing">
+           <number>10</number>
           </property>
-          <property name="widgetResizable">
-           <bool>true</bool>
+          <property name="leftMargin">
+           <number>12</number>
           </property>
-          <widget class="QWidget" name="statsScrollContent">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>0</y>
-             <width>991</width>
-             <height>822</height>
-            </rect>
-           </property>
-           <layout class="QVBoxLayout" name="statsTabLayout">
-            <property name="spacing">
-             <number>10</number>
+          <property name="topMargin">
+           <number>12</number>
+          </property>
+          <property name="rightMargin">
+           <number>12</number>
+          </property>
+          <property name="bottomMargin">
+           <number>12</number>
+          </property>
+          <item>
+           <widget class="QGroupBox" name="statsFilterGroup">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-            <property name="leftMargin">
-             <number>12</number>
+            <property name="title">
+             <string>Bộ lọc</string>
             </property>
-            <property name="topMargin">
-             <number>12</number>
-            </property>
-            <property name="rightMargin">
-             <number>12</number>
-            </property>
-            <property name="bottomMargin">
-             <number>12</number>
-            </property>
-            <item>
-             <widget class="QGroupBox" name="statsFilterGroup">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="title">
-               <string>Bo loc</string>
-              </property>
-              <layout class="QHBoxLayout" name="statsFilterLayout">
-               <property name="spacing">
-                <number>12</number>
+            <layout class="QHBoxLayout" name="statsFilterLayout">
+             <property name="spacing">
+              <number>12</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="timePeriodLabel">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Thời gian:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="timePeriodCombo">
+               <property name="minimumSize">
+                <size>
+                 <width>150</width>
+                 <height>0</height>
+                </size>
                </property>
                <item>
-                <widget class="QLabel" name="timePeriodLabel">
-                 <property name="font">
-                  <font>
-                   <pointsize>11</pointsize>
-                   <bold>true</bold>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Thoi gian:</string>
-                 </property>
-                </widget>
+                <property name="text">
+                 <string>Tuần này</string>
+                </property>
                </item>
                <item>
-                <widget class="QComboBox" name="timePeriodCombo">
-                 <property name="minimumSize">
-                  <size>
-                   <width>150</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                 <item>
-                  <property name="text">
-                   <string>Tuan nay</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Thang nay</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Nam nay</string>
-                  </property>
-                 </item>
-                 <item>
-                  <property name="text">
-                   <string>Tat ca</string>
-                  </property>
-                 </item>
-                </widget>
+                <property name="text">
+                 <string>Tháng này</string>
+                </property>
                </item>
                <item>
-                <widget class="QPushButton" name="applyFilterButton">
-                 <property name="text">
-                  <string>Ap dung</string>
-                 </property>
-                </widget>
+                <property name="text">
+                 <string>Năm nay</string>
+                </property>
                </item>
                <item>
-                <spacer>
-                 <property name="orientation">
-                  <enum>Qt::Orientation::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
+                <property name="text">
+                 <string>Tất cả</string>
+                </property>
                </item>
-              </layout>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </widget>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="applyFilterButton">
+               <property name="text">
+                <string>Áp dụng</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer>
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="staffsTab">
        <attribute name="title">
-        <string>Nhan vien</string>
+        <string>Nhân viên</string>
        </attribute>
+       <property name="styleSheet">
+        <string notr="true">QWidget#staffsTab {
+    background-color: #090e18ff;
+    border-image: url(:/icons/logobook.png) 0 0 0 0 stretch stretch;
+    background-image: url(:/icons/logobook.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}</string>
+       </property>
        <layout class="QVBoxLayout" name="staffsTabLayout">
         <property name="spacing">
          <number>12</number>
@@ -903,7 +1023,7 @@
         <item>
          <widget class="QGroupBox" name="staffsFilterGroup">
           <property name="title">
-           <string>Bo loc</string>
+           <string>Bộ lọc</string>
           </property>
           <layout class="QHBoxLayout" name="staffsFilterLayout">
            <property name="spacing">
@@ -924,7 +1044,7 @@
            <item>
             <widget class="QLineEdit" name="staffSearchEdit">
              <property name="placeholderText">
-              <string>Tim nhan vien theo ten, ma nhan vien hoac chuc vu</string>
+              <string>Tìm nhân viên theo tên, mã nhân viên hoặc chức vụ</string>
              </property>
             </widget>
            </item>
@@ -934,7 +1054,7 @@
            <item>
             <widget class="QPushButton" name="staffFilterButton">
              <property name="text">
-              <string>Loc</string>
+              <string>Lọc</string>
              </property>
             </widget>
            </item>
@@ -947,7 +1067,7 @@
         <item>
          <widget class="QGroupBox" name="staffsActionsGroup">
           <property name="title">
-           <string>Tac vu</string>
+           <string>Tác vụ</string>
           </property>
           <layout class="QHBoxLayout" name="staffsActionsLayout">
            <property name="spacing">
@@ -968,28 +1088,28 @@
            <item>
             <widget class="QPushButton" name="addStaffButton">
              <property name="text">
-              <string>Them nhan vien</string>
+              <string>Thêm nhân viên</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="editStaffButton">
              <property name="text">
-              <string>Cap nhat</string>
+              <string>Cập nhật</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="deleteStaffButton">
              <property name="text">
-              <string>Xoa</string>
+              <string>Xóa</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="toggleStaffStatusButton">
              <property name="text">
-              <string>Chuyen trang thai</string>
+              <string>Chuyển trạng thái</string>
              </property>
             </widget>
            </item>
@@ -1013,8 +1133,17 @@
       </widget>
       <widget class="QWidget" name="accountsTab">
        <attribute name="title">
-        <string>Tai khoan</string>
+        <string>Tài khoản</string>
        </attribute>
+       <property name="styleSheet">
+        <string notr="true">QWidget#accountsTab {
+    background-color: #090e18ff;
+    border-image: url(:/icons/logobook.png) 0 0 0 0 stretch stretch;
+    background-image: url(:/icons/logobook.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}</string>
+       </property>
        <layout class="QVBoxLayout" name="accountsTabLayout">
         <property name="spacing">
          <number>12</number>
@@ -1037,7 +1166,7 @@
         <item>
          <widget class="QGroupBox" name="accountsActionsGroup">
           <property name="title">
-           <string>Tac vu</string>
+           <string>Tác vụ</string>
           </property>
           <layout class="QHBoxLayout" name="accountsActionsLayout">
            <property name="spacing">
@@ -1058,28 +1187,28 @@
            <item>
             <widget class="QPushButton" name="addAccountButton">
              <property name="text">
-              <string>Them tai khoan</string>
+              <string>Thêm tài khoản</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="resetPasswordButton">
              <property name="text">
-              <string>Dat lai mat khau</string>
+              <string>Đặt lại mật khẩu</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="toggleAccountButton">
              <property name="text">
-              <string>Kich hoat / Vo hieu</string>
+              <string>Kích hoạt / Vô hiệu</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="deleteAccountButton">
              <property name="text">
-              <string>Xoa tai khoan</string>
+              <string>Xóa tai khoan</string>
              </property>
             </widget>
            </item>
@@ -1103,8 +1232,17 @@
       </widget>
       <widget class="QWidget" name="settingsTab">
        <attribute name="title">
-        <string>Cai dat</string>
+        <string>Cài đặt</string>
        </attribute>
+       <property name="styleSheet">
+        <string notr="true">QWidget#settingsTab {
+    background-color: #090e18ff;
+    border-image: url(:/icons/logobook.png) 0 0 0 0 stretch stretch;
+    background-image: url(:/icons/logobook.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}</string>
+       </property>
        <layout class="QVBoxLayout" name="settingsTabLayout">
         <property name="spacing">
          <number>12</number>
@@ -1124,7 +1262,7 @@
         <item>
          <widget class="QGroupBox" name="settingsGroup">
           <property name="title">
-           <string>Thiet lap he thong</string>
+           <string>Thiết lập hệ thống</string>
           </property>
           <layout class="QGridLayout" name="settingsLayout">
            <property name="leftMargin">
@@ -1145,7 +1283,7 @@
            <item row="0" column="0">
             <widget class="QLabel" name="maxBorrowDaysLabel">
              <property name="text">
-              <string>So ngay muon toi da</string>
+              <string>Số ngày mượn tối đa</string>
              </property>
             </widget>
            </item>
@@ -1155,7 +1293,7 @@
            <item row="1" column="0">
             <widget class="QLabel" name="finePerDayLabel">
              <property name="text">
-              <string>Tien phat moi ngay</string>
+              <string>Tiền phạt mỗi ngày</string>
              </property>
             </widget>
            </item>
@@ -1165,7 +1303,7 @@
            <item row="2" column="0">
             <widget class="QLabel" name="maxBooksPerReaderLabel">
              <property name="text">
-              <string>So sach toi da moi doc gia</string>
+              <string>Số sách tối đa mỗi độc giả</string>
              </property>
             </widget>
            </item>
@@ -1175,7 +1313,7 @@
            <item row="3" column="0" colspan="2">
             <widget class="QPushButton" name="saveConfigButton">
              <property name="text">
-              <string>Luu cau hinh</string>
+              <string>Lưu cấu hình</string>
              </property>
             </widget>
            </item>
@@ -1199,7 +1337,7 @@
    </property>
    <widget class="QMenu" name="menuSystem">
     <property name="title">
-     <string>He thong</string>
+     <string>Hệ thống</string>
     </property>
     <addaction name="refreshAction"/>
     <addaction name="logoutAction"/>
@@ -1209,12 +1347,12 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="refreshAction">
    <property name="text">
-    <string>Reset</string>
+  <string>Reset</string>
    </property>
   </action>
   <action name="logoutAction">
    <property name="text">
-    <string>Logout</string>
+  <string>Logout</string>
    </property>
   </action>
  </widget>

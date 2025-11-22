@@ -1,5 +1,6 @@
 #include "ReportRequestDialog.h"
 
+#include <QAbstractSpinBox>
 #include <QDateEdit>
 #include <QDateTime>
 #include <QDialogButtonBox>
@@ -12,6 +13,7 @@
 #include <QVBoxLayout>
 
 #include "QtBridge.h"
+#include "core/custom/QtContainers.h"
 
 using namespace std;
 
@@ -26,8 +28,14 @@ QString generateRequestId(const QString &staff) {
 
 namespace pbl2::ui {
 
-    ReportRequestDialog::ReportRequestDialog(const QString &staffUsername, QWidget *parent)
-        : QDialog(parent), staffUsername(staffUsername) {
+    ReportRequestDialog::ReportRequestDialog(const QString &staffUsername,
+                                             const custom::Vector<custom::CustomString> &knownBookIds,
+                                             QWidget *parent)
+        : QDialog(parent), staffUsername(staffUsername), knownBookIds(knownBookIds) {
+        for (auto &id : this->knownBookIds) {
+            const QString upper = bridge::toQString(id).trimmed().toUpper();
+            id = bridge::toCustomString(upper);
+        }
         setWindowTitle(tr("Lập báo cáo tổng hợp"));
         setModal(true);
         setWindowIcon(QIcon(":/ui/resources/icons/report.png"));
@@ -79,9 +87,15 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
 
         lostSpin = new QSpinBox(this);
         lostSpin->setRange(0, 100000);
+        lostSpin->setReadOnly(true);
+        lostSpin->setButtonSymbols(QAbstractSpinBox::NoButtons);
 
         overdueSpin = new QSpinBox(this);
         overdueSpin->setRange(0, 100000);
+
+        affectedBooksEdit = new QPlainTextEdit(this);
+        affectedBooksEdit->setPlaceholderText(tr("Nhập sách mất/hỏng dạng <Mã sách>:<Số lượng>, ví dụ: BK001:1; BK010:2"));
+        affectedBooksEdit->setMinimumHeight(80);
 
         notesEdit = new QPlainTextEdit(this);
         notesEdit->setPlaceholderText(tr("Mô tả các vụ việc mất/hỏng sách, yêu cầu xóa sách..."));
@@ -101,6 +115,7 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
         form->addRow(tr("Từ ngày"), fromDateEdit);
         form->addRow(tr("Đến ngày"), toDateEdit);
         form->addRow(tr("Số phiếu xử lý"), handledSpin);
+        form->addRow(tr("Sách mất/hỏng"), affectedBooksEdit);
         form->addRow(tr("Số sách mất/hỏng"), lostSpin);
         form->addRow(tr("Độc giả quá hạn"), overdueSpin);
         form->addRow(tr("Ghi chú"), notesEdit);
@@ -109,6 +124,7 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
         buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
         connect(buttonBox, &QDialogButtonBox::accepted, this, &ReportRequestDialog::accept);
         connect(buttonBox, &QDialogButtonBox::rejected, this, &ReportRequestDialog::reject);
+        connect(affectedBooksEdit, &QPlainTextEdit::textChanged, this, &ReportRequestDialog::refreshAffectedCountPreview);
 
         auto *layout = new QVBoxLayout(this);
         layout->setContentsMargins(16, 16, 16, 16);
@@ -117,6 +133,94 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
         layout->addWidget(errorLabel);
         layout->addWidget(buttonBox);
         setMinimumSize(640, 560);
+
+        refreshAffectedCountPreview();
+    }
+
+    custom::Vector<QString> ReportRequestDialog::splitTokens(const QString &normalized) const {
+        custom::Vector<QString> tokens;
+        QString current;
+        for (const QChar ch : normalized) {
+            if (ch == QChar(';')) {
+                const QString trimmed = current.trimmed();
+                if (!trimmed.isEmpty()) tokens.append(trimmed);
+                current.clear();
+            } else {
+                current.append(ch);
+            }
+        }
+        const QString trimmed = current.trimmed();
+        if (!trimmed.isEmpty()) tokens.append(trimmed);
+        return tokens;
+    }
+
+    bool ReportRequestDialog::isKnownBookId(const QString &idUpper) const {
+        if (knownBookIds.isEmpty()) return true;
+        for (const auto &id : knownBookIds) {
+            if (bridge::toQString(id).compare(idUpper, Qt::CaseInsensitive) == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    custom::Vector<ReportRequestDialog::AffectedBookEntry> ReportRequestDialog::parseAffectedBooks(custom::Vector<QString> *errors) const {
+        custom::Vector<AffectedBookEntry> aggregated;
+        const QString raw = affectedBooksEdit ? affectedBooksEdit->toPlainText() : QString();
+        QString normalized = raw;
+        normalized.replace('\n', ';');
+        normalized.replace(',', ';');
+
+        const auto tokens = splitTokens(normalized);
+        for (const auto &token : tokens) {
+            const int sep = token.indexOf(':');
+            const QString id = (sep >= 0 ? token.left(sep) : token).trimmed();
+            const QString countStr = sep >= 0 ? token.mid(sep + 1).trimmed() : QStringLiteral("1");
+
+            if (id.isEmpty()) {
+                if (errors) errors->append(tr("Thiếu mã sách trong dòng \"%1\".").arg(token));
+                continue;
+            }
+
+            bool ok = true;
+            const int count = countStr.isEmpty() ? 1 : countStr.toInt(&ok);
+            if (!ok || count <= 0) {
+                if (errors) errors->append(tr("Số lượng không hợp lệ ở dòng \"%1\".").arg(token));
+                continue;
+            }
+
+            const QString canonicalId = id.toUpper();
+            if (!isKnownBookId(canonicalId)) {
+                if (errors) errors->append(tr("Mã sách \"%1\" không tồn tại.").arg(id));
+                continue;
+            }
+
+            int existingIndex = -1;
+            for (int i = 0; i < aggregated.size(); ++i) {
+                if (aggregated[i].id.compare(canonicalId, Qt::CaseInsensitive) == 0) {
+                    existingIndex = i;
+                    break;
+                }
+            }
+            if (existingIndex >= 0) {
+                aggregated[existingIndex].count += count;
+            } else {
+                AffectedBookEntry entry;
+                entry.id = canonicalId;
+                entry.count = count;
+                aggregated.append(entry);
+            }
+        }
+        return aggregated;
+    }
+
+    void ReportRequestDialog::refreshAffectedCountPreview() const {
+        int total = 0;
+        const auto parsed = parseAffectedBooks(nullptr);
+        for (int i = 0; i < parsed.size(); ++i) {
+            total += parsed[i].count;
+        }
+        if (lostSpin) lostSpin->setValue(total);
     }
 
     bool ReportRequestDialog::validateInputs() const {
@@ -128,6 +232,27 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
             showError(tr("Ngày kết thúc phải lớn hơn ngày bắt đầu."));
             return false;
         }
+        custom::Vector<QString> errors;
+        const auto affected = parseAffectedBooks(&errors);
+        if (!errors.isEmpty()) {
+            QString merged;
+            for (int i = 0; i < errors.size(); ++i) {
+                if (!merged.isEmpty()) merged.append('\n');
+                merged.append(errors[i]);
+            }
+            showError(merged);
+            return false;
+        }
+        if (affected.isEmpty()) {
+            showError(tr("Vui lòng nhập danh sách sách bị mất/hỏng (dạng <Mã sách>:<Số lượng>)."));
+            return false;
+        }
+        int total = 0;
+        for (int i = 0; i < affected.size(); ++i) {
+            total += affected[i].count;
+        }
+        if (lostSpin) lostSpin->setValue(total);
+
         return true;
     }
 
@@ -137,14 +262,25 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
     }
 
     model::ReportRequest ReportRequestDialog::reportRequest() const {
+        const auto affected = parseAffectedBooks(nullptr);
+        QString serialized;
+        int totalLost = 0;
+        for (int i = 0; i < affected.size(); ++i) {
+            const auto &entry = affected[i];
+            if (!serialized.isEmpty()) serialized.append(';');
+            serialized.append(QStringLiteral("%1:%2").arg(entry.id, QString::number(entry.count)));
+            totalLost += entry.count;
+        }
+
         model::ReportRequest req;
         req.setRequestId(bridge::toCustomString(requestIdEdit->text().trimmed()));
         req.setStaffUsername(bridge::toCustomString(staffUsername));
         req.setFromDate(bridge::toCoreDate(fromDateEdit->date()));
         req.setToDate(bridge::toCoreDate(toDateEdit->date()));
         req.setHandledLoans(handledSpin->value());
-        req.setLostOrDamaged(lostSpin->value());
+        req.setLostOrDamaged(totalLost);
         req.setOverdueReaders(overdueSpin->value());
+        req.setAffectedBooks(bridge::toCustomString(serialized));
         req.setNotes(bridge::toCustomString(notesEdit->toPlainText().trimmed()));
         req.setStatus(custom::CustomStringLiteral("PENDING"));
         req.setCreatedAt(core::DateTime::nowUtc());

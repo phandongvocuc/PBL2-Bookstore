@@ -44,7 +44,7 @@ void PieChart::paintEvent(QPaintEvent *event) {
     qreal total = 0;
     for (const auto &s : segments_) total += s.second;
     if (total <= 0) {
-        p.drawText(rect(), Qt::AlignCenter, QObject::tr("Khong co du lieu"));
+        p.drawText(rect(), Qt::AlignCenter, QObject::tr("Không có dữ liệu"));
         return;
     }
 

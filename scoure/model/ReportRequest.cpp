@@ -57,6 +57,14 @@ void ReportRequest::setOverdueReaders(const int value) {
     overdueReaders = value;
 }
 
+const custom::CustomString &ReportRequest::getAffectedBooks() const {
+    return affectedBooks;
+}
+
+void ReportRequest::setAffectedBooks(const custom::CustomString &value) {
+    affectedBooks = value;
+}
+
 const custom::CustomString &ReportRequest::getNotes() const {
     return notes;
 }

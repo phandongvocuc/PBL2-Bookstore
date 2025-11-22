@@ -30,13 +30,13 @@ void StatsWidget::setupUi() {
     };
 
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setSpacing(64);
-    mainLayout->setContentsMargins(18, 14, 18, 14);
+    mainLayout->setSpacing(24);
+    mainLayout->setContentsMargins(10, 8, 10, 8);
 
     auto *titleRow = new QHBoxLayout();
     auto *titleLabel = new QLabel(tr("THỐNG KÊ"), this);
     QFont titleFont = titleLabel->font();
-    titleFont.setPointSize(24);
+    titleFont.setPointSize(18);
     titleFont.setBold(true);
     titleLabel->setFont(titleFont);
     titleLabel->setStyleSheet("color: #0f172a;");
@@ -51,15 +51,15 @@ void StatsWidget::setupUi() {
 
     auto *scrollContent = new QWidget();
     auto *contentLayout = new QVBoxLayout(scrollContent);
-    contentLayout->setSpacing(14);
-    contentLayout->setContentsMargins(10, 10, 10, 10);
+    contentLayout->setSpacing(10);
+    contentLayout->setContentsMargins(6, 6, 6, 6);
 
     const auto panelStyle = QStringLiteral(
-        "QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; }");
+        "QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px; }");
 
     // Summary cards row
     auto *cardsRow = new QHBoxLayout();
-    cardsRow->setSpacing(20);
+    cardsRow->setSpacing(12);
 
     auto *booksCard = createStatsCard(tr("Tổng số sách"), QString());
     totalBooksValue = booksCard->findChild<QLabel *>("valueLabel");
@@ -81,18 +81,18 @@ void StatsWidget::setupUi() {
 
     // First row: category chart + top books
     auto *chartsRow = new QHBoxLayout();
-    chartsRow->setSpacing(16);
+    chartsRow->setSpacing(10);
 
     auto *categoryPanel = new QFrame(this);
     categoryPanel->setStyleSheet(panelStyle);
-    categoryPanel->setMinimumHeight(300);
+    categoryPanel->setMinimumHeight(210);
     applyShadow(categoryPanel);
     auto *categoryLayout = new QVBoxLayout(categoryPanel);
-    categoryLayout->setSpacing(10);
+    categoryLayout->setSpacing(8);
 
     auto *categoryLabel = new QLabel(tr("Lượt mượn theo thể loại"), categoryPanel);
     QFont sectionFont = categoryLabel->font();
-    sectionFont.setPointSize(13);
+    sectionFont.setPointSize(11);
     sectionFont.setBold(true);
     categoryLabel->setFont(sectionFont);
     categoryLabel->setStyleSheet("color: #1f2937;");
@@ -102,16 +102,16 @@ void StatsWidget::setupUi() {
     categoryChart->setAxisLabels(QString(), QString());
     categoryChart->setShowLegend(false);
     categoryChart->setMode(StatsChart::Mode::Bar);
-    categoryChart->setMinimumHeight(240);
+    categoryChart->setMinimumHeight(170);
     categoryLayout->addWidget(categoryChart);
     chartsRow->addWidget(categoryPanel, 1);
 
     auto *topBooksPanel = new QFrame(this);
     topBooksPanel->setStyleSheet(panelStyle);
-    topBooksPanel->setMinimumHeight(300);
+    topBooksPanel->setMinimumHeight(210);
     applyShadow(topBooksPanel);
     auto *topBookLayout = new QVBoxLayout(topBooksPanel);
-    topBookLayout->setSpacing(10);
+    topBookLayout->setSpacing(8);
 
     auto *topBookLabel = new QLabel(tr("Top sách được mượn nhiều nhất"), topBooksPanel);
     topBookLabel->setFont(sectionFont);
@@ -122,7 +122,7 @@ void StatsWidget::setupUi() {
     topBooksChart->setAxisLabels(QString(), QString());
     topBooksChart->setShowLegend(false);
     topBooksChart->setMode(StatsChart::Mode::Bar);
-    topBooksChart->setMinimumHeight(240);
+    topBooksChart->setMinimumHeight(170);
     topBookLayout->addWidget(topBooksChart);
     chartsRow->addWidget(topBooksPanel, 1);
 
@@ -130,14 +130,14 @@ void StatsWidget::setupUi() {
 
     // Second row: monthly chart + fines summary
     auto *bottomRow = new QHBoxLayout();
-    bottomRow->setSpacing(16);
+    bottomRow->setSpacing(10);
 
     auto *monthlyPanel = new QFrame(this);
     monthlyPanel->setStyleSheet(panelStyle);
-    monthlyPanel->setMinimumHeight(280);
+    monthlyPanel->setMinimumHeight(200);
     applyShadow(monthlyPanel);
     auto *monthlyLayout = new QVBoxLayout(monthlyPanel);
-    monthlyLayout->setSpacing(10);
+    monthlyLayout->setSpacing(8);
 
     auto *monthlyLabel = new QLabel(tr("Lượt mượn theo tháng"), monthlyPanel);
     monthlyLabel->setFont(sectionFont);
@@ -148,16 +148,16 @@ void StatsWidget::setupUi() {
     monthlyChart->setAxisLabels(QString(), QString());
     monthlyChart->setShowLegend(false);
     monthlyChart->setMode(StatsChart::Mode::Bar);
-    monthlyChart->setMinimumHeight(220);
+    monthlyChart->setMinimumHeight(160);
     monthlyLayout->addWidget(monthlyChart);
     bottomRow->addWidget(monthlyPanel, 1);
 
     auto *finePanel = new QFrame(this);
     finePanel->setStyleSheet(panelStyle);
-    finePanel->setMinimumHeight(280);
+    finePanel->setMinimumHeight(200);
     applyShadow(finePanel);
     auto *fineLayout = new QVBoxLayout(finePanel);
-    fineLayout->setSpacing(10);
+    fineLayout->setSpacing(8);
 
     auto *fineTitle = new QLabel(tr("Thống kê phạt"), finePanel);
     fineTitle->setFont(sectionFont);
@@ -167,7 +167,7 @@ void StatsWidget::setupUi() {
     fineSummaryLabel = new QLabel(tr("Tổng tiền phạt tháng này: 0 VND"), finePanel);
     overdueBooksLabel = new QLabel(tr("Sách trễ hạn: 0 quyển"), finePanel);
     overdueReadersLabel = new QLabel(tr("Số người đang trễ: 0 người"), finePanel);
-    const QString subStyle = "color: #111827; font-size: 11pt;";
+    const QString subStyle = "color: #111827; font-size: 9pt;";
     fineSummaryLabel->setStyleSheet(subStyle);
     overdueBooksLabel->setStyleSheet(subStyle);
     overdueReadersLabel->setStyleSheet(subStyle);
@@ -178,14 +178,14 @@ void StatsWidget::setupUi() {
     fineLayout->addSpacing(8);
 
     auto *finesGrid = new QGridLayout();
-    finesGrid->setHorizontalSpacing(20);
-    finesGrid->setVerticalSpacing(6);
+    finesGrid->setHorizontalSpacing(12);
+    finesGrid->setVerticalSpacing(4);
 
     auto makeFineRow = [&](int row, const QString &name, const QString &value) {
         auto *nameLabel = new QLabel(QStringLiteral("* %1").arg(name), finePanel);
         auto *valueLabel = new QLabel(value, finePanel);
-        nameLabel->setStyleSheet("color: #1f2937; font-size: 11pt;");
-        valueLabel->setStyleSheet("color: #1f2937; font-size: 11pt;");
+        nameLabel->setStyleSheet("color: #1f2937; font-size: 10pt;");
+        valueLabel->setStyleSheet("color: #1f2937; font-size: 10pt;");
         finesGrid->addWidget(nameLabel, row, 0, Qt::AlignLeft);
         finesGrid->addWidget(valueLabel, row, 1, Qt::AlignRight);
     };
@@ -205,9 +205,9 @@ void StatsWidget::setupUi() {
 QFrame *StatsWidget::createStatsCard(const QString &title, const QString &icon) {
     auto *card = new QFrame(this);
     card->setStyleSheet(
-        "QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px; }"
+        "QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 6px; }"
         "QLabel { background: transparent; border: none; }");
-    card->setMinimumSize(270, 195);
+    card->setMinimumSize(210, 145);
     card->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     auto *shadow = new QGraphicsDropShadowEffect(card);
     shadow->setBlurRadius(16);
@@ -216,13 +216,13 @@ QFrame *StatsWidget::createStatsCard(const QString &title, const QString &icon) 
     card->setGraphicsEffect(shadow);
 
     auto *layout = new QVBoxLayout(card);
-    layout->setSpacing(6);
+    layout->setSpacing(5);
     layout->setAlignment(Qt::AlignCenter);
 
     if (!icon.isEmpty()) {
         auto *iconLabel = new QLabel(icon, card);
         QFont iconFont = iconLabel->font();
-        iconFont.setPointSize(22);
+        iconFont.setPointSize(20);
         iconLabel->setFont(iconFont);
         iconLabel->setAlignment(Qt::AlignCenter);
         layout->addWidget(iconLabel);
@@ -231,7 +231,7 @@ QFrame *StatsWidget::createStatsCard(const QString &title, const QString &icon) 
     auto *valueLabel = new QLabel("0", card);
     valueLabel->setObjectName("valueLabel");
     QFont valueFont = valueLabel->font();
-    valueFont.setPointSize(24);
+    valueFont.setPointSize(22);
     valueFont.setBold(true);
     valueLabel->setFont(valueFont);
     valueLabel->setAlignment(Qt::AlignCenter);
@@ -240,7 +240,7 @@ QFrame *StatsWidget::createStatsCard(const QString &title, const QString &icon) 
 
     auto *titleLabel = new QLabel(title, card);
     QFont titleFont = titleLabel->font();
-    titleFont.setPointSize(11);
+    titleFont.setPointSize(10);
     titleFont.setBold(true);
     titleLabel->setFont(titleFont);
     titleLabel->setAlignment(Qt::AlignCenter);
@@ -345,8 +345,8 @@ void StatsWidget::updatePieChart(int cardFees, int fines) const {
     if (!revenuePieChart) return;
 
     custom::Vector<QPair<QString, int>> segments;
-    segments.append(qMakePair(tr("Lam the"), cardFees));
-    segments.append(qMakePair(tr("Tien phat"), fines));
+    segments.append(qMakePair(tr("Làm thẻ"), cardFees));
+    segments.append(qMakePair(tr("Tiền phạt"), fines));
 
     revenuePieChart->setSegments(segments);
 }
