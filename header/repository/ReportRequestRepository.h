@@ -1,8 +1,7 @@
 #pragma once
 
-#include "core/custom/CustomString.h"
-
-#include "core/custom/DynamicArray.h"
+#include "../../core/CustomString.h"
+#include "../../core/DynamicArray.h"
 
 #include "model/ReportRequest.h"
 
@@ -10,13 +9,13 @@ namespace pbl2::repository {
 
 class ReportRequestRepository {
 public:
-    explicit ReportRequestRepository(const custom::CustomString &dataDir);
+    explicit ReportRequestRepository(const core::CustomString &dataDir);
 
-    [[nodiscard]] custom::DynamicArray<model::ReportRequest> loadAll() const;
-    void saveAll(const custom::DynamicArray<model::ReportRequest> &requests) const;
+    [[nodiscard]] core::DynamicArray<model::ReportRequest> loadAll() const;
+    void saveAll(const core::DynamicArray<model::ReportRequest> &requests) const;
 
 private:
-    custom::CustomString dataPath;
+    core::CustomString dataPath;
 };
 
 }  // namespace pbl2::repository

@@ -3,8 +3,8 @@
 #include <cstdio>
 #include <cstring>
 using namespace std;
-using custom::CustomString;
-using custom::DynamicArray;
+using pbl2::core::CustomString;
+using pbl2::core::DynamicArray;
 
 namespace pbl2::serialization {
 namespace {
@@ -435,7 +435,7 @@ DynamicArray<model::ReportRequest> BinaryFileStore::readReports(const CustomStri
         value.setHandledLoans(record.handledLoans);
         value.setLostOrDamaged(record.lostOrDamaged);
         value.setOverdueReaders(record.overdueReaders);
-        value.setAffectedBooks(custom::CustomStringLiteral(""));  // Legacy records không lưu sách cụ thể
+        value.setAffectedBooks(core::CustomStringLiteral(""));  // Legacy records không lưu sách cụ thể
         value.setNotes(CustomString(record.notes));
         value.setStatus(CustomString(record.status));
         value.setCreatedAt(unpackDateTime(record.createdAt));

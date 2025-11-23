@@ -1,8 +1,6 @@
 #include "core/DateTime.h"
 
 #include <chrono>
-#include <ctime>
-#include <cstdio>
 
 using namespace std;
 
@@ -40,11 +38,11 @@ bool DateTime::isValid() const {
     return true;
 }
 
-custom::CustomString DateTime::toCompactTimestamp() const {
+core::CustomString DateTime::toCompactTimestamp() const {
     if (!isValid()) return {};
     char buffer[20];
     snprintf(buffer, sizeof(buffer), "%04d%02d%02d%02d%02d%02d%03d", year_, month_, day_, hour_, minute_, second_, millisecond_);
-    return custom::CustomString(buffer);
+    return core::CustomString(buffer);
 }
 
 DateTime DateTime::nowUtc() {

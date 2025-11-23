@@ -7,7 +7,7 @@
 #include <QVBoxLayout>
 
 #include "QtBridge.h"
-#include "core/custom/QtContainers.h"
+#include "../core/CustomContainers.h"
 
 using namespace pbl2;
 using namespace pbl2::bridge;
@@ -49,8 +49,8 @@ struct AffectedBookRow {
     int count{0};
 };
 
-custom::Vector<AffectedBookRow> parseAffectedBooks(const QString &raw, const custom::Vector<model::Book> &books) {
-    custom::Vector<AffectedBookRow> rows;
+core::Vector<AffectedBookRow> parseAffectedBooks(const QString &raw, const core::Vector<model::Book> &books) {
+    core::Vector<AffectedBookRow> rows;
     QString normalized = raw;
     normalized.replace('\n', ';');
     normalized.replace(',', ';');
@@ -108,7 +108,7 @@ namespace pbl2::ui {
 
 ReportDetailsDialog::ReportDetailsDialog(const model::ReportRequest &report,
                                          const QString &statusText,
-                                         const custom::Vector<model::Book> &books,
+                                         const core::Vector<model::Book> &books,
                                          QWidget *parent)
     : QDialog(parent) {
     setWindowTitle(tr("Chi tiết báo cáo"));

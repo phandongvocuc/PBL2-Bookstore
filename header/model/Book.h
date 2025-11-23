@@ -1,26 +1,26 @@
 #pragma once
 
 #include "core/Date.h"
-#include "core/custom/CustomString.h"
+#include "../../core/CustomString.h"
 
 namespace pbl2::model {
 
 class Book {
 public:
-    [[nodiscard]] const custom::CustomString &getId() const;
-    void setId(const custom::CustomString &value);
+    [[nodiscard]] const core::CustomString &getId() const;
+    void setId(const core::CustomString &value);
 
-    [[nodiscard]] const custom::CustomString &getTitle() const;
-    void setTitle(const custom::CustomString &value);
+    [[nodiscard]] const core::CustomString &getTitle() const;
+    void setTitle(const core::CustomString &value);
 
-    [[nodiscard]] const custom::CustomString &getAuthor() const;
-    void setAuthor(const custom::CustomString &value);
+    [[nodiscard]] const core::CustomString &getAuthor() const;
+    void setAuthor(const core::CustomString &value);
 
-    [[nodiscard]] const custom::CustomString &getGenre() const;
-    void setGenre(const custom::CustomString &value);
+    [[nodiscard]] const core::CustomString &getGenre() const;
+    void setGenre(const core::CustomString &value);
 
-    [[nodiscard]] const custom::CustomString &getPublisher() const;
-    void setPublisher(const custom::CustomString &value);
+    [[nodiscard]] const core::CustomString &getPublisher() const;
+    void setPublisher(const core::CustomString &value);
 
     [[nodiscard]] const core::Date &getPublishDate() const;
     void setPublishDate(const core::Date &value);
@@ -31,23 +31,23 @@ public:
     [[nodiscard]] int getQuantity() const;
     void setQuantity(int value);
 
-    [[nodiscard]] const custom::CustomString &getStatus() const;
-    void setStatus(const custom::CustomString &value);
+    [[nodiscard]] const core::CustomString &getStatus() const;
+    void setStatus(const core::CustomString &value);
 
-    [[nodiscard]] const custom::CustomString &getSummary() const;
-    void setSummary(const custom::CustomString &value);
+    [[nodiscard]] const core::CustomString &getSummary() const;
+    void setSummary(const core::CustomString &value);
 
 private:
-    custom::CustomString id;
-    custom::CustomString title;
-    custom::CustomString author;
-    custom::CustomString genre;
-    custom::CustomString publisher;
+    core::CustomString id;
+    core::CustomString title;
+    core::CustomString author;
+    core::CustomString genre;
+    core::CustomString publisher;
     core::Date publishDate;
     int publishYear{0};
     int quantity{0};
-    custom::CustomString status;
-    custom::CustomString summary;
+    core::CustomString status;
+    core::CustomString summary;
 };
 
 }  // namespace model

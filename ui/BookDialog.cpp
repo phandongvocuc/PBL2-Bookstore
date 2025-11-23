@@ -146,9 +146,9 @@ void BookDialog::setBook(const model::Book &book, const bool editing) {
         quantitySpin->setReadOnly(false);
         quantitySpin->setButtonSymbols(QAbstractSpinBox::UpDownArrows);
     }
-    const custom::CustomString status = model::canonicalBookStatus(book.getStatus());
+    const core::CustomString status = model::canonicalBookStatus(book.getStatus());
     for (int i = 0; i < statusCombo->count(); ++i) {
-        if (const custom::CustomString option = bridge::toCustomString(statusCombo->itemData(i).toString()); option.compare(status, custom::CaseSensitivity::Sensitive) == 0) {
+        if (const core::CustomString option = bridge::toCustomString(statusCombo->itemData(i).toString()); option.compare(status, core::CaseSensitivity::Sensitive) == 0) {
             statusCombo->setCurrentIndex(i);
             break;
         }
@@ -173,7 +173,7 @@ model::Book BookDialog::book() const {
     b.setPublishYear(publishYearSpin->value());
     b.setQuantity(quantitySpin->value());
     const auto statusValue = model::canonicalBookStatus(bridge::toCustomString(statusCombo->currentData().toString()));
-    b.setStatus(statusValue.isEmpty() ? custom::CustomStringLiteral("CÒN") : statusValue);
+    b.setStatus(statusValue.isEmpty() ? core::CustomStringLiteral("CÒN") : statusValue);
     b.setSummary(bridge::toCustomString(summaryEdit->toPlainText().trimmed()));
     return b;
 }

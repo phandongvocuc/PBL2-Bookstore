@@ -3,7 +3,7 @@
 #include <QDialog>
 #include <QString>
 
-#include "core/custom/QtContainers.h"
+#include "../core/CustomContainers.h"
 #include "model/Book.h"
 #include "model/ReportRequest.h"
 
@@ -17,7 +17,7 @@ class ReportDetailsDialog final : public QDialog {
 public:
     ReportDetailsDialog(const model::ReportRequest &report,
                         const QString &statusText,
-                        const custom::Vector<model::Book> &books,
+                        const core::Vector<model::Book> &books,
                         QWidget *parent = nullptr);
 
 private:

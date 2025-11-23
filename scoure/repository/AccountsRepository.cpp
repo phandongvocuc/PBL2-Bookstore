@@ -7,18 +7,18 @@ using namespace std;
 
 namespace pbl2::repository {
 
-AccountsRepository::AccountsRepository(const custom::CustomString &dataDir)
-    : dataPath(core::path::join(dataDir, custom::CustomStringLiteral("users.bin"))) {}
+AccountsRepository::AccountsRepository(const core::CustomString &dataDir)
+    : dataPath(core::path::join(dataDir, core::CustomStringLiteral("users.bin"))) {}
 
-custom::DynamicArray<model::Account> AccountsRepository::loadAll() const {
+core::DynamicArray<model::Account> AccountsRepository::loadAll() const {
     return serialization::BinaryFileStore::readAccounts(dataPath);
 }
 
-void AccountsRepository::saveAll(const custom::DynamicArray<model::Account> &accounts) const {
+void AccountsRepository::saveAll(const core::DynamicArray<model::Account> &accounts) const {
     serialization::BinaryFileStore::writeAccounts(accounts, dataPath);
 }
 
-custom::CustomString AccountsRepository::hashPassword(const custom::CustomString &plainText) {
+core::CustomString AccountsRepository::hashPassword(const core::CustomString &plainText) {
     // Simple password storage - just return plaintext
     return plainText;
 }

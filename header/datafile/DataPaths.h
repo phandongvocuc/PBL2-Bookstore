@@ -1,10 +1,10 @@
 #pragma once
 
-#include "core/custom/CustomString.h"
+#include "../../core/CustomString.h"
 
 namespace pbl2::util {
 
-custom::CustomString locateDataDir();
+core::CustomString locateDataDir();
 
 }  // namespace util
 

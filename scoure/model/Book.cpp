@@ -2,43 +2,43 @@
 
 namespace pbl2::model {
 
-const custom::CustomString &Book::getId() const {
+const core::CustomString &Book::getId() const {
     return id;
 }
 
-void Book::setId(const custom::CustomString &value) {
+void Book::setId(const core::CustomString &value) {
     id = value;
 }
 
-const custom::CustomString &Book::getTitle() const {
+const core::CustomString &Book::getTitle() const {
     return title;
 }
 
-void Book::setTitle(const custom::CustomString &value) {
+void Book::setTitle(const core::CustomString &value) {
     title = value;
 }
 
-const custom::CustomString &Book::getAuthor() const {
+const core::CustomString &Book::getAuthor() const {
     return author;
 }
 
-void Book::setAuthor(const custom::CustomString &value) {
+void Book::setAuthor(const core::CustomString &value) {
     author = value;
 }
 
-const custom::CustomString &Book::getGenre() const {
+const core::CustomString &Book::getGenre() const {
     return genre;
 }
 
-void Book::setGenre(const custom::CustomString &value) {
+void Book::setGenre(const core::CustomString &value) {
     genre = value;
 }
 
-const custom::CustomString &Book::getPublisher() const {
+const core::CustomString &Book::getPublisher() const {
     return publisher;
 }
 
-void Book::setPublisher(const custom::CustomString &value) {
+void Book::setPublisher(const core::CustomString &value) {
     publisher = value;
 }
 
@@ -66,19 +66,19 @@ void Book::setQuantity(const int value) {
     quantity = value;
 }
 
-const custom::CustomString &Book::getStatus() const {
+const core::CustomString &Book::getStatus() const {
     return status;
 }
 
-void Book::setStatus(const custom::CustomString &value) {
+void Book::setStatus(const core::CustomString &value) {
     status = value;
 }
 
-const custom::CustomString &Book::getSummary() const {
+const core::CustomString &Book::getSummary() const {
     return summary;
 }
 
-void Book::setSummary(const custom::CustomString &value) {
+void Book::setSummary(const core::CustomString &value) {
     summary = value;
 }
 

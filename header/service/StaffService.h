@@ -1,8 +1,8 @@
 #pragma once
 
-#include "core/custom/Optional.h"
-#include "core/custom/CustomString.h"
-#include "core/custom/DynamicArray.h"
+#include "../../core/Optional.h"
+#include "../../core/CustomString.h"
+#include "../../core/DynamicArray.h"
 
 #include "model/Staff.h"
 #include "repository/StaffRepository.h"
@@ -12,18 +12,18 @@ namespace pbl2::service {
 
     class StaffService : public BaseService<model::Staff, repository::StaffRepository> {
     public:
-        explicit StaffService(const custom::CustomString &dataDir);
+        explicit StaffService(const core::CustomString &dataDir);
 
-        [[nodiscard]] custom::DynamicArray<model::Staff> fetchAll() const override;
-        [[nodiscard]] custom::Optional<model::Staff> findById(const custom::CustomString &staffId) const override;
+        [[nodiscard]] core::DynamicArray<model::Staff> fetchAll() const override;
+        [[nodiscard]] core::Optional<model::Staff> findById(const core::CustomString &staffId) const override;
         [[nodiscard]] bool addStaff(const model::Staff &staff) const;
         [[nodiscard]] bool updateStaff(const model::Staff &staff) const;
-        [[nodiscard]] bool setStaffActive(const custom::CustomString &staffId, bool active) const;
-        [[nodiscard]] bool removeStaff(const custom::CustomString &staffId) const;
+        [[nodiscard]] bool setStaffActive(const core::CustomString &staffId, bool active) const;
+        [[nodiscard]] bool removeStaff(const core::CustomString &staffId) const;
 
     private:
-        [[nodiscard]] custom::DynamicArray<model::Staff> ensureLoaded() const override;
-        void persist(const custom::DynamicArray<model::Staff> &staffs) const override;
+        [[nodiscard]] core::DynamicArray<model::Staff> ensureLoaded() const override;
+        void persist(const core::DynamicArray<model::Staff> &staffs) const override;
     };
 
 } // namespace pbl2::service

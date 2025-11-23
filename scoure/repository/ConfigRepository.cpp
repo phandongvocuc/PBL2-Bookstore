@@ -7,8 +7,8 @@ using namespace std;
 
 namespace pbl2::repository {
 
-ConfigRepository::ConfigRepository(const custom::CustomString &dataDir)
-	: dataPath(core::path::join(dataDir, custom::CustomStringLiteral("config.bin"))) {}
+ConfigRepository::ConfigRepository(const core::CustomString &dataDir)
+	: dataPath(core::path::join(dataDir, core::CustomStringLiteral("config.bin"))) {}
 
 model::SystemConfig ConfigRepository::load() const {
 	return serialization::BinaryFileStore::readConfig(dataPath);

@@ -7,8 +7,8 @@
 #include <memory>
 #include <QDate>
 
-#include "core/custom/Optional.h"
-#include "core/custom/CustomString.h"
+#include "../core/Optional.h"
+#include "../core/CustomString.h"
 
 #include "service/AccountService.h"
 #include "service/BookService.h"
@@ -25,7 +25,7 @@
 #include "model/Staff.h"
 #include "SystemConfig.h"
 #include "StatsWidget.h"
-#include "core/custom/QtContainers.h"
+#include "../core/CustomContainers.h"
 
 namespace Ui {
 class MainWindow;
@@ -75,7 +75,7 @@ private:
     void populateStaffs();
     void populateLoans();
     void populateReports();
-    void fillReportsList(const custom::Vector<model::ReportRequest> &reports) const;
+    void fillReportsList(const core::Vector<model::ReportRequest> &reports) const;
     void applyReportFilter();
     void clearReportFilter();
     void updateStatisticsSummary();
@@ -83,14 +83,14 @@ private:
     void refreshConfigInputs() const;
 
     void applyBookFilter();
-    void fillBooksList(const custom::Vector<model::Book> &books) const;
+    void fillBooksList(const core::Vector<model::Book> &books) const;
     void applyReaderFilter();
-    void fillReadersList(const custom::Vector<model::Reader> &readers) const;
+    void fillReadersList(const core::Vector<model::Reader> &readers) const;
     void applyStaffFilter();
-    void fillStaffsList(const custom::Vector<model::Staff> &staffs) const;
+    void fillStaffsList(const core::Vector<model::Staff> &staffs) const;
     void applyLoanFilter();
-    void fillLoansList(const custom::Vector<model::Loan> &loans);
-    void fillAccountsList(const custom::Vector<model::Account> &accounts);
+    void fillLoansList(const core::Vector<model::Loan> &loans);
+    void fillAccountsList(const core::Vector<model::Account> &accounts);
 
     void handleAddBook();
     void handleEditBook();
@@ -126,7 +126,7 @@ private:
     void handleSaveConfig();
     void handleLogout();
 
-    static custom::Optional<int> currentRow(const QListWidget *list);
+    static core::Optional<int> currentRow(const QListWidget *list);
     [[nodiscard]] QString nextBookId() const;
     [[nodiscard]] QString nextReaderId() const;
     [[nodiscard]] QString nextStaffId() const;
@@ -162,7 +162,7 @@ private:
     StatsWidget *statsWidget{nullptr};
     void updateStatsDashboardWidget();
 
-    custom::CustomString dataDirectory;
+    core::CustomString dataDirectory;
     service::BookService bookService;
     service::ReaderService readerService;
     service::StaffService staffService;
@@ -192,12 +192,12 @@ private:
     QLineEdit *reportStaffFilter{nullptr};
     QDateEdit *reportFromFilter{nullptr};
     QDateEdit *reportToFilter{nullptr};
-    custom::Vector<model::ReportRequest> reportsCache;
-    custom::Vector<model::Book> booksCache;
-    custom::Vector<model::Reader> readersCache;
-    custom::Vector<model::Staff> staffsCache;
-    custom::Vector<model::Loan> loansCache;
-    custom::Vector<model::Account> accountsCache;
+    core::Vector<model::ReportRequest> reportsCache;
+    core::Vector<model::Book> booksCache;
+    core::Vector<model::Reader> readersCache;
+    core::Vector<model::Staff> staffsCache;
+    core::Vector<model::Loan> loansCache;
+    core::Vector<model::Account> accountsCache;
 
     QLineEdit *bookSearchEdit{nullptr};
     QComboBox *bookStatusFilter{nullptr};

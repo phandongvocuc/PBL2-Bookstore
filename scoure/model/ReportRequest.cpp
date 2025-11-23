@@ -1,19 +1,19 @@
 #include "model/ReportRequest.h"
 namespace pbl2::model {
 
-const custom::CustomString &ReportRequest::getRequestId() const {
+const core::CustomString &ReportRequest::getRequestId() const {
     return requestId;
 }
 
-void ReportRequest::setRequestId(const custom::CustomString &value) {
+void ReportRequest::setRequestId(const core::CustomString &value) {
     requestId = value;
 }
 
-const custom::CustomString &ReportRequest::getStaffUsername() const {
+const core::CustomString &ReportRequest::getStaffUsername() const {
     return staffUsername;
 }
 
-void ReportRequest::setStaffUsername(const custom::CustomString &value) {
+void ReportRequest::setStaffUsername(const core::CustomString &value) {
     staffUsername = value;
 }
 
@@ -57,27 +57,27 @@ void ReportRequest::setOverdueReaders(const int value) {
     overdueReaders = value;
 }
 
-const custom::CustomString &ReportRequest::getAffectedBooks() const {
+const core::CustomString &ReportRequest::getAffectedBooks() const {
     return affectedBooks;
 }
 
-void ReportRequest::setAffectedBooks(const custom::CustomString &value) {
+void ReportRequest::setAffectedBooks(const core::CustomString &value) {
     affectedBooks = value;
 }
 
-const custom::CustomString &ReportRequest::getNotes() const {
+const core::CustomString &ReportRequest::getNotes() const {
     return notes;
 }
 
-void ReportRequest::setNotes(const custom::CustomString &value) {
+void ReportRequest::setNotes(const core::CustomString &value) {
     notes = value;
 }
 
-const custom::CustomString &ReportRequest::getStatus() const {
+const core::CustomString &ReportRequest::getStatus() const {
     return status;
 }
 
-void ReportRequest::setStatus(const custom::CustomString &value) {
+void ReportRequest::setStatus(const core::CustomString &value) {
     status = value;
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/custom/CustomString.h"
-#include "core/custom/DynamicArray.h"
+#include "../../core/CustomString.h"
+#include "../../core/DynamicArray.h"
 
 #include "model/Account.h"
 
@@ -9,14 +9,14 @@ namespace pbl2::repository {
 
 class AccountsRepository {
 public:
-    explicit AccountsRepository(const custom::CustomString &dataDir);
+    explicit AccountsRepository(const core::CustomString &dataDir);
 
-    [[nodiscard]] custom::DynamicArray<model::Account> loadAll() const;
-    void saveAll(const custom::DynamicArray<model::Account> &accounts) const;
-    static custom::CustomString hashPassword(const custom::CustomString &plainText);
+    [[nodiscard]] core::DynamicArray<model::Account> loadAll() const;
+    void saveAll(const core::DynamicArray<model::Account> &accounts) const;
+    static core::CustomString hashPassword(const core::CustomString &plainText);
 
 private:
-    custom::CustomString dataPath;
+    core::CustomString dataPath;
 };
 
 }  // namespace pbl2::repository

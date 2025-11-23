@@ -2,14 +2,14 @@
 
 namespace pbl2::service {
 
-LoanService::LoanService(const custom::CustomString &dataDir)
+LoanService::LoanService(const core::CustomString &dataDir)
     : BaseService(dataDir) {}
 
-custom::DynamicArray<model::Loan> LoanService::fetchAll() const {
+core::DynamicArray<model::Loan> LoanService::fetchAll() const {
     return BaseService::fetchAll();
 }
 
-custom::Optional<model::Loan> LoanService::findById(const custom::CustomString &loanId) const {
+core::Optional<model::Loan> LoanService::findById(const core::CustomString &loanId) const {
     return BaseService::findById(loanId);
 }
 
@@ -22,15 +22,15 @@ bool LoanService::updateLoan(const model::Loan &loan) const {
     return updateItem(loan);
 }
 
-bool LoanService::removeLoan(const custom::CustomString &loanId) const {
+bool LoanService::removeLoan(const core::CustomString &loanId) const {
     return removeItem(loanId);
 }
 
-bool LoanService::updateStatus(const custom::CustomString &loanId, const custom::CustomString &status, const core::Date &returnDate) const {
+bool LoanService::updateStatus(const core::CustomString &loanId, const core::CustomString &status, const core::Date &returnDate) const {
     const auto loans = ensureLoaded();
     bool changed = false;
     for (auto &loan : loans) {
-        if (loan.getLoanId().compare(loanId, custom::CaseSensitivity::Insensitive) == 0) {
+        if (loan.getLoanId().compare(loanId, core::CaseSensitivity::Insensitive) == 0) {
             if (const auto normalizedStatus = status.trimmed(); !normalizedStatus.isEmpty()) {
                 loan.setStatus(normalizedStatus.toUpper());
             }
@@ -44,12 +44,12 @@ bool LoanService::updateStatus(const custom::CustomString &loanId, const custom:
     return true;
 }
 
-bool LoanService::applyFine(const custom::CustomString &loanId, const int fine) const {
+bool LoanService::applyFine(const core::CustomString &loanId, const int fine) const {
     if (fine < 0) return false;
     const auto loans = ensureLoaded();
     bool updated = false;
     for (auto &loan : loans) {
-        if (loan.getLoanId().compare(loanId, custom::CaseSensitivity::Insensitive) == 0) {
+        if (loan.getLoanId().compare(loanId, core::CaseSensitivity::Insensitive) == 0) {
             loan.setFine(fine);
             updated = true;
             break;
@@ -59,11 +59,11 @@ bool LoanService::applyFine(const custom::CustomString &loanId, const int fine) 
     persist(loans);
     return true;
 }
-    custom::DynamicArray<model::Loan> LoanService::ensureLoaded() const {
+    core::DynamicArray<model::Loan> LoanService::ensureLoaded() const {
         return repository.loadAll();
     }
 
-    void LoanService::persist(const custom::DynamicArray<model::Loan> &loans) const {
+    void LoanService::persist(const core::DynamicArray<model::Loan> &loans) const {
         repository.saveAll(loans);
 }
 

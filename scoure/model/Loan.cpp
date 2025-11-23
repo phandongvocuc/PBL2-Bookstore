@@ -2,27 +2,27 @@
 
 namespace pbl2::model {
 
-const custom::CustomString &Loan::getLoanId() const {
+const core::CustomString &Loan::getLoanId() const {
     return loanId;
 }
 
-void Loan::setLoanId(const custom::CustomString &value) {
+void Loan::setLoanId(const core::CustomString &value) {
     loanId = value;
 }
 
-const custom::CustomString &Loan::getReaderId() const {
+const core::CustomString &Loan::getReaderId() const {
     return readerId;
 }
 
-void Loan::setReaderId(const custom::CustomString &value) {
+void Loan::setReaderId(const core::CustomString &value) {
     readerId = value;
 }
 
-const custom::CustomString &Loan::getBookId() const {
+const core::CustomString &Loan::getBookId() const {
     return bookId;
 }
 
-void Loan::setBookId(const custom::CustomString &value) {
+void Loan::setBookId(const core::CustomString &value) {
     bookId = value;
 }
 
@@ -50,11 +50,11 @@ void Loan::setReturnDate(const core::Date &value) {
     returnDate = value;
 }
 
-const custom::CustomString &Loan::getStatus() const {
+const core::CustomString &Loan::getStatus() const {
     return status;
 }
 
-void Loan::setStatus(const custom::CustomString &value) {
+void Loan::setStatus(const core::CustomString &value) {
     status = value;
 }
 
@@ -66,11 +66,11 @@ void Loan::setFine(const int value) {
     fine = value;
 }
 
-const custom::CustomString &Loan::getStaffUsername() const {
+const core::CustomString &Loan::getStaffUsername() const {
     return staffUsername;
 }
 
-void Loan::setStaffUsername(const custom::CustomString &value) {
+void Loan::setStaffUsername(const core::CustomString &value) {
     staffUsername = value;
 }
 

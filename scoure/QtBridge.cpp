@@ -9,12 +9,12 @@ using namespace std;
 
 namespace pbl2::bridge {
 
-    custom::CustomString toCustomString(const QString &value) {
+    core::CustomString toCustomString(const QString &value) {
         const QByteArray bytes = value.toUtf8();
-        return {bytes.constData(), static_cast<custom::CustomString::SizeType>(bytes.size())};
+        return {bytes.constData(), static_cast<core::CustomString::SizeType>(bytes.size())};
     }
 
-    QString toQString(const custom::CustomString &value) {
+    QString toQString(const core::CustomString &value) {
         return QString::fromUtf8(reinterpret_cast<const char *>(value.bytes()), static_cast<int>(value.length()));
     }
 

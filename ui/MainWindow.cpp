@@ -19,7 +19,7 @@
 #include <QResizeEvent>
 #include <QTableWidgetItem>
 #include "core/IdGenerator.h"
-#include "core/custom/DynamicArray.h"
+#include "../core/DynamicArray.h"
 #include "QtBridge.h"
 #include "BookStatus.h"
 #include "MainWindow.h"
@@ -454,11 +454,11 @@ QString normalizedStatus(const QString &text) {
     return text.trimmed().toUpper();
 }
 
-QString normalizedStatus(const custom::CustomString &text) {
+QString normalizedStatus(const core::CustomString &text) {
     return normalizedStatus(toQString(text));
 }
 
-QString bookStatusText(const custom::CustomString &code) {
+QString bookStatusText(const core::CustomString &code) {
     const QString value = toQString(model::canonicalBookStatus(code));
     if (value == QStringLiteral("CÒN")) return QObject::tr("CÒN");
     if (value == QStringLiteral("HẾT")) return QObject::tr("HẾT");
@@ -490,10 +490,10 @@ QString bookStatusText(const custom::CustomString &code) {
 }
 
 template <typename T>
-custom::Vector<T> toQVector(const custom::DynamicArray<T> &values) {
-    custom::Vector<T> result;
+core::Vector<T> toQVector(const core::DynamicArray<T> &values) {
+    core::Vector<T> result;
     result.reserve(static_cast<int>(values.size()));
-    for (typename custom::DynamicArray<T>::SizeType i = 0U; i < values.size(); ++i) {
+    for (typename core::DynamicArray<T>::SizeType i = 0U; i < values.size(); ++i) {
         result.append(values[i]);
     }
     return result;
@@ -1280,7 +1280,7 @@ void MainWindow::populateBooks() {
     applyBookFilter();
 }
 
-void MainWindow::fillBooksList(const custom::Vector<model::Book> &books) const {
+void MainWindow::fillBooksList(const core::Vector<model::Book> &books) const {
     if (!booksList) return;
 
     const QListWidgetItem *currentItem = booksList->currentItem();
@@ -1353,7 +1353,7 @@ void MainWindow::fillBooksList(const custom::Vector<model::Book> &books) const {
 }
 
 void MainWindow::applyBookFilter() {
-    custom::Vector<model::Book> filtered;
+    core::Vector<model::Book> filtered;
     const QString term = bookSearchEdit ? bookSearchEdit->text().trimmed().toLower() : QString();
     const QString statusFilter = bookStatusFilter ? bookStatusFilter->currentData().toString() : QStringLiteral("ALL");
     for (const auto &book : booksCache) {
@@ -1382,7 +1382,7 @@ void MainWindow::populateReaders() {
     applyReaderFilter();
 }
 
-void MainWindow::fillReadersList(const custom::Vector<model::Reader> &readers) const {
+void MainWindow::fillReadersList(const core::Vector<model::Reader> &readers) const {
     if (!readersList) return;
 
     const QListWidgetItem *currentItem = readersList->currentItem();
@@ -1458,7 +1458,7 @@ void MainWindow::fillReadersList(const custom::Vector<model::Reader> &readers) c
 }
 
 void MainWindow::applyReaderFilter() {
-    custom::Vector<model::Reader> filtered;
+    core::Vector<model::Reader> filtered;
     filtered.reserve(readersCache.size());
     const QString term = readerSearchEdit ? readerSearchEdit->text().trimmed().toLower() : QString();
     const QString statusSelection = readerStatusFilter ? readerStatusFilter->currentData().toString() : QStringLiteral("ALL");
@@ -1500,7 +1500,7 @@ void MainWindow::populateLoans() {
     applyLoanFilter();
 }
 
-void MainWindow::fillLoansList(const custom::Vector<model::Loan> &loans) {
+void MainWindow::fillLoansList(const core::Vector<model::Loan> &loans) {
     if (!loansList) return;
 
     const QListWidgetItem *currentItem = loansList->currentItem();
@@ -1609,7 +1609,7 @@ void MainWindow::fillLoansList(const custom::Vector<model::Loan> &loans) {
 }
 
 void MainWindow::applyLoanFilter() {
-    custom::Vector<model::Loan> filtered;
+    core::Vector<model::Loan> filtered;
     filtered.reserve(loansCache.size());
     const QString term = loanSearchEdit ? loanSearchEdit->text().trimmed().toLower() : QString();
     const QString statusFilter = loanStatusFilter ? loanStatusFilter->currentData().toString() : QStringLiteral("ALL");
@@ -1640,7 +1640,7 @@ void MainWindow::populateReports() {
     applyReportFilter();
 }
 
-void MainWindow::fillReportsList(const custom::Vector<model::ReportRequest> &reports) const {
+void MainWindow::fillReportsList(const core::Vector<model::ReportRequest> &reports) const {
     if (!reportsList) return;
 
     const QListWidgetItem *currentItem = reportsList->currentItem();
@@ -1710,7 +1710,7 @@ void MainWindow::fillReportsList(const custom::Vector<model::ReportRequest> &rep
     }
 }
 
-void MainWindow::fillAccountsList(const custom::Vector<model::Account> &accounts) {
+void MainWindow::fillAccountsList(const core::Vector<model::Account> &accounts) {
     if (!accountsList) return;
 
     const QListWidgetItem *currentItem = accountsList->currentItem();
@@ -1802,7 +1802,7 @@ void MainWindow::fillAccountsList(const custom::Vector<model::Account> &accounts
 }
 
 void MainWindow::applyReportFilter() {
-    custom::Vector<model::ReportRequest> filtered;
+    core::Vector<model::ReportRequest> filtered;
     filtered.reserve(reportsCache.size());
     const QString staffTerm = reportStaffFilter ? reportStaffFilter->text().trimmed().toLower() : QString();
     const bool hasFrom = reportFromFilter && reportFromFilter->date() != reportFromFilter->minimumDate();
@@ -1970,7 +1970,7 @@ void MainWindow::updateStatsCharts() {
     // Genre distribution
     if (genreChart) {
         // Ensure all known genres appear on the X axis with 0 counts when absent
-        custom::Map<QString, int> genreCounts;
+        core::Map<QString, int> genreCounts;
         for (const auto &g : allGenres) {
             genreCounts[g] = 0;
         }
@@ -2007,15 +2007,17 @@ void MainWindow::updateStatsCharts() {
             series.values.append(genreCounts.value(g, 0));
         }
 
+        core::Vector<StatsChart::Series> genreSeries;
+        genreSeries.append(series);
         genreChart->setCategories(allGenres);
-        genreChart->setSeries({series});
+        genreChart->setSeries(genreSeries);
         genreChart->setTitle(tr("Thống kê theo thể loại"));
         genreChart->setAxisLabels(tr("Thể loại"), tr("Số lượt mượn"));
     }
 
     // Top borrowed genres (chart + side list)
     if (topBooksChart) {
-        custom::Map<QString, int> genreBorrowCounts;
+        core::Map<QString, int> genreBorrowCounts;
         // Initialize to 0 so all genres show up on the chart
         for (const auto &g : allGenres) {
             genreBorrowCounts[g] = 0;
@@ -2054,8 +2056,10 @@ void MainWindow::updateStatsCharts() {
             series.values.append(genreBorrowCounts.value(g, 0));
         }
 
+        core::Vector<StatsChart::Series> topBookSeries;
+        topBookSeries.append(series);
         topBooksChart->setCategories(allGenres);
-        topBooksChart->setSeries({series});
+        topBooksChart->setSeries(topBookSeries);
         topBooksChart->setTitle(tr("Thể loại mượn nhiều nhất"));
         topBooksChart->setAxisLabels(tr("Thể loại"), tr("Số lượt mượn"));
 
@@ -2094,11 +2098,15 @@ void MainWindow::updateStatsCharts() {
 
         StatsChart::Series series;
         series.name = QStringLiteral("Doanh thu (nghìn đồng)");
-        series.values = {static_cast<double>(cardFees), static_cast<double>(fines)};
+        series.values.clear();
+        series.values.append(static_cast<double>(cardFees));
+        series.values.append(static_cast<double>(fines));
         series.color = QColor(59, 130, 246);
 
+        core::Vector<StatsChart::Series> revenueSeries;
+        revenueSeries.append(series);
         revenueChart->setCategories(categories);
-        revenueChart->setSeries({series});
+        revenueChart->setSeries(revenueSeries);
         revenueChart->setValueSuffix(QStringLiteral("k"));
     }
 
@@ -2106,7 +2114,7 @@ void MainWindow::updateStatsCharts() {
     if (activeReadersList) {
         activeReadersList->clear();
 
-        custom::Map<QString, int> readerBorrowCounts;
+        core::Map<QString, int> readerBorrowCounts;
         QSet<QString> overdueReaders;
 
         const QDate today = QDate::currentDate();
@@ -2136,7 +2144,7 @@ void MainWindow::updateStatsCharts() {
             const auto readerOpt = ranges::find_if(as_const(readersCache), [&](const model::Reader &r) {
                 return toQString(r.getId()) == fst;
             });
-            if (readerOpt == readersCache.cend()) continue;
+            if (readerOpt == readersCache.end()) continue;
 
             const QString readerName = toQString(readerOpt->getFullName());
             const bool hasOverdue = overdueReaders.contains(fst);
@@ -2183,7 +2191,7 @@ void MainWindow::updateStatsDashboardWidget() {
     statsWidget->updateStats(totalBooks, totalReaders, totalLoans, overdueLoans, totalFines);
 
     // Borrow counts by category (genre) within the current filter range
-    custom::Map<QString, int> categoryCounts;
+    core::Map<QString, int> categoryCounts;
     for (const auto &loan : loansCache) {
         // Skip loans outside the selected date range or without a valid borrow date
         if (const QDate borrowDate = loan.getBorrowDate().isValid() ? toQDate(loan.getBorrowDate()) : QDate(); !borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) {
@@ -2208,7 +2216,7 @@ void MainWindow::updateStatsDashboardWidget() {
     statsWidget->updateCategoryChart(categoryCounts);
 
     // Top borrowed books (by title) within the current filter range
-    custom::Map<QString, int> bookBorrowCounts;
+    core::Map<QString, int> bookBorrowCounts;
     for (const auto &loan : loansCache) {
         // Skip loans outside the selected date range or without a valid borrow date
         if (const QDate borrowDate = loan.getBorrowDate().isValid() ? toQDate(loan.getBorrowDate()) : QDate(); !borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) {
@@ -2244,7 +2252,7 @@ void MainWindow::updateStatsDashboardWidget() {
         }
     }
 
-    custom::Vector<int> monthlyCounts;
+    core::Vector<int> monthlyCounts;
     for (int i : monthlyRaw) {
         monthlyCounts.append(i);
     }
@@ -2313,47 +2321,47 @@ void MainWindow::refreshConfigInputs() const {
     maxBooksPerReaderSpin->setValue(max(1, currentConfig.getMaxBooksPerReader()));
 }
 
-custom::Optional<int> MainWindow::currentRow(const QListWidget *list) {
-    if (!list) return custom::nullopt;
+core::Optional<int> MainWindow::currentRow(const QListWidget *list) {
+    if (!list) return core::nullopt;
     const int row = list->currentRow();
-    if (row < 0) return custom::nullopt;
-    return custom::Optional(row);
+    if (row < 0) return core::nullopt;
+    return core::Optional(row);
 }
 
 QString MainWindow::nextBookId() const {
-    custom::DynamicArray<custom::CustomString> ids;
+    core::DynamicArray<core::CustomString> ids;
     ids.reserve(booksCache.size());
     for (const auto &book : booksCache) {
         ids.pushBack(book.getId());
     }
-    return toQString(core::IdGenerator::nextId(ids, custom::CustomStringLiteral("B"), 3));
+    return toQString(core::IdGenerator::nextId(ids, core::CustomStringLiteral("B"), 3));
 }
 
 QString MainWindow::nextReaderId() const {
-    custom::DynamicArray<custom::CustomString> ids;
+    core::DynamicArray<core::CustomString> ids;
     ids.reserve(readersCache.size());
     for (const auto &reader : readersCache) {
         ids.pushBack(reader.getId());
     }
-    return toQString(core::IdGenerator::nextId(ids, custom::CustomStringLiteral("R"), 3));
+    return toQString(core::IdGenerator::nextId(ids, core::CustomStringLiteral("R"), 3));
 }
 
 QString MainWindow::nextStaffId() const {
-    custom::DynamicArray<custom::CustomString> ids;
+    core::DynamicArray<core::CustomString> ids;
     ids.reserve(staffsCache.size());
     for (const auto &s : staffsCache) {
         ids.pushBack(s.getId());
     }
-    return toQString(core::IdGenerator::nextId(ids, custom::CustomStringLiteral("S"), 3));
+    return toQString(core::IdGenerator::nextId(ids, core::CustomStringLiteral("S"), 3));
 }
 
 QString MainWindow::nextLoanId() const {
-    custom::DynamicArray<custom::CustomString> ids;
+    core::DynamicArray<core::CustomString> ids;
     ids.reserve(loansCache.size());
     for (const auto &loan : loansCache) {
         ids.pushBack(loan.getLoanId());
     }
-    return toQString(core::IdGenerator::nextId(ids, custom::CustomStringLiteral("L"), 3));
+    return toQString(core::IdGenerator::nextId(ids, core::CustomStringLiteral("L"), 3));
 }
 
 void MainWindow::handleAddBook() {
@@ -2423,7 +2431,7 @@ void MainWindow::populateStaffs() {
     applyStaffFilter();
 }
 
-void MainWindow::fillStaffsList(const custom::Vector<model::Staff> &staffs) const {
+void MainWindow::fillStaffsList(const core::Vector<model::Staff> &staffs) const {
     if (!staffsList) return;
 
     const QListWidgetItem *currentItem = staffsList->currentItem();
@@ -2498,7 +2506,7 @@ void MainWindow::fillStaffsList(const custom::Vector<model::Staff> &staffs) cons
 }
 
 void MainWindow::applyStaffFilter() {
-    custom::Vector<model::Staff> filtered;
+    core::Vector<model::Staff> filtered;
     filtered.reserve(staffsCache.size());
     const QString term = staffSearchEdit ? staffSearchEdit->text().trimmed().toLower() : QString();
     const QString statusCode = staffStatusFilter ? staffStatusFilter->currentData().toString() : QStringLiteral("ALL");
@@ -2932,7 +2940,7 @@ void MainWindow::handleNewLoan() {
         showWarningDialog(tr("Thiếu dữ liệu"), tr("Cần có ít nhất một bạn đọc và một cuốn sách."));
         return;
     }
-    custom::Vector<model::Reader> availableReaders;
+    core::Vector<model::Reader> availableReaders;
     availableReaders.reserve(readersCache.size());
     for (const auto &reader : readersCache) {
         if (reader.isActive()) availableReaders.append(reader);
@@ -2960,7 +2968,7 @@ void MainWindow::handleNewLoan() {
         showWarningDialog(tr("Không khả dụng"), tr("Sách này đã hết số lượng cho mượn."));
         return;
     }
-    loan.setStatus(custom::CustomStringLiteral("BORROWED"));
+    loan.setStatus(core::CustomStringLiteral("BORROWED"));
     loan.setFine(0);
     if (!loanService.createLoan(loan)) {
         showWarningDialog(tr("Không thành công"), tr("Không thể tạo phiếu mượn."));
@@ -3016,7 +3024,7 @@ void MainWindow::handleMarkReturned() {
     const int lateDays = overdueSpan > 0 ? static_cast<int>(overdueSpan) : 0;
     const int fine = lateDays * currentConfig.getFinePerDay();
 
-    if (!loanService.updateStatus(loanKey, custom::CustomStringLiteral("RETURNED"), toCoreDate(returnDate))) {
+    if (!loanService.updateStatus(loanKey, core::CustomStringLiteral("RETURNED"), toCoreDate(returnDate))) {
         showWarningDialog(tr("Không thành công"), tr("Không thể cập nhật trạng thái phiếu."));
         return;
     }
@@ -3070,7 +3078,7 @@ void MainWindow::handleExtendLoan() {
     model::Loan updatedLoan = *loanOpt;
     const QDate adjustedDueDate = toQDate(updatedLoan.getDueDate()).addDays(days);
     updatedLoan.setDueDate(toCoreDate(adjustedDueDate));
-    updatedLoan.setStatus(custom::CustomStringLiteral("BORROWED"));
+    updatedLoan.setStatus(core::CustomStringLiteral("BORROWED"));
     if (!loanService.updateLoan(updatedLoan)) {
         showWarningDialog(tr("Không thành công"), tr("Không thể gia hạn phiếu."));
         return;
@@ -3233,7 +3241,7 @@ void MainWindow::handleLossOrDamage(const QString &status) {
         }
         // Nếu đang mượn thì không giảm số lượng, không đổi trạng thái
         if (shouldSetStatus) {
-            updatedBook.setStatus(model::canonicalBookStatus(custom::CustomStringLiteral("HẾT")));
+            updatedBook.setStatus(model::canonicalBookStatus(core::CustomStringLiteral("HẾT")));
         }
         if (!bookService.updateBook(updatedBook)) {
             showWarningDialog(tr("Cảnh báo"), tr("Không thể cập nhật thông tin sách."));
@@ -3260,7 +3268,7 @@ void MainWindow::handleLossOrDamage(const QString &status) {
         tr("%1 - phiếu %2 - lý do: %3 - tiền đề xuất: %4 VND")
             .arg(statusLabel, loanId, reason)
             .arg(fee)));
-    req.setStatus(custom::CustomStringLiteral("PENDING"));
+    req.setStatus(core::CustomStringLiteral("PENDING"));
     req.setCreatedAt(toCoreDateTime(QDateTime::currentDateTime()));
     if (!reportService.submitRequest(req)) {
         showWarningDialog(tr("Cảnh báo"), tr("Không thể ghi nhận báo cáo."));
@@ -3279,7 +3287,7 @@ void MainWindow::handleLossOrDamage(const QString &status) {
 
 void MainWindow::handleSubmitReport() {
     if (!staffRole) return;
-    custom::Vector<custom::CustomString> bookIds;
+    core::Vector<core::CustomString> bookIds;
     bookIds.reserve(booksCache.size());
     for (const auto &book : booksCache) {
         bookIds.append(book.getId());
@@ -3369,7 +3377,7 @@ void MainWindow::setupNavigationMenu() {
         QString iconName;
     };
 
-    custom::Vector<NavEntry> entries;
+    core::Vector<NavEntry> entries;
     entries.reserve(tabs->count());
     for (int i = 0; i < tabs->count(); ++i) {
         const QString tabText = tabs->tabText(i);
@@ -3592,7 +3600,7 @@ void MainWindow::handleAddAccount() {
         return;
     }
     const QString staffId = toQString(dialog.staffId()).trimmed();
-    custom::Optional<custom::CustomString> staffKey;
+    core::Optional<core::CustomString> staffKey;
     if (!staffId.isEmpty()) {
         staffKey = toCustomString(staffId);
         if (!staffService.findById(staffKey.value()).has_value()) {

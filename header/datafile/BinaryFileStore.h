@@ -4,8 +4,8 @@
 
 #include "core/Date.h"
 #include "core/DateTime.h"
-#include "core/custom/CustomString.h"
-#include "core/custom/DynamicArray.h"
+#include "../../core/CustomString.h"
+#include "../../core/DynamicArray.h"
 #include "header/SystemConfig.h"
 #include "header/model/Account.h"
 #include "header/model/Book.h"
@@ -125,21 +125,21 @@ struct ConfigRecord {
 
 class BinaryFileStore {
 public:
-    static bool writeBooks(const custom::DynamicArray<model::Book> &items, const custom::CustomString &path);
-    static bool writeReaders(const custom::DynamicArray<model::Reader> &items, const custom::CustomString &path);
-    static bool writeLoans(const custom::DynamicArray<model::Loan> &items, const custom::CustomString &path);
-    static bool writeAccounts(const custom::DynamicArray<model::Account> &items, const custom::CustomString &path);
-    static bool writeStaff(const custom::DynamicArray<model::Staff> &items, const custom::CustomString &path);
-    static bool writeReports(const custom::DynamicArray<model::ReportRequest> &items, const custom::CustomString &path);
-    static bool writeConfig(const model::SystemConfig &item, const custom::CustomString &path);
+    static bool writeBooks(const core::DynamicArray<model::Book> &items, const core::CustomString &path);
+    static bool writeReaders(const core::DynamicArray<model::Reader> &items, const core::CustomString &path);
+    static bool writeLoans(const core::DynamicArray<model::Loan> &items, const core::CustomString &path);
+    static bool writeAccounts(const core::DynamicArray<model::Account> &items, const core::CustomString &path);
+    static bool writeStaff(const core::DynamicArray<model::Staff> &items, const core::CustomString &path);
+    static bool writeReports(const core::DynamicArray<model::ReportRequest> &items, const core::CustomString &path);
+    static bool writeConfig(const model::SystemConfig &item, const core::CustomString &path);
 
-    static custom::DynamicArray<model::Book> readBooks(const custom::CustomString &path);
-    static custom::DynamicArray<model::Reader> readReaders(const custom::CustomString &path);
-    static custom::DynamicArray<model::Loan> readLoans(const custom::CustomString &path);
-    static custom::DynamicArray<model::Account> readAccounts(const custom::CustomString &path);
-    static custom::DynamicArray<model::Staff> readStaff(const custom::CustomString &path);
-    static custom::DynamicArray<model::ReportRequest> readReports(const custom::CustomString &path);
-    static model::SystemConfig readConfig(const custom::CustomString &path);
+    static core::DynamicArray<model::Book> readBooks(const core::CustomString &path);
+    static core::DynamicArray<model::Reader> readReaders(const core::CustomString &path);
+    static core::DynamicArray<model::Loan> readLoans(const core::CustomString &path);
+    static core::DynamicArray<model::Account> readAccounts(const core::CustomString &path);
+    static core::DynamicArray<model::Staff> readStaff(const core::CustomString &path);
+    static core::DynamicArray<model::ReportRequest> readReports(const core::CustomString &path);
+    static model::SystemConfig readConfig(const core::CustomString &path);
 
 protected:
     static DateRecord packDate(const core::Date &value);
@@ -148,7 +148,7 @@ protected:
     static DateTimeRecord packDateTime(const core::DateTime &value);
     static core::DateTime unpackDateTime(const DateTimeRecord &record);
 
-    static void assignText(char *destination, size_t capacity, const custom::CustomString &value);
+    static void assignText(char *destination, size_t capacity, const core::CustomString &value);
 
     static BookRecord packBook(const model::Book &value);
     static model::Book unpackBook(const BookRecord &record);

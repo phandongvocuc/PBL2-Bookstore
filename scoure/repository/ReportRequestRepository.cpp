@@ -7,14 +7,14 @@ using namespace std;
 
 namespace pbl2::repository {
 
-ReportRequestRepository::ReportRequestRepository(const custom::CustomString &dataDir)
-	: dataPath(core::path::join(dataDir, custom::CustomStringLiteral("report_requests.bin"))) {}
+ReportRequestRepository::ReportRequestRepository(const core::CustomString &dataDir)
+	: dataPath(core::path::join(dataDir, core::CustomStringLiteral("report_requests.bin"))) {}
 
-custom::DynamicArray<model::ReportRequest> ReportRequestRepository::loadAll() const {
+core::DynamicArray<model::ReportRequest> ReportRequestRepository::loadAll() const {
 	return serialization::BinaryFileStore::readReports(dataPath);
 }
 
-void ReportRequestRepository::saveAll(const custom::DynamicArray<model::ReportRequest> &requests) const {
+void ReportRequestRepository::saveAll(const core::DynamicArray<model::ReportRequest> &requests) const {
 	serialization::BinaryFileStore::writeReports(requests, dataPath);
 }
 

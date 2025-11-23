@@ -10,19 +10,19 @@ namespace pbl2::model {
         hireDate = value;
     }
 
-    const custom::CustomString &Staff::getPosition() const {
+    const core::CustomString &Staff::getPosition() const {
         return position;
     }
 
-    void Staff::setPosition(const custom::CustomString &value) {
+    void Staff::setPosition(const core::CustomString &value) {
         position = value;
     }
 
-    const custom::CustomString &Staff::getNotes() const {
+    const core::CustomString &Staff::getNotes() const {
         return notes;
     }
 
-    void Staff::setNotes(const custom::CustomString &value) {
+    void Staff::setNotes(const core::CustomString &value) {
         notes = value;
     }
 
