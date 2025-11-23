@@ -24,7 +24,7 @@
    </property>
    <property name="font">
     <font>
-     <family>Serif</family>
+     <family>Sans Serif</family>
      <pointsize>24</pointsize>
      <bold>false</bold>
     </font>
@@ -118,7 +118,7 @@
    </property>
    <property name="font">
     <font>
-     <family>Serif</family>
+     <family>Sans Serif</family>
     </font>
    </property>
    <property name="text">
@@ -149,7 +149,7 @@
    </property>
    <property name="font">
     <font>
-     <family>Serif</family>
+     <family>Sans Serif</family>
     </font>
    </property>
    <property name="text">
@@ -167,7 +167,7 @@
    </property>
    <property name="font">
     <font>
-     <family>Serif</family>
+     <family>Sans Serif</family>
     </font>
    </property>
    <item>
