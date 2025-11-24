@@ -118,6 +118,8 @@ private:
     void handleSubmitReport();
     void handleReportStatusChange(const QString &status);
     void handleViewReportDetails();
+    bool applyBookAdjustmentsForReport(const model::ReportRequest &report, QStringList *errors = nullptr);
+    void handleDeleteReport();
 
     void handleAddAccount();
     void handleResetPassword();
