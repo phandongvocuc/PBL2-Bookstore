@@ -836,17 +836,24 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="rejectReportButton">
-             <property name="text">
-              <string>Từ chối</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="reportsActionsSpacer">
-             <property name="orientation">
-              <enum>Qt::Orientation::Horizontal</enum>
-             </property>
+           <widget class="QPushButton" name="rejectReportButton">
+            <property name="text">
+             <string>Từ chối</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="deleteReportButton">
+            <property name="text">
+             <string>Xóa báo cáo</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="reportsActionsSpacer">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
              <property name="sizeHint" stdset="0">
               <size>
                <width>40</width>

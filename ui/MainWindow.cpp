@@ -52,6 +52,51 @@ constexpr int kCardRoleSecondaryDetail = Qt::UserRole + 9;
 
 QString normalizedStatus(const QString &text);
 
+struct AffectedBookChange {
+    QString id;
+    int count{0};
+};
+
+core::DynamicArray<AffectedBookChange> parseAffectedBookChanges(const QString &raw) {
+    core::DynamicArray<AffectedBookChange> changes;
+    QString normalized = raw;
+    normalized.replace('\n', ';');
+    normalized.replace(',', ';');
+
+    auto appendEntry = [&](const QString &token) {
+        if (token.isEmpty()) return;
+        const int sep = token.indexOf(':');
+        const QString id = (sep >= 0 ? token.left(sep) : token).trimmed();
+        const QString countStr = sep >= 0 ? token.mid(sep + 1).trimmed() : QStringLiteral("1");
+        if (id.isEmpty()) return;
+
+        bool ok = true;
+        const int count = countStr.isEmpty() ? 1 : countStr.toInt(&ok);
+        if (!ok || count <= 0) return;
+
+        const QString canonical = id.toUpper();
+        for (int i = 0; i < changes.size(); ++i) {
+            if (changes[i].id.compare(canonical, Qt::CaseInsensitive) == 0) {
+                changes[i].count += count;
+                return;
+            }
+        }
+        changes.append(AffectedBookChange{canonical, count});
+    };
+
+    QString current;
+    for (const QChar ch : normalized) {
+        if (ch == QChar(';')) {
+            appendEntry(current.trimmed());
+            current.clear();
+        } else {
+            current.append(ch);
+        }
+    }
+    appendEntry(current.trimmed());
+    return changes;
+}
+
 QColor statusBadgeColor(const QString &statusCode) {
     const QString normalized = normalizedStatus(statusCode);
     if (normalized == QStringLiteral("CÒN")) return {0x28, 0xA7, 0x45};
@@ -1009,6 +1054,10 @@ void MainWindow::configureReportsTab() {
         connect(ui->rejectReportButton, &QPushButton::clicked, [this]() {
             handleReportStatusChange(QStringLiteral("REJECTED"));
         });
+    }
+    if (ui->deleteReportButton) {
+        ui->deleteReportButton->setVisible(adminRole);
+        connect(ui->deleteReportButton, &QPushButton::clicked, this, &MainWindow::handleDeleteReport);
     }
 }
 
@@ -3218,26 +3267,6 @@ void MainWindow::handleLossOrDamage(const QString &status) {
         return;
     }
 
-    if (const auto bookOpt = bookService.findById(loanOpt->getBookId()); bookOpt.has_value()) {
-        model::Book updatedBook = *bookOpt;
-        // Chỉ giảm số lượng nếu phiếu mượn chưa bị trừ (tức là không phải đang ở trạng thái 'BORROWED')
-        bool shouldSetStatus = false;
-        if (normalizedStatus(loanOpt->getStatus()) != QStringLiteral("BORROWED")) {
-            updatedBook.setQuantity(max(0, updatedBook.getQuantity() - 1));
-            // Nếu sau khi giảm còn 0 quyển, chuyển trạng thái sách sang 'HET'
-            if (updatedBook.getQuantity() == 0) {
-                shouldSetStatus = true;
-            }
-        }
-        // Nếu đang mượn thì không giảm số lượng, không đổi trạng thái
-        if (shouldSetStatus) {
-            updatedBook.setStatus(model::canonicalBookStatus(core::CustomStringLiteral("HẾT")));
-        }
-        if (!bookService.updateBook(updatedBook)) {
-            showWarningDialog(tr("Cảnh báo"), tr("Không thể cập nhật thông tin sách."));
-        }
-    }
-
     model::ReportRequest req;
     const QString prefix = status == QStringLiteral("LOST") ? QStringLiteral("MẤT") : QStringLiteral("HƯ");
     const QString requestId = QStringLiteral("%1-%2")
@@ -3292,6 +3321,30 @@ void MainWindow::handleSubmitReport() {
     notifyEvent(tr("Đã gửi báo cáo."), EventSeverity::Success, 2000);
 }
 
+bool MainWindow::applyBookAdjustmentsForReport(const model::ReportRequest &report, QStringList *errors) {
+    const auto changes = parseAffectedBookChanges(toQString(report.getAffectedBooks()));
+    bool ok = true;
+    for (const auto &change : changes) {
+        const auto bookOpt = bookService.findById(toCustomString(change.id));
+        if (!bookOpt.has_value()) {
+            ok = false;
+            if (errors) errors->append(tr("Không tìm thấy sách %1.").arg(change.id));
+            continue;
+        }
+        model::Book updated = *bookOpt;
+        const int newQty = max(0, updated.getQuantity() - change.count);
+        updated.setQuantity(newQty);
+        if (model::isAvailabilityStatus(updated.getStatus())) {
+            updated.setStatus(model::availabilityStatusForQuantity(newQty));
+        }
+        if (!bookService.updateBook(updated)) {
+            ok = false;
+            if (errors) errors->append(tr("Không thể cập nhật sách %1.").arg(change.id));
+        }
+    }
+    return ok;
+}
+
 void MainWindow::handleReportStatusChange(const QString &status) {
     if (!adminRole) return;
     const auto row = currentRow(reportsList);
@@ -3312,12 +3365,84 @@ void MainWindow::handleReportStatusChange(const QString &status) {
         showWarningDialog(tr("Không tìm thấy"), tr("Không thể xác định báo cáo đã chọn."));
         return;
     }
-    if (!reportService.updateStatus(toCustomString(requestId), toCustomString(status))) {
+
+    const model::ReportRequest *selectedReport = nullptr;
+    for (const auto &report : reportsCache) {
+        if (toQString(report.getRequestId()).compare(requestId, Qt::CaseInsensitive) == 0) {
+            selectedReport = &report;
+            break;
+        }
+    }
+    if (!selectedReport) {
+        showWarningDialog(tr("Không tìm thấy"), tr("Không thể tìm thấy dữ liệu báo cáo."));
+        return;
+    }
+
+    const QString targetStatus = normalizedStatus(status);
+    if (targetStatus.isEmpty()) {
+        showWarningDialog(tr("Không thành công"), tr("Trạng thái không hợp lệ."));
+        return;
+    }
+    const QString previousStatus = normalizedStatus(selectedReport->getStatus());
+
+    if (!reportService.updateStatus(toCustomString(requestId), toCustomString(targetStatus))) {
         showWarningDialog(tr("Không thành công"), tr("Không thể cập nhật trạng thái."));
         return;
     }
+
+    if (targetStatus == QStringLiteral("APPROVED") && previousStatus != QStringLiteral("APPROVED")) {
+        QStringList errors;
+        if (!applyBookAdjustmentsForReport(*selectedReport, &errors)) {
+            // Roll back status if we could not update inventory
+            const bool rolledBack = reportService.updateStatus(toCustomString(requestId), selectedReport->getStatus());
+            if (!rolledBack) {
+                errors.append(tr("Không thể khôi phục trạng thái báo cáo sau khi lỗi."));
+            }
+            reloadData();
+            showWarningDialog(tr("Không thành công"),
+                              errors.isEmpty() ? tr("Không thể cập nhật số lượng sách.")
+                                               : errors.join('\n'));
+            return;
+        }
+    }
+
     reloadData();
     notifyEvent(tr("Đã cập nhật trạng thái báo cáo."), EventSeverity::Success, 2000);
+}
+
+void MainWindow::handleDeleteReport() {
+    if (!adminRole) return;
+    const auto row = currentRow(reportsList);
+    if (!row.has_value()) {
+        showInfoDialog(tr("Cảnh báo"), tr("Vui lòng chọn một báo cáo."));
+        return;
+    }
+    const QListWidgetItem *item = reportsList ? reportsList->item(row.value()) : nullptr;
+    if (!item) {
+        showWarningDialog(tr("Không tìm thấy"), tr("Không thể xác định báo cáo đã chọn."));
+        return;
+    }
+    QString requestId = item->data(kCardRoleId).toString();
+    if (requestId.isEmpty()) {
+        requestId = item->data(Qt::UserRole).toString();
+    }
+    if (requestId.isEmpty()) {
+        showWarningDialog(tr("Không tìm thấy"), tr("Không thể xác định báo cáo đã chọn."));
+        return;
+    }
+
+    if (askEventQuestion(tr("Xác nhận"),
+                         tr("Bạn có chắc muốn xóa báo cáo %1? Hành động này không thể hoàn tác.")
+                             .arg(requestId)) != QMessageBox::Yes) {
+        return;
+    }
+
+    if (!reportService.removeItem(toCustomString(requestId))) {
+        showWarningDialog(tr("Không thành công"), tr("Không thể xóa báo cáo."));
+        return;
+    }
+    reloadData();
+    notifyEvent(tr("Đã xóa báo cáo."), EventSeverity::Success, 2000);
 }
 
 void MainWindow::handleLogout() {
