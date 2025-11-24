@@ -13,15 +13,15 @@ PieChart::PieChart(QWidget *parent) : QWidget(parent) {
     setMinimumSize(200, 200);
 }
 
-void PieChart::setSegments(const core::Vector<QPair<QString, int>> &segments) {
+void PieChart::setSegments(const core::DynamicArray<QPair<QString, int>> &segments) {
     segments_ = segments;
     ensureColors(segments_.size());
     update();
 }
 
 void PieChart::ensureColors(int n) {
-    static core::Vector<QColor> base = []() {
-        core::Vector<QColor> colors;
+    static core::DynamicArray<QColor> base = []() {
+        core::DynamicArray<QColor> colors;
         colors.append(QColor(0x4E, 0x79, 0xA7));
         colors.append(QColor(0xA6, 0xCD, 0x6B));
         colors.append(QColor(0xF6, 0xC1, 0x3E));

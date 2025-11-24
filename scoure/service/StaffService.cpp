@@ -22,7 +22,7 @@ namespace pbl2::service {
     }
 
     bool StaffService::setStaffActive(const core::CustomString &staffId, bool active) const {
-        const auto staffs = ensureLoaded();
+        auto staffs = ensureLoaded();
         bool changed = false;
         for (auto &staff : staffs) {
             if (staff.getId().compare(staffId, core::CaseSensitivity::Insensitive) == 0) {

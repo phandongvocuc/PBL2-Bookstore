@@ -19,7 +19,7 @@ core::Optional<model::Account> AccountService::authenticate(const core::CustomSt
     const core::CustomString trimmed = username.trimmed();
     if (trimmed.isEmpty() || password.isEmpty()) return {};
 
-    const auto accounts = ensureLoaded();
+    auto accounts = ensureLoaded();
     if (accounts.isEmpty()) return {};
 
     const core::CustomString hashed = repository::AccountsRepository::hashPassword(password);
@@ -117,7 +117,8 @@ bool AccountService::isEmployeeIdInUse(const core::CustomString &staffId, const 
     if (trimmedStaff.isEmpty()) return false;
     const core::CustomString trimmedExclude = excludeUsername.trimmed();
 
-    for (const auto accounts = ensureLoaded(); const auto &acc : accounts) {
+    const auto accounts = ensureLoaded();
+    for (const auto &acc : accounts) {
         if (acc.getEmployeeId().trimmed().isEmpty()) continue;
         if (acc.getEmployeeId().compare(trimmedStaff, core::CaseSensitivity::Insensitive) != 0) continue;
         if (!trimmedExclude.isEmpty() && acc.getUsername().compare(trimmedExclude, core::CaseSensitivity::Insensitive) == 0) {

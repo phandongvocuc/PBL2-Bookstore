@@ -25,7 +25,8 @@
 #include "model/Staff.h"
 #include "SystemConfig.h"
 #include "StatsWidget.h"
-#include "../core/CustomContainers.h"
+#include "../core/DynamicArray.h"
+#include "../core/Map.h"
 
 namespace Ui {
 class MainWindow;
@@ -75,7 +76,7 @@ private:
     void populateStaffs();
     void populateLoans();
     void populateReports();
-    void fillReportsList(const core::Vector<model::ReportRequest> &reports) const;
+    void fillReportsList(const core::DynamicArray<model::ReportRequest> &reports) const;
     void applyReportFilter();
     void clearReportFilter();
     void updateStatisticsSummary();
@@ -83,14 +84,14 @@ private:
     void refreshConfigInputs() const;
 
     void applyBookFilter();
-    void fillBooksList(const core::Vector<model::Book> &books) const;
+    void fillBooksList(const core::DynamicArray<model::Book> &books) const;
     void applyReaderFilter();
-    void fillReadersList(const core::Vector<model::Reader> &readers) const;
+    void fillReadersList(const core::DynamicArray<model::Reader> &readers) const;
     void applyStaffFilter();
-    void fillStaffsList(const core::Vector<model::Staff> &staffs) const;
+    void fillStaffsList(const core::DynamicArray<model::Staff> &staffs) const;
     void applyLoanFilter();
-    void fillLoansList(const core::Vector<model::Loan> &loans);
-    void fillAccountsList(const core::Vector<model::Account> &accounts);
+    void fillLoansList(const core::DynamicArray<model::Loan> &loans);
+    void fillAccountsList(const core::DynamicArray<model::Account> &accounts);
 
     void handleAddBook();
     void handleEditBook();
@@ -192,12 +193,12 @@ private:
     QLineEdit *reportStaffFilter{nullptr};
     QDateEdit *reportFromFilter{nullptr};
     QDateEdit *reportToFilter{nullptr};
-    core::Vector<model::ReportRequest> reportsCache;
-    core::Vector<model::Book> booksCache;
-    core::Vector<model::Reader> readersCache;
-    core::Vector<model::Staff> staffsCache;
-    core::Vector<model::Loan> loansCache;
-    core::Vector<model::Account> accountsCache;
+    core::DynamicArray<model::ReportRequest> reportsCache;
+    core::DynamicArray<model::Book> booksCache;
+    core::DynamicArray<model::Reader> readersCache;
+    core::DynamicArray<model::Staff> staffsCache;
+    core::DynamicArray<model::Loan> loansCache;
+    core::DynamicArray<model::Account> accountsCache;
 
     QLineEdit *bookSearchEdit{nullptr};
     QComboBox *bookStatusFilter{nullptr};

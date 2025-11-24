@@ -2,7 +2,7 @@
 
 #include <QDialog>
 #include <QString>
-#include "../core/CustomContainers.h"
+#include "../core/DynamicArray.h"
 
 #include "model/Book.h"
 #include "model/Loan.h"
@@ -20,8 +20,8 @@ class LoanDialog final : public QDialog {
     Q_OBJECT
 
 public:
-    LoanDialog(const core::Vector<model::Reader> &readers,
-               const core::Vector<model::Book> &books,
+    LoanDialog(const core::DynamicArray<model::Reader> &readers,
+               const core::DynamicArray<model::Book> &books,
                int maxBorrowDays,
                const QString &staffUsername,
                QWidget *parent = nullptr);
@@ -36,8 +36,8 @@ private:
     [[nodiscard]] bool validateInputs() const;
     void showError(const QString &message) const;
 
-    core::Vector<model::Reader> readers;
-    core::Vector<model::Book> books;
+    core::DynamicArray<model::Reader> readers;
+    core::DynamicArray<model::Book> books;
     QLineEdit *loanIdEdit{nullptr};
     QComboBox *readerCombo{nullptr};
     QComboBox *bookCombo{nullptr};

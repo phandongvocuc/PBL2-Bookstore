@@ -489,16 +489,6 @@ QString bookStatusText(const core::CustomString &code) {
     return status;
 }
 
-template <typename T>
-core::Vector<T> toQVector(const core::DynamicArray<T> &values) {
-    core::Vector<T> result;
-    result.reserve(static_cast<int>(values.size()));
-    for (typename core::DynamicArray<T>::SizeType i = 0U; i < values.size(); ++i) {
-        result.append(values[i]);
-    }
-    return result;
-}
-
 }
 
 namespace pbl2::ui {
@@ -747,13 +737,13 @@ void MainWindow::setupUi() {
     
     // Force reload cache for statistics display
     if (booksCache.isEmpty()) {
-        booksCache = toQVector(bookService.fetchAll());
+        booksCache = bookService.fetchAll();
     }
     if (readersCache.isEmpty()) {
-        readersCache = toQVector(readerService.fetchAll());
+        readersCache = readerService.fetchAll();
     }
     if (loansCache.isEmpty()) {
-        loansCache = toQVector(loanService.fetchAll());
+        loansCache = loanService.fetchAll();
     }
     
     // Force refresh stats display with real data
@@ -1227,30 +1217,30 @@ void MainWindow::configureSettingsTab() {
 }
 
 void MainWindow::reloadData() {
-    booksCache = toQVector(bookService.fetchAll());
+    booksCache = bookService.fetchAll();
     applyBookFilter();
 
-    readersCache = toQVector(readerService.fetchAll());
+    readersCache = readerService.fetchAll();
     applyReaderFilter();
 
     if (adminRole) {
-        staffsCache = toQVector(staffService.fetchAll());
+        staffsCache = staffService.fetchAll();
         applyStaffFilter();
     } else {
         staffsCache.clear();
     }
 
-    loansCache = toQVector(loanService.fetchAll());
+    loansCache = loanService.fetchAll();
     applyLoanFilter();
 
-    reportsCache = toQVector(reportService.fetchAll());
+    reportsCache = reportService.fetchAll();
     applyReportFilter();
     
     // Update stats tab
     applyStatsFilter();
 
     if (adminRole) {
-        accountsCache = toQVector(accountService.fetchAll());
+        accountsCache = accountService.fetchAll();
         refreshAccounts();
     } else {
         accountsCache.clear();
@@ -1276,11 +1266,11 @@ void MainWindow::reloadData() {
 }
 
 void MainWindow::populateBooks() {
-    booksCache = toQVector(bookService.fetchAll());
+    booksCache = bookService.fetchAll();
     applyBookFilter();
 }
 
-void MainWindow::fillBooksList(const core::Vector<model::Book> &books) const {
+void MainWindow::fillBooksList(const core::DynamicArray<model::Book> &books) const {
     if (!booksList) return;
 
     const QListWidgetItem *currentItem = booksList->currentItem();
@@ -1353,7 +1343,7 @@ void MainWindow::fillBooksList(const core::Vector<model::Book> &books) const {
 }
 
 void MainWindow::applyBookFilter() {
-    core::Vector<model::Book> filtered;
+    core::DynamicArray<model::Book> filtered;
     const QString term = bookSearchEdit ? bookSearchEdit->text().trimmed().toLower() : QString();
     const QString statusFilter = bookStatusFilter ? bookStatusFilter->currentData().toString() : QStringLiteral("ALL");
     for (const auto &book : booksCache) {
@@ -1378,11 +1368,11 @@ void MainWindow::applyBookFilter() {
 }
 
 void MainWindow::populateReaders() {
-    readersCache = toQVector(readerService.fetchAll());
+    readersCache = readerService.fetchAll();
     applyReaderFilter();
 }
 
-void MainWindow::fillReadersList(const core::Vector<model::Reader> &readers) const {
+void MainWindow::fillReadersList(const core::DynamicArray<model::Reader> &readers) const {
     if (!readersList) return;
 
     const QListWidgetItem *currentItem = readersList->currentItem();
@@ -1458,7 +1448,7 @@ void MainWindow::fillReadersList(const core::Vector<model::Reader> &readers) con
 }
 
 void MainWindow::applyReaderFilter() {
-    core::Vector<model::Reader> filtered;
+    core::DynamicArray<model::Reader> filtered;
     filtered.reserve(readersCache.size());
     const QString term = readerSearchEdit ? readerSearchEdit->text().trimmed().toLower() : QString();
     const QString statusSelection = readerStatusFilter ? readerStatusFilter->currentData().toString() : QStringLiteral("ALL");
@@ -1496,11 +1486,11 @@ void MainWindow::applyReaderFilter() {
 }
 
 void MainWindow::populateLoans() {
-    loansCache = toQVector(loanService.fetchAll());
+    loansCache = loanService.fetchAll();
     applyLoanFilter();
 }
 
-void MainWindow::fillLoansList(const core::Vector<model::Loan> &loans) {
+void MainWindow::fillLoansList(const core::DynamicArray<model::Loan> &loans) {
     if (!loansList) return;
 
     const QListWidgetItem *currentItem = loansList->currentItem();
@@ -1609,7 +1599,7 @@ void MainWindow::fillLoansList(const core::Vector<model::Loan> &loans) {
 }
 
 void MainWindow::applyLoanFilter() {
-    core::Vector<model::Loan> filtered;
+    core::DynamicArray<model::Loan> filtered;
     filtered.reserve(loansCache.size());
     const QString term = loanSearchEdit ? loanSearchEdit->text().trimmed().toLower() : QString();
     const QString statusFilter = loanStatusFilter ? loanStatusFilter->currentData().toString() : QStringLiteral("ALL");
@@ -1636,11 +1626,11 @@ void MainWindow::applyLoanFilter() {
 }
 
 void MainWindow::populateReports() {
-    reportsCache = toQVector(reportService.fetchAll());
+    reportsCache = reportService.fetchAll();
     applyReportFilter();
 }
 
-void MainWindow::fillReportsList(const core::Vector<model::ReportRequest> &reports) const {
+void MainWindow::fillReportsList(const core::DynamicArray<model::ReportRequest> &reports) const {
     if (!reportsList) return;
 
     const QListWidgetItem *currentItem = reportsList->currentItem();
@@ -1710,7 +1700,7 @@ void MainWindow::fillReportsList(const core::Vector<model::ReportRequest> &repor
     }
 }
 
-void MainWindow::fillAccountsList(const core::Vector<model::Account> &accounts) {
+void MainWindow::fillAccountsList(const core::DynamicArray<model::Account> &accounts) {
     if (!accountsList) return;
 
     const QListWidgetItem *currentItem = accountsList->currentItem();
@@ -1802,7 +1792,7 @@ void MainWindow::fillAccountsList(const core::Vector<model::Account> &accounts) 
 }
 
 void MainWindow::applyReportFilter() {
-    core::Vector<model::ReportRequest> filtered;
+    core::DynamicArray<model::ReportRequest> filtered;
     filtered.reserve(reportsCache.size());
     const QString staffTerm = reportStaffFilter ? reportStaffFilter->text().trimmed().toLower() : QString();
     const bool hasFrom = reportFromFilter && reportFromFilter->date() != reportFromFilter->minimumDate();
@@ -2007,7 +1997,7 @@ void MainWindow::updateStatsCharts() {
             series.values.append(genreCounts.value(g, 0));
         }
 
-        core::Vector<StatsChart::Series> genreSeries;
+        core::DynamicArray<StatsChart::Series> genreSeries;
         genreSeries.append(series);
         genreChart->setCategories(allGenres);
         genreChart->setSeries(genreSeries);
@@ -2056,7 +2046,7 @@ void MainWindow::updateStatsCharts() {
             series.values.append(genreBorrowCounts.value(g, 0));
         }
 
-        core::Vector<StatsChart::Series> topBookSeries;
+        core::DynamicArray<StatsChart::Series> topBookSeries;
         topBookSeries.append(series);
         topBooksChart->setCategories(allGenres);
         topBooksChart->setSeries(topBookSeries);
@@ -2103,7 +2093,7 @@ void MainWindow::updateStatsCharts() {
         series.values.append(static_cast<double>(fines));
         series.color = QColor(59, 130, 246);
 
-        core::Vector<StatsChart::Series> revenueSeries;
+        core::DynamicArray<StatsChart::Series> revenueSeries;
         revenueSeries.append(series);
         revenueChart->setCategories(categories);
         revenueChart->setSeries(revenueSeries);
@@ -2252,7 +2242,7 @@ void MainWindow::updateStatsDashboardWidget() {
         }
     }
 
-    core::Vector<int> monthlyCounts;
+    core::DynamicArray<int> monthlyCounts;
     for (int i : monthlyRaw) {
         monthlyCounts.append(i);
     }
@@ -2427,11 +2417,11 @@ void MainWindow::configureStaffsTab() {
 }
 
 void MainWindow::populateStaffs() {
-    staffsCache = toQVector(staffService.fetchAll());
+    staffsCache = staffService.fetchAll();
     applyStaffFilter();
 }
 
-void MainWindow::fillStaffsList(const core::Vector<model::Staff> &staffs) const {
+void MainWindow::fillStaffsList(const core::DynamicArray<model::Staff> &staffs) const {
     if (!staffsList) return;
 
     const QListWidgetItem *currentItem = staffsList->currentItem();
@@ -2506,7 +2496,7 @@ void MainWindow::fillStaffsList(const core::Vector<model::Staff> &staffs) const 
 }
 
 void MainWindow::applyStaffFilter() {
-    core::Vector<model::Staff> filtered;
+    core::DynamicArray<model::Staff> filtered;
     filtered.reserve(staffsCache.size());
     const QString term = staffSearchEdit ? staffSearchEdit->text().trimmed().toLower() : QString();
     const QString statusCode = staffStatusFilter ? staffStatusFilter->currentData().toString() : QStringLiteral("ALL");
@@ -2940,7 +2930,7 @@ void MainWindow::handleNewLoan() {
         showWarningDialog(tr("Thiếu dữ liệu"), tr("Cần có ít nhất một bạn đọc và một cuốn sách."));
         return;
     }
-    core::Vector<model::Reader> availableReaders;
+    core::DynamicArray<model::Reader> availableReaders;
     availableReaders.reserve(readersCache.size());
     for (const auto &reader : readersCache) {
         if (reader.isActive()) availableReaders.append(reader);
@@ -3287,7 +3277,7 @@ void MainWindow::handleLossOrDamage(const QString &status) {
 
 void MainWindow::handleSubmitReport() {
     if (!staffRole) return;
-    core::Vector<core::CustomString> bookIds;
+    core::DynamicArray<core::CustomString> bookIds;
     bookIds.reserve(booksCache.size());
     for (const auto &book : booksCache) {
         bookIds.append(book.getId());
@@ -3377,7 +3367,7 @@ void MainWindow::setupNavigationMenu() {
         QString iconName;
     };
 
-    core::Vector<NavEntry> entries;
+    core::DynamicArray<NavEntry> entries;
     entries.reserve(tabs->count());
     for (int i = 0; i < tabs->count(); ++i) {
         const QString tabText = tabs->tabText(i);
@@ -3591,7 +3581,7 @@ void MainWindow::handleAddAccount() {
     if (!adminRole) return;
     AccountDialog dialog(this);
     // Provide staff list for selection
-    staffsCache = toQVector(staffService.fetchAll());
+    staffsCache = staffService.fetchAll();
     dialog.setStaffList(staffsCache);
     if (dialog.exec() != QDialog::Accepted) return;
     const auto usernameKey = dialog.username();

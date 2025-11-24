@@ -3,7 +3,8 @@
 #include <QLabel>
 #include <QFrame>
 #include <QListWidget>
-#include "../core/CustomContainers.h"
+#include "../core/DynamicArray.h"
+#include "../core/Map.h"
 #include "StatsChart.h"
 #include "PieChart.h"
 
@@ -22,13 +23,13 @@ public:
     
     void updateCategoryChart(const core::Map<QString, int> &categoryBorrowCounts) const;
 
-    void updateMonthlyChart(const core::Vector<int> &monthlyBorrowCounts) const;
+    void updateMonthlyChart(const core::DynamicArray<int> &monthlyBorrowCounts) const;
 
     void updatePieChart(int cardFees, int fines) const;
     
-    void updateLoansList(const core::Vector<QPair<QString, QString>> &loans) const;
+    void updateLoansList(const core::DynamicArray<QPair<QString, QString>> &loans) const;
     
-    void updateActiveReadersList(const core::Vector<QString> &readers) const;
+    void updateActiveReadersList(const core::DynamicArray<QString> &readers) const;
 
 private:
     void setupUi();

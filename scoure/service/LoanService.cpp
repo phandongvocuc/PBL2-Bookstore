@@ -27,7 +27,7 @@ bool LoanService::removeLoan(const core::CustomString &loanId) const {
 }
 
 bool LoanService::updateStatus(const core::CustomString &loanId, const core::CustomString &status, const core::Date &returnDate) const {
-    const auto loans = ensureLoaded();
+    auto loans = ensureLoaded();
     bool changed = false;
     for (auto &loan : loans) {
         if (loan.getLoanId().compare(loanId, core::CaseSensitivity::Insensitive) == 0) {
@@ -46,7 +46,7 @@ bool LoanService::updateStatus(const core::CustomString &loanId, const core::Cus
 
 bool LoanService::applyFine(const core::CustomString &loanId, const int fine) const {
     if (fine < 0) return false;
-    const auto loans = ensureLoaded();
+    auto loans = ensureLoaded();
     bool updated = false;
     for (auto &loan : loans) {
         if (loan.getLoanId().compare(loanId, core::CaseSensitivity::Insensitive) == 0) {
