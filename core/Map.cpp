@@ -1,5 +1,5 @@
 #include "Map.h"
-#include <QString>
+#include "CustomString.h"
 
 namespace pbl2::core {
 
@@ -94,6 +94,6 @@ int Map<K, V>::findIndex(const K &key) const {
     return -1;
 }
 
-template class Map<QString, int>;
+template class Map<CustomString, int>;
 
 }  // namespace pbl2::core
