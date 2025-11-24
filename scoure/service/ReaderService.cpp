@@ -23,7 +23,7 @@ namespace pbl2::service {
     }
 
     bool ReaderService::setReaderActive(const core::CustomString &readerId, bool active) const {
-        const auto readers = ensureLoaded();
+        auto readers = ensureLoaded();
         bool changed = false;
         for (auto &reader : readers) {
             if (reader.getId().compare(readerId, core::CaseSensitivity::Insensitive) == 0) {

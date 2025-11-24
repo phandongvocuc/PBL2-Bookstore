@@ -13,8 +13,6 @@ qt_standard_project_setup()
 # Source files
 file(GLOB_RECURSE SOURCES "scoure/*.cpp" "core/*.cpp" "ui/*.cpp")
 file(GLOB_RECURSE HEADERS "header/*.h" "core/*.h" "ui/*.h")
-# Templates in CustomContainers are header-only; exclude its .cpp to avoid double definitions
-list(FILTER SOURCES EXCLUDE REGEX "core/CustomContainers.cpp$")
 
 qt_add_resources(ICON_RESOURCES
     ui/resources/icons/icons.qrc

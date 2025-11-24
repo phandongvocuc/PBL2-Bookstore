@@ -13,7 +13,7 @@
 #include <QVBoxLayout>
 
 #include "QtBridge.h"
-#include "../core/CustomContainers.h"
+#include "../core/DynamicArray.h"
 
 using namespace std;
 
@@ -29,7 +29,7 @@ QString generateRequestId(const QString &staff) {
 namespace pbl2::ui {
 
     ReportRequestDialog::ReportRequestDialog(const QString &staffUsername,
-                                             const core::Vector<core::CustomString> &knownBookIds,
+                                             const core::DynamicArray<core::CustomString> &knownBookIds,
                                              QWidget *parent)
         : QDialog(parent), staffUsername(staffUsername), knownBookIds(knownBookIds) {
         for (auto &id : this->knownBookIds) {
@@ -137,8 +137,8 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
         refreshAffectedCountPreview();
     }
 
-    core::Vector<QString> ReportRequestDialog::splitTokens(const QString &normalized) const {
-        core::Vector<QString> tokens;
+    core::DynamicArray<QString> ReportRequestDialog::splitTokens(const QString &normalized) const {
+        core::DynamicArray<QString> tokens;
         QString current;
         for (const QChar ch : normalized) {
             if (ch == QChar(';')) {
@@ -164,8 +164,8 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
         return false;
     }
 
-    core::Vector<ReportRequestDialog::AffectedBookEntry> ReportRequestDialog::parseAffectedBooks(core::Vector<QString> *errors) const {
-        core::Vector<AffectedBookEntry> aggregated;
+    core::DynamicArray<ReportRequestDialog::AffectedBookEntry> ReportRequestDialog::parseAffectedBooks(core::DynamicArray<QString> *errors) const {
+        core::DynamicArray<AffectedBookEntry> aggregated;
         const QString raw = affectedBooksEdit ? affectedBooksEdit->toPlainText() : QString();
         QString normalized = raw;
         normalized.replace('\n', ';');
@@ -232,7 +232,7 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
             showError(tr("Ngày kết thúc phải lớn hơn ngày bắt đầu."));
             return false;
         }
-        core::Vector<QString> errors;
+        core::DynamicArray<QString> errors;
         const auto affected = parseAffectedBooks(&errors);
         if (!errors.isEmpty()) {
             QString merged;

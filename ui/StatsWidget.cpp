@@ -275,7 +275,7 @@ void StatsWidget::updateTopBooksChart(const core::Map<QString, int> &bookBorrowC
     });
 
     QStringList categories;
-    core::Vector<double> values;
+    core::DynamicArray<double> values;
     const int count = qMin(6, sortedBooks.size());
     for (int i = 0; i < count; ++i) {
         categories.append(sortedBooks[i].first);
@@ -287,7 +287,7 @@ void StatsWidget::updateTopBooksChart(const core::Map<QString, int> &bookBorrowC
     series.values = values;
     series.color = QColor(0x3b, 0x82, 0xf6);
 
-    core::Vector<StatsChart::Series> seriesVec;
+    core::DynamicArray<StatsChart::Series> seriesVec;
     seriesVec.append(series);
     topBooksChart->setCategories(categories);
     topBooksChart->setSeries(seriesVec);
@@ -306,7 +306,7 @@ void StatsWidget::updateCategoryChart(const core::Map<QString, int> &categoryBor
     });
 
     QStringList categories;
-    core::Vector<double> values;
+    core::DynamicArray<double> values;
     for (const auto &[fst, snd] : items) {
         categories.append(fst);
         values.append(snd);
@@ -317,18 +317,18 @@ void StatsWidget::updateCategoryChart(const core::Map<QString, int> &categoryBor
     series.values = values;
     series.color = QColor(0x3b, 0x82, 0xf6);
 
-    core::Vector<StatsChart::Series> seriesVec;
+    core::DynamicArray<StatsChart::Series> seriesVec;
     seriesVec.append(series);
     categoryChart->setCategories(categories);
     categoryChart->setSeries(seriesVec);
     categoryChart->setMode(StatsChart::Mode::Bar);
 }
 
-void StatsWidget::updateMonthlyChart(const core::Vector<int> &monthlyBorrowCounts) const {
+void StatsWidget::updateMonthlyChart(const core::DynamicArray<int> &monthlyBorrowCounts) const {
     if (!monthlyChart) return;
 
     QStringList categories;
-    core::Vector<double> values;
+    core::DynamicArray<double> values;
     const int size = monthlyBorrowCounts.size();
     for (int i = 0; i < size; ++i) {
         categories.append(tr("T%1").arg(i + 1));
@@ -340,7 +340,7 @@ void StatsWidget::updateMonthlyChart(const core::Vector<int> &monthlyBorrowCount
     series.values = values;
     series.color = QColor(0x3b, 0x82, 0xf6);
 
-    core::Vector<StatsChart::Series> seriesVec;
+    core::DynamicArray<StatsChart::Series> seriesVec;
     seriesVec.append(series);
     monthlyChart->setCategories(categories);
     monthlyChart->setSeries(seriesVec);
@@ -350,14 +350,14 @@ void StatsWidget::updateMonthlyChart(const core::Vector<int> &monthlyBorrowCount
 void StatsWidget::updatePieChart(int cardFees, int fines) const {
     if (!revenuePieChart) return;
 
-    core::Vector<QPair<QString, int>> segments;
+    core::DynamicArray<QPair<QString, int>> segments;
     segments.append(qMakePair(tr("Làm thẻ"), cardFees));
     segments.append(qMakePair(tr("Tiền phạt"), fines));
 
     revenuePieChart->setSegments(segments);
 }
 
-void StatsWidget::updateLoansList(const core::Vector<QPair<QString, QString>> &loans) const {
+void StatsWidget::updateLoansList(const core::DynamicArray<QPair<QString, QString>> &loans) const {
     if (!recentLoansList) return;
 
     recentLoansList->clear();
@@ -368,7 +368,7 @@ void StatsWidget::updateLoansList(const core::Vector<QPair<QString, QString>> &l
     }
 }
 
-void StatsWidget::updateActiveReadersList(const core::Vector<QString> &readers) const {
+void StatsWidget::updateActiveReadersList(const core::DynamicArray<QString> &readers) const {
     if (!activeReadersList) return;
 
     activeReadersList->clear();

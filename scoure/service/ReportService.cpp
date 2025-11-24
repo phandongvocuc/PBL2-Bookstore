@@ -38,7 +38,7 @@ namespace pbl2::service {
     }
 
     bool ReportService::updateStatus(const core::CustomString &requestId, const core::CustomString &status) const {
-        const auto requests = ensureLoaded();
+        auto requests = ensureLoaded();
         bool changed = false;
         for (auto &request : requests) {
             if (request.getRequestId().compare(requestId, core::CaseSensitivity::Insensitive) == 0) {

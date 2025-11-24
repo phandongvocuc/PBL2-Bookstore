@@ -28,7 +28,7 @@ void StatsChart::setCategories(const QStringList &categories) {
     update();
 }
 
-void StatsChart::setSeries(const core::Vector<Series> &series) {
+void StatsChart::setSeries(const core::DynamicArray<Series> &series) {
     series_ = series;
     update();
 }
@@ -189,8 +189,8 @@ void StatsChart::drawBarChart(QPainter &painter, const QRect &plotArea) const {
 
     // Draw bars with gradient and shadow effect
     // Nếu chỉ có 1 series và nhiều thể loại, tô mỗi cột 1 màu để phân biệt
-    static core::Vector defaultColors = []() {
-        core::Vector<QColor> colors;
+    static core::DynamicArray defaultColors = []() {
+        core::DynamicArray<QColor> colors;
         colors.append(QColor(0xEF5350));
         colors.append(QColor(0xAB47BC));
         colors.append(QColor(0x42A5F5));

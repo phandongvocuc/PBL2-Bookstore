@@ -1,6 +1,7 @@
 #pragma once
 
 #include <initializer_list>
+
 using namespace std;
 namespace pbl2::core {
 
@@ -39,6 +40,13 @@ public:
         destroy();
     }
 
+    DynamicArray &operator=(const DynamicArray &other) {
+        if (this != &other) {
+            copyFrom(other);
+        }
+        return *this;
+    }
+
     T &operator[](SizeType index) {
         return _data[index];
     }
@@ -47,10 +55,22 @@ public:
         return _data[index];
     }
 
+    const T &at(SizeType index) const {
+        return _data[index];
+    }
+
     void pushBack(const T &value) {
         ensureCapacity(_size + 1U);
         _data[_size] = value;
         ++_size;
+    }
+
+    void push_back(const T &value) {
+        pushBack(value);
+    }
+
+    void append(const T &value) {
+        pushBack(value);
     }
 
     void removeAt(const SizeType index) {
@@ -94,6 +114,10 @@ public:
         return _size == 0U;
     }
 
+    [[nodiscard]] SizeType capacity() const {
+        return _capacity;
+    }
+
     T *data() {
         return _data;
     }
@@ -102,12 +126,24 @@ public:
         return _data;
     }
 
-    Iterator begin() const {
+    Iterator begin() {
         return _data;
     }
 
-    Iterator end() const {
-        return _data ? _data + _size : 0;
+    ConstIterator begin() const {
+        return _data;
+    }
+
+    Iterator end() {
+        return _data ? _data + _size : nullptr;
+    }
+
+    ConstIterator end() const {
+        return _data ? _data + _size : nullptr;
+    }
+
+    T value(const SizeType index, const T &defaultValue = T()) const {
+        return index < _size ? _data[index] : defaultValue;
     }
 
 private:
@@ -127,6 +163,7 @@ private:
             destroy();
             return;
         }
+        _size = 0U;
         reallocate(other._size);
         for (SizeType i = 0; i < other._size; ++i) {
             _data[i] = other._data[i];
@@ -156,4 +193,4 @@ private:
     SizeType _capacity;
 };
 
-} // namespace core
+} // namespace pbl2::core

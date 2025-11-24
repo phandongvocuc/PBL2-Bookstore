@@ -7,7 +7,7 @@
 #include <QVBoxLayout>
 
 #include "QtBridge.h"
-#include "../core/CustomContainers.h"
+#include "../core/DynamicArray.h"
 
 using namespace pbl2;
 using namespace pbl2::bridge;
@@ -49,8 +49,8 @@ struct AffectedBookRow {
     int count{0};
 };
 
-core::Vector<AffectedBookRow> parseAffectedBooks(const QString &raw, const core::Vector<model::Book> &books) {
-    core::Vector<AffectedBookRow> rows;
+core::DynamicArray<AffectedBookRow> parseAffectedBooks(const QString &raw, const core::DynamicArray<model::Book> &books) {
+    core::DynamicArray<AffectedBookRow> rows;
     QString normalized = raw;
     normalized.replace('\n', ';');
     normalized.replace(',', ';');
@@ -108,7 +108,7 @@ namespace pbl2::ui {
 
 ReportDetailsDialog::ReportDetailsDialog(const model::ReportRequest &report,
                                          const QString &statusText,
-                                         const core::Vector<model::Book> &books,
+                                         const core::DynamicArray<model::Book> &books,
                                          QWidget *parent)
     : QDialog(parent) {
     setWindowTitle(tr("Chi tiết báo cáo"));
@@ -163,7 +163,7 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
     form->addRow(makeCaption(tr("Sách mất/hư"), this), makeValueLabel(QString::number(report.getLostOrDamaged()), this));
     form->addRow(makeCaption(tr("Độc giả quá hạn"), this), makeValueLabel(QString::number(report.getOverdueReaders()), this));
 
-    const auto affectedRows = parseAffectedBooks(bridge::toQString(report.getAffectedBooks()), books);
+        const auto affectedRows = parseAffectedBooks(bridge::toQString(report.getAffectedBooks()), books);
     QString affectedText;
     for (int i = 0; i < affectedRows.size(); ++i) {
         const auto &row = affectedRows[i];

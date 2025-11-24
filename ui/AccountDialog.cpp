@@ -116,7 +116,7 @@ void AccountDialog::accept() {
     QDialog::accept();
 }
 
-void AccountDialog::setStaffList(const core::Vector<model::Staff> &staffs) const {
+void AccountDialog::setStaffList(const core::DynamicArray<model::Staff> &staffs) const {
     // Clear except first placeholder
     const core::CustomString currentSel = bridge::toCustomString(staffCombo->currentData().toString());
     staffCombo->clear();

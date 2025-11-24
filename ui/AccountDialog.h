@@ -2,7 +2,7 @@
 
 #include <QDialog>
 #include <QString>
-#include "../core/CustomContainers.h"
+#include "../core/DynamicArray.h"
 #include "../core/CustomString.h"
 #include "model/Staff.h"
 
@@ -25,7 +25,7 @@ public:
     [[nodiscard]] core::CustomString role() const;
     [[nodiscard]] bool isActive() const;
     // Staff linkage accessors
-    void setStaffList(const core::Vector<model::Staff> &staffs) const;
+    void setStaffList(const core::DynamicArray<model::Staff> &staffs) const;
     [[nodiscard]] core::CustomString staffId() const;
 
 protected:

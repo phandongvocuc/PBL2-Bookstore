@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QWidget>
-#include "../core/CustomContainers.h"
+#include "../core/DynamicArray.h"
 #include <QPair>
 #include <QString>
 #include <QColor>
@@ -14,14 +14,14 @@ public:
     explicit PieChart(QWidget *parent = nullptr);
 
     // segments: pair<label, value>
-    void setSegments(const core::Vector<QPair<QString, int>> &segments);
+    void setSegments(const core::DynamicArray<QPair<QString, int>> &segments);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
-    core::Vector<QPair<QString, int>> segments_;
-    core::Vector<QColor> colors_;
+    core::DynamicArray<QPair<QString, int>> segments_;
+    core::DynamicArray<QColor> colors_;
     void ensureColors(int n);
 };
 
