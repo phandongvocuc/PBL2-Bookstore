@@ -466,12 +466,6 @@
 			null
 		],
 		[
-			"/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/CustomContainers.h",
-			"MU",
-			"TAC5DWH4SE/moc_CustomContainers.cpp",
-			null
-		],
-		[
 			"/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/CustomString.h",
 			"MU",
 			"TAC5DWH4SE/moc_CustomString.cpp",
@@ -499,6 +493,12 @@
 			"/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/IdGenerator.h",
 			"MU",
 			"TAC5DWH4SE/moc_IdGenerator.cpp",
+			null
+		],
+		[
+			"/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/Map.h",
+			"MU",
+			"TAC5DWH4SE/moc_Map.cpp",
 			null
 		],
 		[
@@ -762,7 +762,6 @@
 		"QT_CHARTS_LIB",
 		"QT_CORE_LIB",
 		"QT_GUI_LIB",
-		"QT_NO_DEBUG",
 		"QT_OPENGLWIDGETS_LIB",
 		"QT_OPENGL_LIB",
 		"QT_WIDGETS_LIB"
@@ -813,7 +812,7 @@
 	"MOC_PATH_PREFIX" : false,
 	"MOC_PREDEFS_CMD" : 
 	[
-		"/usr/bin/c++",
+		"/usr/bin/clang++",
 		"-std=gnu++20",
 		"-w",
 		"-dM",
@@ -850,6 +849,11 @@
 		],
 		[
 			"/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/IdGenerator.cpp",
+			"MU",
+			null
+		],
+		[
+			"/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/Map.cpp",
 			"MU",
 			null
 		],
