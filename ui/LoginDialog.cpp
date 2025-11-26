@@ -8,9 +8,6 @@
 
 using namespace std;
 
-namespace {
-
-}
 
 namespace pbl2::ui {
 
