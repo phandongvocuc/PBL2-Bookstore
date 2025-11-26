@@ -79,6 +79,10 @@ BookDialog::BookDialog(QWidget *parent) : QDialog(parent) {
 
     quantitySpin = new QSpinBox(this);
     quantitySpin->setRange(0, 100000);
+    originalPriceSpin = new QSpinBox(this);
+    originalPriceSpin->setRange(0, 1000000000);
+    originalPriceSpin->setSingleStep(1000);
+    originalPriceSpin->setSuffix(tr(" VND"));
 
     statusCombo = new QComboBox(this);
     statusCombo->addItem(tr("CÒN"), QStringLiteral("CÒN"));
@@ -110,6 +114,7 @@ BookDialog::BookDialog(QWidget *parent) : QDialog(parent) {
     quantitySpin->setButtonSymbols(QAbstractSpinBox::UpDownArrows);
 
     form->addRow(tr("Số lượng"), quantitySpin);
+    form->addRow(tr("Giá gốc"), originalPriceSpin);
     form->addRow(tr("Tình trạng"), statusCombo);
     form->addRow(tr("Tóm tắt"), summaryEdit);
     formGroup->setLayout(form);
@@ -139,6 +144,7 @@ void BookDialog::setBook(const model::Book &book, const bool editing) {
     publishDateEdit->setDate(date.isValid() ? date : QDate::currentDate());
     publishYearSpin->setValue(book.getPublishYear());
     quantitySpin->setValue(book.getQuantity());
+    originalPriceSpin->setValue(book.getOriginalPrice());
     if (editing) {
         quantitySpin->setReadOnly(true);
         quantitySpin->setButtonSymbols(QAbstractSpinBox::NoButtons);
@@ -172,6 +178,7 @@ model::Book BookDialog::book() const {
     b.setPublishDate(bridge::toCoreDate(publishDateEdit->date()));
     b.setPublishYear(publishYearSpin->value());
     b.setQuantity(quantitySpin->value());
+    b.setOriginalPrice(originalPriceSpin->value());
     const auto statusValue = model::canonicalBookStatus(bridge::toCustomString(statusCombo->currentData().toString()));
     b.setStatus(statusValue.isEmpty() ? core::CustomStringLiteral("CÒN") : statusValue);
     b.setSummary(bridge::toCustomString(summaryEdit->toPlainText().trimmed()));

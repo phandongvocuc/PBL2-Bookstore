@@ -19,6 +19,17 @@
 using namespace std;
 using namespace pbl2;
 
+// Định nghĩa biến toàn cục cho các service
+pbl2::service::ReaderService *readerService = nullptr;
+pbl2::service::StaffService *staffService = nullptr;
+
+namespace pbl2 {
+namespace ui {
+    service::StaffService *staffService = nullptr;
+    service::ReaderService *readerService = nullptr;
+}
+}
+
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
     // Force a simple, light theme so it does not
@@ -40,6 +51,10 @@ int main(int argc, char *argv[]) {
     const auto dataDir = util::locateDataDir();
     const QString dataDirPath = bridge::toQString(dataDir);
     service::AccountService accountService(dataDir);
+
+    // Khởi tạo các service toàn cục
+    pbl2::ui::readerService = new pbl2::service::ReaderService(dataDir);
+    pbl2::ui::staffService = new pbl2::service::StaffService(dataDir);
 
     unique_ptr<ui::MainWindow> window;
     function<void(bool)> showLogin;

@@ -914,8 +914,13 @@
   /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/CaseSensitivity.h \
   /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/CustomString.h \
   /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/Date.h \
+  /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/DynamicArray.h \
+  /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/Optional.h \
   /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/header/model/Person.h \
   /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/header/model/Reader.h \
+  /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/header/repository/ReadersRepository.h \
+  /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/header/service/BaseService.h \
+  /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/header/service/ReaderService.h \
   /opt/homebrew/Cellar/qtbase/6.9.3/lib/QtCore.framework/Versions/A/Headers/QString \
   /opt/homebrew/Cellar/qtbase/6.9.3/lib/QtCore.framework/Versions/A/Headers/q17memory.h \
   /opt/homebrew/Cellar/qtbase/6.9.3/lib/QtCore.framework/Versions/A/Headers/q20functional.h \

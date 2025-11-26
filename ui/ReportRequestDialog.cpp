@@ -184,7 +184,7 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
 
             bool ok = true;
             const int count = countStr.isEmpty() ? 1 : countStr.toInt(&ok);
-            if (!ok || count <= 0) {
+            if (!ok) {
                 if (errors) errors->append(tr("Số lượng không hợp lệ ở dòng \"%1\".").arg(token));
                 continue;
             }

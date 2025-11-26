@@ -1,5 +1,4 @@
 #include "model/Staff.h"
-using namespace std;
 namespace pbl2::model {
 
     const core::Date &Staff::getHireDate() const {

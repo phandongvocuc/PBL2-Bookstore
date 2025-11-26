@@ -3,13 +3,11 @@
 #include <QVBoxLayout>
 
 #include "QtBridge.h"
+#include "DialogTheme.h"
 #include "ui_LoginDialog.h"
 
 using namespace std;
 
-namespace {
-
-}
 
 namespace pbl2::ui {
 
@@ -50,6 +48,8 @@ LoginDialog::LoginDialog(service::AccountService &accountService, QWidget *paren
     }
 
     setAutoFillBackground(true);
+    // Áp dụng theme chung cho dialog
+    pbl2::ui::applyDialogTheme(this);
 }
 
 LoginDialog::~LoginDialog() = default;

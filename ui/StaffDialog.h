@@ -4,6 +4,7 @@
 #include <QString>
 
 #include "model/Staff.h"
+#include "service/StaffService.h"
 
 class QCheckBox;
 class QComboBox;
@@ -12,6 +13,8 @@ class QDialogButtonBox;
 class QLabel;
 class QLineEdit;
 namespace pbl2::ui {
+// Biến toàn cục cho service
+extern pbl2::service::StaffService *staffService;
 
 class StaffDialog final : public QDialog {
     Q_OBJECT

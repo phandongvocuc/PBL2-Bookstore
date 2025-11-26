@@ -39,6 +39,7 @@ private:
     QDateEdit *publishDateEdit{nullptr};
     QSpinBox *publishYearSpin{nullptr};
     QSpinBox *quantitySpin{nullptr};
+    QSpinBox *originalPriceSpin{nullptr};
     QComboBox *statusCombo{nullptr};
     QPlainTextEdit *summaryEdit{nullptr};
     QDialogButtonBox *buttonBox{nullptr};

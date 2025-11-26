@@ -31,6 +31,9 @@ public:
     [[nodiscard]] int getQuantity() const;
     void setQuantity(int value);
 
+    [[nodiscard]] int getOriginalPrice() const;
+    void setOriginalPrice(int value);
+
     [[nodiscard]] const core::CustomString &getStatus() const;
     void setStatus(const core::CustomString &value);
 
@@ -46,6 +49,7 @@ private:
     core::Date publishDate;
     int publishYear{0};
     int quantity{0};
+    int originalPrice{0};
     core::CustomString status;
     core::CustomString summary;
 };

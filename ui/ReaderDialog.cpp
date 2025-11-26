@@ -1,6 +1,7 @@
 #include "ReaderDialog.h"
 
 #include "QtBridge.h"
+#include "service/ReaderService.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -185,6 +186,16 @@ void ReaderDialog::showError(const QString &message) const {
 void ReaderDialog::accept() {
     errorLabel->setVisible(false);
     if (!validateInputs()) return;
+
+    // Kiểm tra trùng lặp số điện thoại và căn cước công dân
+    // Giả sử có thể truy cập service qua biến readerService (cần chỉnh lại nếu tên khác)
+    extern pbl2::service::ReaderService *readerService;
+    const auto phone = phoneEdit->text().trimmed();
+    const auto identityCard = identityCardEdit->text().trimmed();
+    if (readerService && readerService->isDuplicatePhoneOrIdentityCard(bridge::toCustomString(phone), bridge::toCustomString(identityCard))) {
+        showError(tr("Số điện thoại hoặc số CCCD đã tồn tại trong hệ thống."));
+        return;
+    }
     QDialog::accept();
 }
 

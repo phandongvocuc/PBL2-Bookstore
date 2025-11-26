@@ -36,12 +36,12 @@ public:
     {
         if (LoginDialog->objectName().isEmpty())
             LoginDialog->setObjectName("LoginDialog");
-        LoginDialog->resize(806, 731);
+        LoginDialog->resize(637, 723);
         titleLabel = new QLabel(LoginDialog);
         titleLabel->setObjectName("titleLabel");
-        titleLabel->setGeometry(QRect(30, 80, 751, 91));
+        titleLabel->setGeometry(QRect(50, 80, 521, 91));
         QFont font;
-        font.setFamilies({QString::fromUtf8("Serif")});
+        font.setFamilies({QString::fromUtf8("Sans Serif")});
         font.setPointSize(24);
         font.setBold(false);
         titleLabel->setFont(font);
@@ -52,7 +52,7 @@ public:
         errorLabel->setAlignment(Qt::AlignmentFlag::AlignCenter);
         loginButton = new QPushButton(LoginDialog);
         loginButton->setObjectName("loginButton");
-        loginButton->setGeometry(QRect(510, 570, 151, 51));
+        loginButton->setGeometry(QRect(340, 570, 151, 51));
         QFont font1;
         font1.setPointSize(10);
         loginButton->setFont(font1);
@@ -63,27 +63,27 @@ public:
         exitButton->setAutoFillBackground(false);
         passwordEdit = new QLineEdit(LoginDialog);
         passwordEdit->setObjectName("passwordEdit");
-        passwordEdit->setGeometry(QRect(380, 350, 371, 41));
+        passwordEdit->setGeometry(QRect(140, 350, 371, 51));
         passwordEdit->setEchoMode(QLineEdit::EchoMode::Password);
         passwordLabel = new QLabel(LoginDialog);
         passwordLabel->setObjectName("passwordLabel");
-        passwordLabel->setGeometry(QRect(30, 330, 251, 101));
+        passwordLabel->setGeometry(QRect(30, 360, 81, 41));
         QFont font2;
-        font2.setFamilies({QString::fromUtf8("Serif")});
+        font2.setFamilies({QString::fromUtf8("Sans Serif")});
         passwordLabel->setFont(font2);
         usernameEdit = new QLineEdit(LoginDialog);
         usernameEdit->setObjectName("usernameEdit");
-        usernameEdit->setGeometry(QRect(380, 260, 371, 41));
+        usernameEdit->setGeometry(QRect(140, 240, 371, 51));
         usernameEdit->setTabletTracking(true);
         usernameLabel = new QLabel(LoginDialog);
         usernameLabel->setObjectName("usernameLabel");
-        usernameLabel->setGeometry(QRect(30, 230, 251, 81));
+        usernameLabel->setGeometry(QRect(30, 250, 101, 31));
         usernameLabel->setFont(font2);
         roleComboBox = new QComboBox(LoginDialog);
         roleComboBox->addItem(QString());
         roleComboBox->addItem(QString());
         roleComboBox->setObjectName("roleComboBox");
-        roleComboBox->setGeometry(QRect(330, 170, 171, 51));
+        roleComboBox->setGeometry(QRect(140, 420, 171, 31));
         roleComboBox->setFont(font2);
 
         retranslateUi(LoginDialog);

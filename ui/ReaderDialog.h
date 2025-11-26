@@ -4,6 +4,7 @@
 #include <QString>
 
 #include "model/Reader.h"
+#include "service/ReaderService.h"
 
 class QCheckBox;
 class QComboBox;
@@ -14,6 +15,8 @@ class QLineEdit;
 class QSpinBox;
 
 namespace pbl2::ui {
+// Biến toàn cục cho service
+extern pbl2::service::ReaderService *readerService;
 
 class ReaderDialog final : public QDialog {
     Q_OBJECT

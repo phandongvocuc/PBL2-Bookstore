@@ -912,12 +912,11 @@
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/ptrcheck.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/stdarg.h \
   /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/CaseSensitivity.h \
-  /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/CustomContainers.cpp \
-  /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/CustomContainers.h \
   /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/CustomString.h \
   /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/Date.h \
   /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/DateTime.h \
   /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/DynamicArray.h \
+  /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/Map.h \
   /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/Optional.h \
   /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/header/SystemConfig.h \
   /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/header/model/Account.h \

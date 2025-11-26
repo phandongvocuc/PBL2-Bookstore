@@ -1,6 +1,6 @@
 #include "core/IdGenerator.h"
 #include "core/DynamicArray.h"
-
+#include "core/CustomString.h"
 #include <string>
 
 using namespace std;

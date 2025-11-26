@@ -8,7 +8,10 @@ namespace {
 QString buildDialogStylesheet() {
     QString s;
 
-    // Base button style – primary action
+     // Màu nền cho QDialog (login)
+     s += "QDialog { background-color: #00D2FF; }";
+
+     // Base button style – primary action
     s += "QPushButton {"
          "  background-color: #1976D2;"   // primary blue
          "  color: white;"

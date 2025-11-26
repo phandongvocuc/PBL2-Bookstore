@@ -14,6 +14,20 @@ struct FileHeader {
     uint32_t count;
 };
 
+// Legacy book record without originalPrice (pre-price addition)
+struct LegacyBookRecord {
+    char id[32];
+    char title[256];
+    char author[128];
+    char genre[64];
+    char publisher[128];
+    DateRecord publishDate;
+    int32_t publishYear;
+    int32_t quantity;
+    char status[32];
+    char summary[512];
+};
+
 // Legacy report record without affectedBooks (pre-affectedBooks addition)
 struct LegacyReportRequestRecord {
     char requestId[32];
@@ -172,6 +186,7 @@ BookRecord BinaryFileStore::packBook(const model::Book &value) {
     record.publishDate = packDate(value.getPublishDate());
     record.publishYear = value.getPublishYear();
     record.quantity = value.getQuantity();
+    record.originalPrice = value.getOriginalPrice();
     assignText(record.status, sizeof(record.status), value.getStatus());
     assignText(record.summary, sizeof(record.summary), value.getSummary());
     return record;
@@ -187,6 +202,7 @@ model::Book BinaryFileStore::unpackBook(const BookRecord &record) {
     value.setPublishDate(unpackDate(record.publishDate));
     value.setPublishYear(record.publishYear);
     value.setQuantity(record.quantity);
+    value.setOriginalPrice(record.originalPrice);
     value.setStatus(CustomString(record.status));
     value.setSummary(CustomString(record.summary));
     return value;
@@ -373,7 +389,35 @@ bool BinaryFileStore::writeBooks(const DynamicArray<model::Book> &items, const C
 }
 
 DynamicArray<model::Book> BinaryFileStore::readBooks(const CustomString &path) {
-    return readCollection<model::Book, BookRecord>(path, unpackBook);
+    // Try reading the latest format (with originalPrice)
+    DynamicArray<model::Book> current = readCollection<model::Book, BookRecord>(path, unpackBook);
+    if (!current.isEmpty()) {
+        return current;
+    }
+
+    // Fallback: legacy format without originalPrice
+    DynamicArray<LegacyBookRecord> legacyRecords;
+    if (!readfile(path, legacyRecords)) {
+        return current;  // Could be empty new file
+    }
+    DynamicArray<model::Book> models(legacyRecords.size());
+    for (size_t i = 0; i < legacyRecords.size(); ++i) {
+        const auto &record = legacyRecords[i];
+        model::Book value;
+        value.setId(CustomString(record.id));
+        value.setTitle(CustomString(record.title));
+        value.setAuthor(CustomString(record.author));
+        value.setGenre(CustomString(record.genre));
+        value.setPublisher(CustomString(record.publisher));
+        value.setPublishDate(unpackDate(record.publishDate));
+        value.setPublishYear(record.publishYear);
+        value.setQuantity(record.quantity);
+        value.setOriginalPrice(0);
+        value.setStatus(CustomString(record.status));
+        value.setSummary(CustomString(record.summary));
+        models[i] = value;
+    }
+    return models;
 }
 
 bool BinaryFileStore::writeReaders(const DynamicArray<model::Reader> &items, const CustomString &path) {

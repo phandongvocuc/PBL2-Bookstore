@@ -66,6 +66,14 @@ void Book::setQuantity(const int value) {
     quantity = value;
 }
 
+int Book::getOriginalPrice() const {
+    return originalPrice;
+}
+
+void Book::setOriginalPrice(const int value) {
+    originalPrice = value;
+}
+
 const core::CustomString &Book::getStatus() const {
     return status;
 }

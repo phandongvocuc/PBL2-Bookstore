@@ -2,6 +2,20 @@
 
 namespace pbl2::service {
 
+    bool ReaderService::isDuplicatePhoneOrIdentityCard(const core::CustomString &phone, const core::CustomString &identityCard) const {
+        auto readers = ensureLoaded();
+        for (const auto &reader : readers) {
+            // Kiểm tra số điện thoại
+            if (reader.getPhone().compare(phone, core::CaseSensitivity::Insensitive) == 0) {
+                return true;
+            }
+            // Kiểm tra căn cước công dân
+            if (reader.getIdentityCard().compare(identityCard, core::CaseSensitivity::Insensitive) == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
     ReaderService::ReaderService(const core::CustomString &dataDir)
         : BaseService(dataDir) {}
 

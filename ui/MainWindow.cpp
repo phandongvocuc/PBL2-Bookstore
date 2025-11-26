@@ -72,7 +72,7 @@ core::DynamicArray<AffectedBookChange> parseAffectedBookChanges(const QString &r
 
         bool ok = true;
         const int count = countStr.isEmpty() ? 1 : countStr.toInt(&ok);
-        if (!ok || count <= 0) return;
+        if (!ok) return;
 
         const QString canonical = id.toUpper();
         for (int i = 0; i < changes.size(); ++i) {
@@ -114,6 +114,11 @@ QColor statusBadgeColor(const QString &statusCode) {
     if (normalized == QStringLiteral("ACTIVE")) return {0x28, 0xA7, 0x45};
     if (normalized == QStringLiteral("INACTIVE")) return {0x96, 0x9D, 0xA6};
     return {0x2F, 0x6A, 0xD0};
+}
+
+QString formatCurrency(int value) {
+    const QLocale viLocale(QLocale::Vietnamese, QLocale::Vietnam);
+    return viLocale.toString(value) + QStringLiteral(" VND");
 }
 
 class CardListDelegate final : public QStyledItemDelegate {
@@ -1345,6 +1350,8 @@ void MainWindow::fillBooksList(const core::DynamicArray<model::Book> &books) con
         const QString author = toQString(book.getAuthor());
         const QString genre = toQString(book.getGenre());
         const QString publisher = toQString(book.getPublisher());
+        const int originalPrice = book.getOriginalPrice();
+        const QString priceText = originalPrice > 0 ? formatCurrency(originalPrice) : tr("Chưa đặt giá");
         const QDate publishDate = toQDate(book.getPublishDate());
         const QString dateText = publishDate.isValid() ? publishDate.toString(Qt::ISODate) : tr("Không rõ");
         const QString status = bookStatusText(book.getStatus());
@@ -1362,12 +1369,17 @@ void MainWindow::fillBooksList(const core::DynamicArray<model::Book> &books) con
         item->setData(kCardRoleHeader, headerLine);
         item->setData(kCardRoleMeta, metaLine);
         item->setData(kCardRoleDetail, detailLine);
-        item->setData(kCardRoleSecondaryDetail, tr("Tình trạng: %1").arg(status));
+        item->setData(kCardRoleSecondaryDetail, tr("Giá gốc: %1 | Tình trạng: %2").arg(priceText, status));
         item->setData(kCardRoleBadgeText, status);
         item->setData(kCardRoleBadgeColor, statusBadgeColor(statusCode));
         item->setData(kCardRolePillText, tr("Số lượng: %1").arg(book.getQuantity()));
         item->setData(kCardRolePillColor, QVariant());
-        item->setToolTip(QStringList{headerLine, metaLine, detailLine, tr("Tình trạng: %1").arg(status), tr("Số lượng: %1").arg(book.getQuantity())}.join('\n'));
+        item->setToolTip(QStringList{headerLine,
+                                     metaLine,
+                                     detailLine,
+                                     tr("Giá gốc: %1").arg(priceText),
+                                     tr("Tình trạng: %1").arg(status),
+                                     tr("Số lượng: %1").arg(book.getQuantity())}.join('\n'));
         item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
         QSize hint = item->sizeHint();
@@ -1404,6 +1416,7 @@ void MainWindow::applyBookFilter() {
                 toQString(book.getAuthor()),
                 toQString(book.getGenre()),
                 toQString(book.getPublisher()),
+                QString::number(book.getOriginalPrice()),
                 bookStatus
             }.join(' ').toLower();
             if (!haystack.contains(term)) continue;
@@ -3228,10 +3241,13 @@ void MainWindow::handleLossOrDamage(const QString &status) {
         showWarningDialog(tr("Không tìm thấy"), tr("Không tìm thấy phiếu mượn."));
         return;
     }
-    if (normalizedStatus(loanOpt->getStatus()) == QStringLiteral("RETURNED")) {
+    const QString previousStatus = normalizedStatus(loanOpt->getStatus());
+    if (previousStatus == QStringLiteral("RETURNED")) {
         showInfoDialog(tr("Thông báo"), tr("Phiếu này đã đóng, không thể báo mất/hỏng."));
         return;
     }
+    const bool alreadyDamaged = previousStatus == QStringLiteral("DAMAGED");
+    const bool isDamaged = status == QStringLiteral("DAMAGED");
 
     bool ok = false;
     QString reason = QInputDialog::getMultiLineText(this,
@@ -3323,6 +3339,9 @@ void MainWindow::handleSubmitReport() {
 
 bool MainWindow::applyBookAdjustmentsForReport(const model::ReportRequest &report, QStringList *errors) {
     const auto changes = parseAffectedBookChanges(toQString(report.getAffectedBooks()));
+    const QString reportId = toQString(report.getRequestId()).toUpper();
+    const bool damageReport = reportId.startsWith(QStringLiteral("HƯ-")) || reportId.startsWith(QStringLiteral("HU-")) || reportId.contains(QStringLiteral("DAMAGED"));
+    const bool lostReport = reportId.startsWith(QStringLiteral("MẤT-")) || reportId.startsWith(QStringLiteral("MAT-")) || reportId.contains(QStringLiteral("LOST"));
     bool ok = true;
     for (const auto &change : changes) {
         const auto bookOpt = bookService.findById(toCustomString(change.id));
@@ -3332,14 +3351,22 @@ bool MainWindow::applyBookAdjustmentsForReport(const model::ReportRequest &repor
             continue;
         }
         model::Book updated = *bookOpt;
-        const int newQty = max(0, updated.getQuantity() - change.count);
-        updated.setQuantity(newQty);
-        if (model::isAvailabilityStatus(updated.getStatus())) {
-            updated.setStatus(model::availabilityStatusForQuantity(newQty));
+        int delta = -change.count;  // Default: trừ số lượng đã báo
+        if (damageReport) {
+            delta = change.count;  // Hư: trả lại số lượng sau khi được duyệt
+        } else if (lostReport) {
+            delta = 0 ;     // Mất:mất sách không thay đổi số lượng
         }
-        if (!bookService.updateBook(updated)) {
-            ok = false;
-            if (errors) errors->append(tr("Không thể cập nhật sách %1.").arg(change.id));
+        if (delta != 0) {
+            const int newQty = max(0, updated.getQuantity() + delta);
+            updated.setQuantity(newQty);
+            if (model::isAvailabilityStatus(updated.getStatus())) {
+                updated.setStatus(model::availabilityStatusForQuantity(newQty));
+            }
+            if (!bookService.updateBook(updated)) {
+                ok = false;
+                if (errors) errors->append(tr("Không thể cập nhật sách %1.").arg(change.id));
+            }
         }
     }
     return ok;

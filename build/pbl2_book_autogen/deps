@@ -915,8 +915,6 @@ pbl2_book_autogen/timestamp: \
 	/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/build/CMakeFiles/4.1.0/CMakeSystem.cmake \
 	/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/build/pbl2_book_autogen/moc_predefs.h \
 	/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/CaseSensitivity.h \
-	/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/CustomContainers.cpp \
-	/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/CustomContainers.h \
 	/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/CustomString.cpp \
 	/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/CustomString.h \
 	/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/Date.cpp \
@@ -926,6 +924,8 @@ pbl2_book_autogen/timestamp: \
 	/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/DynamicArray.h \
 	/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/IdGenerator.cpp \
 	/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/IdGenerator.h \
+	/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/Map.cpp \
+	/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/Map.h \
 	/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/Optional.h \
 	/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/PathUtils.cpp \
 	/Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/PathUtils.h \

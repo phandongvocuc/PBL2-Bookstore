@@ -911,8 +911,10 @@
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/limits.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/ptrcheck.h \
   /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/17/include/stdarg.h \
-  /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/CustomContainers.cpp \
-  /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/CustomContainers.h \
+  /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/CaseSensitivity.h \
+  /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/CustomString.h \
+  /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/DynamicArray.h \
+  /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/core/Map.h \
   /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/ui/PieChart.h \
   /Users/nguyenly/Documents/PBL2/PBL2-Bookstore/ui/StatsChart.h \
   /opt/homebrew/Cellar/qtbase/6.9.3/lib/QtCore.framework/Versions/A/Headers/QPair \
