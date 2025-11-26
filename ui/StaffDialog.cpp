@@ -1,6 +1,7 @@
 #include "StaffDialog.h"
 
 #include "QtBridge.h"
+#include "service/StaffService.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -199,6 +200,14 @@ void StaffDialog::showError(const QString &message) const {
 void StaffDialog::accept() {
     errorLabel->setVisible(false);
     if (!validateInputs()) return;
+
+    // Kiểm tra trùng lặp số điện thoại
+    extern pbl2::service::StaffService *staffService;
+    const auto phone = phoneEdit->text().trimmed();
+    if (staffService && staffService->isDuplicatePhone(bridge::toCustomString(phone))) {
+        showError(tr("Số điện thoại đã tồn tại trong hệ thống."));
+        return;
+    }
     QDialog::accept();
 }
 

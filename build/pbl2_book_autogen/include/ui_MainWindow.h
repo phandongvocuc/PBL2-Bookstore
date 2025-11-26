@@ -117,6 +117,7 @@ public:
     QPushButton *submitReportButton;
     QPushButton *approveReportButton;
     QPushButton *rejectReportButton;
+    QPushButton *deleteReportButton;
     QSpacerItem *reportsActionsSpacer;
     QWidget *statsTab;
     QVBoxLayout *statsTabOuterLayout;
@@ -612,6 +613,11 @@ public:
 
         reportsActionsLayout->addWidget(rejectReportButton);
 
+        deleteReportButton = new QPushButton(reportsActionsGroup);
+        deleteReportButton->setObjectName("deleteReportButton");
+
+        reportsActionsLayout->addWidget(deleteReportButton);
+
         reportsActionsSpacer = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
         reportsActionsLayout->addItem(reportsActionsSpacer);
@@ -942,6 +948,7 @@ public:
         submitReportButton->setText(QCoreApplication::translate("MainWindow", "L\341\272\255p y\303\252u c\341\272\247u", nullptr));
         approveReportButton->setText(QCoreApplication::translate("MainWindow", "Duy\341\273\207t", nullptr));
         rejectReportButton->setText(QCoreApplication::translate("MainWindow", "T\341\273\253 ch\341\273\221i", nullptr));
+        deleteReportButton->setText(QCoreApplication::translate("MainWindow", "X\303\263a b\303\241o c\303\241o", nullptr));
         tabs->setTabText(tabs->indexOf(reportsTab), QCoreApplication::translate("MainWindow", "B\303\241o c\303\241o", nullptr));
         statsFilterGroup->setTitle(QCoreApplication::translate("MainWindow", "B\341\273\231 l\341\273\215c", nullptr));
         timePeriodLabel->setText(QCoreApplication::translate("MainWindow", "Th\341\273\235i gian:", nullptr));

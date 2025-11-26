@@ -24,6 +24,9 @@ namespace pbl2::service {
     private:
         [[nodiscard]] core::DynamicArray<model::Staff> ensureLoaded() const override;
         void persist(const core::DynamicArray<model::Staff> &staffs) const override;
+    public:
+        // Hàm kiểm tra trùng lặp số điện thoại
+        [[nodiscard]] bool isDuplicatePhone(const core::CustomString &phone) const;
     };
 
 } // namespace pbl2::service

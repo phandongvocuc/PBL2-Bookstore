@@ -2,6 +2,15 @@
 
 namespace pbl2::service {
 
+    bool StaffService::isDuplicatePhone(const core::CustomString &phone) const {
+        auto staffs = ensureLoaded();
+        for (const auto &staff : staffs) {
+            if (staff.getPhone().compare(phone, core::CaseSensitivity::Insensitive) == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
     StaffService::StaffService(const core::CustomString &dataDir)
         : BaseService(dataDir) {}
 

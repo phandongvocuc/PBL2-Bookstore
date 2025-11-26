@@ -23,6 +23,9 @@ namespace pbl2::service {
     private:
         [[nodiscard]] core::DynamicArray<model::Reader> ensureLoaded() const override;
         void persist(const core::DynamicArray<model::Reader> &readers) const override;
+    public:
+        // Hàm kiểm tra trùng lặp số điện thoại hoặc căn cước công dân
+        [[nodiscard]] bool isDuplicatePhoneOrIdentityCard(const core::CustomString &phone, const core::CustomString &identityCard) const;
     };
 
 } // namespace pbl2::service
