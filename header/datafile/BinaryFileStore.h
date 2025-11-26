@@ -42,6 +42,7 @@ struct BookRecord {
     DateRecord publishDate;
     int32_t publishYear;
     int32_t quantity;
+    int32_t originalPrice;
     char status[32];
     char summary[512];
 };
