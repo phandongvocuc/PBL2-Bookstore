@@ -52,6 +52,7 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
     setStyleSheet("QDialog { background: #f8fafc; border-radius: 12px; } QGroupBox { font-weight: bold; } QLineEdit, QComboBox, QSpinBox, QDateEdit, QPlainTextEdit { min-height: 32px; font-size: 11pt; } QDialogButtonBox QPushButton { min-width: 90px; min-height: 32px; font-size: 11pt; } QLabel { font-size: 11pt; } ");
 
     idEdit = new QLineEdit(this);
+        idEdit->setValidator(new QIntValidator(0, 2147483647, this)); // Chỉ cho phép nhập số
     fullNameEdit = new QLineEdit(this);
     genderCombo = new QComboBox(this);
     genderCombo->setEditable(true);
@@ -60,6 +61,7 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
     genderCombo->setEditText(QString());
     addressEdit = new QLineEdit(this);
     phoneEdit = new QLineEdit(this);
+        phoneEdit->setValidator(new QIntValidator(0, 2147483647, this)); // Chỉ cho phép nhập số
     emailEdit = new QLineEdit(this);
     positionCombo = new QComboBox(this);
     positionCombo->setEditable(true);

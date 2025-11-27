@@ -43,8 +43,10 @@ ReaderDialog::ReaderDialog(QWidget *parent) : QDialog(parent) {
     genderCombo->setEditText(QString());
     addressEdit = new QLineEdit(this);
     phoneEdit = new QLineEdit(this);
+        phoneEdit->setValidator(new QIntValidator(0, 2147483647, this)); // Chỉ cho phép nhập số
     emailEdit = new QLineEdit(this);
     identityCardEdit = new QLineEdit(this);
+        identityCardEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("^\\d{12}$"), this)); // Chỉ cho phép nhập đúng 12 số
     notesEdit = new QLineEdit(this);
     dobEdit = new QDateEdit(this);
     dobEdit->setCalendarPopup(true);
@@ -127,11 +129,7 @@ void ReaderDialog::setReader(const model::Reader &reader, const bool editing) {
     } else {
         dobEdit->setDate(QDate::currentDate());
     }
-    if (reader.getCreatedDate().isValid()) {
-        createdDateEdit->setDate(bridge::toQDate(reader.getCreatedDate()));
-    } else {
-        createdDateEdit->setDate(QDate::currentDate());
-    }
+    createdDateEdit->setDate(QDate::currentDate()); // Luôn đặt là ngày hôm nay
     if (reader.getExpiryDate().isValid()) {
         expiryDateEdit->setDate(bridge::toQDate(reader.getExpiryDate()));
     } else {

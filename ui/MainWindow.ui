@@ -77,12 +77,12 @@
          <property name="text">
           <string>Điều hướng</string>
          </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QListWidget" name="navigationList">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -103,40 +103,25 @@
           </size>
          </property>
          <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
+          <enum>QFrame::Shape::NoFrame</enum>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Plain</enum>
+          <enum>QFrame::Shadow::Plain</enum>
          </property>
          <property name="lineWidth">
           <number>0</number>
          </property>
          <property name="verticalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
+          <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
          </property>
          <property name="horizontalScrollBarPolicy">
-          <enum>Qt::ScrollBarAlwaysOff</enum>
+          <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
          </property>
-         <property name="movement">
-          <enum>QListView::Static</enum>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
          </property>
-         <property name="flow">
-          <enum>QListView::TopToBottom</enum>
-         </property>
-         <property name="isWrapping" stdset="0">
-          <bool>false</bool>
-         </property>
-         <property name="resizeMode">
-          <enum>QListView::Adjust</enum>
-         </property>
-         <property name="layoutMode">
-          <enum>QListView::Batched</enum>
-         </property>
-         <property name="spacing">
-          <number>8</number>
-         </property>
-         <property name="batchSize">
-          <number>1000</number>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
          </property>
          <property name="iconSize">
           <size>
@@ -145,25 +130,40 @@
           </size>
          </property>
          <property name="textElideMode">
-          <enum>Qt::ElideNone</enum>
+          <enum>Qt::TextElideMode::ElideNone</enum>
          </property>
          <property name="verticalScrollMode">
-          <enum>QAbstractItemView::ScrollPerPixel</enum>
+          <enum>QAbstractItemView::ScrollMode::ScrollPerPixel</enum>
          </property>
          <property name="horizontalScrollMode">
-          <enum>QAbstractItemView::ScrollPerPixel</enum>
+          <enum>QAbstractItemView::ScrollMode::ScrollPerPixel</enum>
          </property>
-         <property name="itemAlignment">
-          <set>Qt::AlignVCenter</set>
+         <property name="movement">
+          <enum>QListView::Movement::Static</enum>
          </property>
-         <property name="selectionMode">
-          <enum>QAbstractItemView::SingleSelection</enum>
+         <property name="flow">
+          <enum>QListView::Flow::TopToBottom</enum>
          </property>
-         <property name="selectionBehavior">
-          <enum>QAbstractItemView::SelectRows</enum>
+         <property name="isWrapping" stdset="0">
+          <bool>false</bool>
+         </property>
+         <property name="resizeMode">
+          <enum>QListView::ResizeMode::Adjust</enum>
+         </property>
+         <property name="layoutMode">
+          <enum>QListView::LayoutMode::Batched</enum>
+         </property>
+         <property name="spacing">
+          <number>8</number>
+         </property>
+         <property name="batchSize">
+          <number>1000</number>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
+         </property>
+         <property name="itemAlignment">
+          <set>Qt::AlignmentFlag::AlignVCenter</set>
          </property>
         </widget>
        </item>
@@ -202,9 +202,6 @@
        <number>0</number>
       </property>
       <widget class="QWidget" name="homeTab">
-       <attribute name="title">
-        <string>Trang chủ</string>
-       </attribute>
        <property name="styleSheet">
         <string notr="true">QWidget#homeTab {
     background-color: #090e18ff;
@@ -214,64 +211,47 @@
     background-position: center;
 }</string>
        </property>
-       <layout class="QVBoxLayout" name="homeTabLayout">
-        <property name="spacing">
-         <number>12</number>
+       <attribute name="title">
+        <string>Trang chủ</string>
+       </attribute>
+       <widget class="QLabel" name="homeTitleLabel">
+        <property name="geometry">
+         <rect>
+          <x>150</x>
+          <y>30</y>
+          <width>571</width>
+          <height>131</height>
+         </rect>
         </property>
-        <property name="leftMargin">
-         <number>18</number>
+        <property name="font">
+         <font>
+          <family>Academy Engraved LET</family>
+          <pointsize>18</pointsize>
+          <bold>false</bold>
+         </font>
         </property>
-        <property name="topMargin">
-         <number>18</number>
+        <property name="text">
+         <string>HỆ THỐNG QUẢN LÝ CHO THUÊ SÁCH VÀ TRUYỆN</string>
         </property>
-        <property name="rightMargin">
-         <number>18</number>
+       </widget>
+       <widget class="QLabel" name="homeHintLabel">
+        <property name="geometry">
+         <rect>
+          <x>34</x>
+          <y>483</y>
+          <width>931</width>
+          <height>181</height>
+         </rect>
         </property>
-        <property name="bottomMargin">
-         <number>18</number>
+        <property name="text">
+         <string>Sử dụng các tab bên dưới hoặc menu bên trái để di chuyển giữa các khu vực. Tất cả thông tin mới nhất về sách, bạn đọc và phiếu mượn sẽ được cập nhật sau mỗi lần tải lại.</string>
         </property>
-        <item>
-         <widget class="QLabel" name="homeTitleLabel">
-          <property name="font">
-           <font>
-            <pointsize>16</pointsize>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Chào mừng trở lại hệ thống quản lý thư viện</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="homeHintLabel">
-          <property name="text">
-           <string>Sử dụng các tab bên dưới hoặc menu bên trái để di chuyển giữa các khu vực. Tất cả thông tin mới nhất về sách, bạn đọc và phiếu mượn sẽ được cập nhật sau mỗi lần tải lại.</string>
-          </property>
-          <property name="wordWrap">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="homeSpacer">
-          <property name="orientation">
-           <enum>Qt::Orientation::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
       </widget>
       <widget class="QWidget" name="booksTab">
-       <attribute name="title">
-        <string>Sách</string>
-       </attribute>
        <property name="styleSheet">
         <string notr="true">QWidget#booksTab {
     background-color: #090e18ff;
@@ -281,6 +261,9 @@
     background-position: center;
 }</string>
        </property>
+       <attribute name="title">
+        <string>Sách</string>
+       </attribute>
        <layout class="QVBoxLayout" name="booksTabLayout">
         <property name="spacing">
          <number>12</number>
@@ -416,9 +399,6 @@
        </layout>
       </widget>
       <widget class="QWidget" name="readersTab">
-       <attribute name="title">
-        <string>Độc giả</string>
-       </attribute>
        <property name="styleSheet">
         <string notr="true">QWidget#readersTab {
     background-color: #090e18ff;
@@ -428,6 +408,9 @@
     background-position: center;
 }</string>
        </property>
+       <attribute name="title">
+        <string>Độc giả</string>
+       </attribute>
        <layout class="QVBoxLayout" name="readersTabLayout">
         <property name="spacing">
          <number>12</number>
@@ -556,9 +539,6 @@
        </layout>
       </widget>
       <widget class="QWidget" name="loansTab">
-       <attribute name="title">
-        <string>Mượn trả</string>
-       </attribute>
        <property name="styleSheet">
         <string notr="true">QWidget#loansTab {
     background-color: #090e18ff;
@@ -568,6 +548,9 @@
     background-position: center;
 }</string>
        </property>
+       <attribute name="title">
+        <string>Mượn trả</string>
+       </attribute>
        <layout class="QVBoxLayout" name="loansTabLayout">
         <property name="spacing">
          <number>12</number>
@@ -710,9 +693,6 @@
        </layout>
       </widget>
       <widget class="QWidget" name="reportsTab">
-       <attribute name="title">
-        <string>Báo cáo</string>
-       </attribute>
        <property name="styleSheet">
         <string notr="true">QWidget#reportsTab {
     background-color: #090e18ff;
@@ -722,6 +702,9 @@
     background-position: center;
 }</string>
        </property>
+       <attribute name="title">
+        <string>Báo cáo</string>
+       </attribute>
        <layout class="QVBoxLayout" name="reportsTabLayout">
         <property name="spacing">
          <number>12</number>
@@ -836,24 +819,24 @@
             </widget>
            </item>
            <item>
-           <widget class="QPushButton" name="rejectReportButton">
-            <property name="text">
-             <string>Từ chối</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="deleteReportButton">
-            <property name="text">
-             <string>Xóa báo cáo</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="reportsActionsSpacer">
-            <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
-            </property>
+            <widget class="QPushButton" name="rejectReportButton">
+             <property name="text">
+              <string>Từ chối</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="deleteReportButton">
+             <property name="text">
+              <string>Xóa báo cáo</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="reportsActionsSpacer">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
              <property name="sizeHint" stdset="0">
               <size>
                <width>40</width>
@@ -868,9 +851,6 @@
        </layout>
       </widget>
       <widget class="QWidget" name="statsTab">
-       <attribute name="title">
-        <string>Thống kê</string>
-       </attribute>
        <property name="styleSheet">
         <string notr="true">QWidget#statsTab {
     background-color: #c9cdd5ff;
@@ -880,6 +860,9 @@
     background-position: center;
 }</string>
        </property>
+       <attribute name="title">
+        <string>Thống kê</string>
+       </attribute>
        <layout class="QVBoxLayout" name="statsTabOuterLayout">
         <property name="spacing">
          <number>0</number>
@@ -887,16 +870,16 @@
         <property name="leftMargin">
          <number>0</number>
         </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
          <layout class="QVBoxLayout" name="statsTabLayout">
           <property name="spacing">
            <number>10</number>
@@ -999,9 +982,6 @@
        </layout>
       </widget>
       <widget class="QWidget" name="staffsTab">
-       <attribute name="title">
-        <string>Nhân viên</string>
-       </attribute>
        <property name="styleSheet">
         <string notr="true">QWidget#staffsTab {
     background-color: #090e18ff;
@@ -1011,6 +991,9 @@
     background-position: center;
 }</string>
        </property>
+       <attribute name="title">
+        <string>Nhân viên</string>
+       </attribute>
        <layout class="QVBoxLayout" name="staffsTabLayout">
         <property name="spacing">
          <number>12</number>
@@ -1139,9 +1122,6 @@
        </layout>
       </widget>
       <widget class="QWidget" name="accountsTab">
-       <attribute name="title">
-        <string>Tài khoản</string>
-       </attribute>
        <property name="styleSheet">
         <string notr="true">QWidget#accountsTab {
     background-color: #090e18ff;
@@ -1151,6 +1131,9 @@
     background-position: center;
 }</string>
        </property>
+       <attribute name="title">
+        <string>Tài khoản</string>
+       </attribute>
        <layout class="QVBoxLayout" name="accountsTabLayout">
         <property name="spacing">
          <number>12</number>
@@ -1238,9 +1221,6 @@
        </layout>
       </widget>
       <widget class="QWidget" name="settingsTab">
-       <attribute name="title">
-        <string>Cài đặt</string>
-       </attribute>
        <property name="styleSheet">
         <string notr="true">QWidget#settingsTab {
     background-color: #090e18ff;
@@ -1250,6 +1230,9 @@
     background-position: center;
 }</string>
        </property>
+       <attribute name="title">
+        <string>Cài đặt</string>
+       </attribute>
        <layout class="QVBoxLayout" name="settingsTabLayout">
         <property name="spacing">
          <number>12</number>
@@ -1338,7 +1321,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1313</width>
+     <width>1333</width>
      <height>37</height>
     </rect>
    </property>
@@ -1354,22 +1337,15 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="refreshAction">
    <property name="text">
-  <string>Reset</string>
+    <string>Reset</string>
    </property>
   </action>
   <action name="logoutAction">
    <property name="text">
-  <string>Logout</string>
+    <string>Logout</string>
    </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>StatsChart</class>
-   <extends>QWidget</extends>
-   <header>StatsChart.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
