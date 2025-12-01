@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1333</width>
-    <height>929</height>
+    <width>1375</width>
+    <height>967</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -853,12 +853,34 @@
       <widget class="QWidget" name="statsTab">
        <property name="styleSheet">
         <string notr="true">QWidget#statsTab {
-    background-color: #c9cdd5ff;
-    border-image: url(:/icons/logobook.png) 0 0 0 0 stretch stretch;
-    background-image: url(:/icons/logobook.png);
-    background-repeat: no-repeat;
-    background-position: center;
-}</string>
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #56b6fa, stop:1 #3f9fe8);
+}
+QGroupBox#statsFilterGroup {
+    color: #e5f1ff;
+    border: 1px solid rgba(255,255,255,0.32);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.12);
+    margin-top: 8px;
+    font-weight: 700;
+}
+QGroupBox#statsFilterGroup::title {
+    subcontrol-origin: margin;
+    left: 12px;
+    padding: 4px 6px;
+}
+#statsFilterGroup QLabel {
+    color: #e5f1ff;
+}
+#statsFilterGroup QComboBox,
+#statsFilterGroup QDateEdit,
+#statsFilterGroup QPushButton {
+    background: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: #0f172a;
+}
+#statsFilterGroup QPushButton:hover { background: #e5f1ff; }</string>
        </property>
        <attribute name="title">
         <string>Thống kê</string>

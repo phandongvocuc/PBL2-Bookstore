@@ -1,6 +1,7 @@
 #include "BookDialog.h"
 #include "BookStatus.h"
 #include "QtBridge.h"
+// ...existing code...
 #include <QComboBox>
 #include <QDateEdit>
 #include <QDate>
@@ -13,6 +14,8 @@
 #include <QStringList>
 #include <QSpinBox>
 #include <QVBoxLayout>
+#include <QPushButton>
+#include <QFileDialog>
 
 using namespace std;
 
@@ -74,15 +77,29 @@ BookDialog::BookDialog(QWidget *parent) : QDialog(parent) {
     publishDateEdit->setCalendarPopup(true);
     publishDateEdit->setDisplayFormat(QStringLiteral("dd/MM/yyyy"));
 
-    publishYearSpin = new QSpinBox(this);
-    publishYearSpin->setRange(0, 9999);
-
     quantitySpin = new QSpinBox(this);
     quantitySpin->setRange(0, 100000);
+    quantitySpin->setReadOnly(true);
+    quantitySpin->setButtonSymbols(QAbstractSpinBox::NoButtons);
     originalPriceSpin = new QSpinBox(this);
     originalPriceSpin->setRange(0, 1000000000);
     originalPriceSpin->setSingleStep(1000);
     originalPriceSpin->setSuffix(tr(" VND"));
+
+    // Ảnh bìa
+    coverLabel = new QLabel(this);
+    coverLabel->setFixedSize(120, 160);
+    coverLabel->setStyleSheet("border: 1px solid #ccc; background: #eee; margin-bottom: 8px;");
+    coverLabel->setAlignment(Qt::AlignCenter);
+    chooseCoverButton = new QPushButton(tr("Chọn ảnh bìa"), this);
+    connect(chooseCoverButton, &QPushButton::clicked, this, [this]() {
+        QString file = QFileDialog::getOpenFileName(this, tr("Chọn ảnh bìa"), QString(), "Images (*.png *.jpg *.jpeg *.bmp)");
+        if (!file.isEmpty()) {
+            QPixmap pix(file);
+            coverLabel->setPixmap(pix.scaled(coverLabel->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            coverImagePath = bridge::toCustomString(file);
+        }
+    });
 
     statusCombo = new QComboBox(this);
     statusCombo->addItem(tr("CÒN"), QStringLiteral("CÒN"));
@@ -103,13 +120,17 @@ BookDialog::BookDialog(QWidget *parent) : QDialog(parent) {
     form->setVerticalSpacing(10);
     form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
     form->setLabelAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    // Thêm ảnh bìa vào đầu form
+    auto *coverLayout = new QHBoxLayout;
+    coverLayout->addWidget(coverLabel);
+    coverLayout->addWidget(chooseCoverButton);
+    form->addRow(tr("Ảnh bìa"), coverLayout);
     form->addRow(tr("Mã sách"), idEdit);
     form->addRow(tr("Tiêu đề"), titleEdit);
     form->addRow(tr("Tác giả"), authorEdit);
     form->addRow(tr("Thể loại"), genreCombo);
     form->addRow(tr("Nhà xuất bản"), publisherEdit);
     form->addRow(tr("Ngày phát hành"), publishDateEdit);
-    form->addRow(tr("Năm xuất bản"), publishYearSpin);
     quantitySpin->setReadOnly(false);
     quantitySpin->setButtonSymbols(QAbstractSpinBox::UpDownArrows);
 
@@ -136,6 +157,7 @@ void BookDialog::setBook(const model::Book &book, const bool editing) {
     editingMode = editing;
     idEdit->setText(bridge::toQString(book.getId()));
     idEdit->setReadOnly(editing || forceIdReadOnly);
+    idEdit->setEnabled(!editing && !forceIdReadOnly);
     titleEdit->setText(bridge::toQString(book.getTitle()));
     authorEdit->setText(bridge::toQString(book.getAuthor()));
     genreCombo->setEditText(bridge::toQString(book.getGenre()));
@@ -146,15 +168,36 @@ void BookDialog::setBook(const model::Book &book, const bool editing) {
     } else {
         publishDateEdit->setDate(QDate::currentDate());
     }
-    publishYearSpin->setValue(book.getPublishYear());
     quantitySpin->setValue(book.getQuantity());
     originalPriceSpin->setValue(book.getOriginalPrice());
     if (editing) {
+        // Khóa những trường không muốn chỉnh sửa khi cập nhật
+        titleEdit->setReadOnly(true);
+        authorEdit->setReadOnly(true);
+        publisherEdit->setReadOnly(true);
+
         quantitySpin->setReadOnly(true);
         quantitySpin->setButtonSymbols(QAbstractSpinBox::NoButtons);
+        quantitySpin->setEnabled(true);
+
+        publishDateEdit->setEnabled(true);
+        originalPriceSpin->setEnabled(true);
+        chooseCoverButton->setEnabled(true);
+        genreCombo->setEnabled(true);
+        summaryEdit->setReadOnly(false);
     } else {
-        quantitySpin->setReadOnly(false);
-        quantitySpin->setButtonSymbols(QAbstractSpinBox::UpDownArrows);
+        quantitySpin->setReadOnly(true);
+        quantitySpin->setButtonSymbols(QAbstractSpinBox::NoButtons);
+        quantitySpin->setEnabled(true);
+
+        publishDateEdit->setEnabled(true);
+        originalPriceSpin->setEnabled(true);
+        chooseCoverButton->setEnabled(true);
+        genreCombo->setEnabled(true);
+        publisherEdit->setReadOnly(false);
+        titleEdit->setReadOnly(false);
+        authorEdit->setReadOnly(false);
+        summaryEdit->setReadOnly(false);
     }
     const core::CustomString status = model::canonicalBookStatus(book.getStatus());
     for (int i = 0; i < statusCombo->count(); ++i) {
@@ -164,6 +207,15 @@ void BookDialog::setBook(const model::Book &book, const bool editing) {
         }
     }
     summaryEdit->setPlainText(bridge::toQString(book.getSummary()));
+    // Hiển thị ảnh bìa nếu có
+    coverImagePath = book.getCoverImagePath();
+    QString coverPath = bridge::toQString(coverImagePath);
+    if (!coverPath.isEmpty()) {
+        QPixmap pix(coverPath);
+        coverLabel->setPixmap(pix.scaled(coverLabel->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    } else {
+        coverLabel->setPixmap(QPixmap());
+    }
 }
 
 void BookDialog::presetId(const QString &id, const bool lockField) {
@@ -181,12 +233,12 @@ model::Book BookDialog::book() const {
     b.setGenre(bridge::toCustomString(genreCombo->currentText().trimmed()));
     b.setPublisher(bridge::toCustomString(publisherEdit->text().trimmed()));
     b.setPublishDate(bridge::toCoreDate(publishDateEdit->date()));
-    b.setPublishYear(publishYearSpin->value());
     b.setQuantity(quantitySpin->value());
     b.setOriginalPrice(originalPriceSpin->value());
     const auto statusValue = model::canonicalBookStatus(bridge::toCustomString(statusCombo->currentData().toString()));
     b.setStatus(statusValue.isEmpty() ? core::CustomStringLiteral("CÒN") : statusValue);
     b.setSummary(bridge::toCustomString(summaryEdit->toPlainText().trimmed()));
+    b.setCoverImagePath(coverImagePath);
     return b;
 }
 

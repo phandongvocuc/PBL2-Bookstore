@@ -1,12 +1,12 @@
 #pragma once
 
-#include <QLabel>
 #include <QFrame>
+#include <QLabel>
 #include <QListWidget>
+#include <QProgressBar>
 #include "../core/DynamicArray.h"
 #include "../core/Map.h"
 #include "StatsChart.h"
-#include "PieChart.h"
 
 namespace pbl2::ui {
 
@@ -18,42 +18,31 @@ public:
 
     void updateStats(int totalBooks, int totalReaders, int totalLoans,
                      int overdueLoans, qint64 totalFines) const;
-    
+
     void updateTopBooksChart(const core::Map<QString, int> &bookBorrowCounts) const;
-    
+
     void updateCategoryChart(const core::Map<QString, int> &categoryBorrowCounts) const;
 
     void updateMonthlyChart(const core::DynamicArray<int> &monthlyBorrowCounts) const;
 
-    void updatePieChart(int cardFees, int fines) const;
-    
-    void updateLoansList(const core::DynamicArray<QPair<QString, QString>> &loans) const;
-    
-    void updateActiveReadersList(const core::DynamicArray<QString> &readers) const;
-
 private:
     void setupUi();
-    
-    // Summary cards
+    QFrame *createMetricCard(const QString &iconPath, const QColor &accent,
+                             const QString &title, QLabel *&valueLabel);
+    QWidget *buildTopBookRow(const QString &title, int count, int maxCount, int colorIndex) const;
+
     QLabel *totalBooksValue{nullptr};
     QLabel *totalReadersValue{nullptr};
     QLabel *totalLoansValue{nullptr};
     QLabel *totalFinesValue{nullptr};
-    QLabel *fineSummaryLabel{nullptr};
+    QLabel *fineHeadlineLabel{nullptr};
     QLabel *overdueBooksLabel{nullptr};
-    QLabel *overdueReadersLabel{nullptr};
-    
-    // Charts
-    StatsChart *topBooksChart{nullptr};
+
     StatsChart *categoryChart{nullptr};
     StatsChart *monthlyChart{nullptr};
-    PieChart *revenuePieChart{nullptr};
-    
-    // Lists
-    QListWidget *recentLoansList{nullptr};
-    QListWidget *activeReadersList{nullptr};
-    
-    QFrame *createStatsCard(const QString &title, const QString &icon = QString());
+    QListWidget *topBooksList{nullptr};
 };
 
 }  // namespace pbl2::ui
+
+using StatsWidget = pbl2::ui::StatsWidget;

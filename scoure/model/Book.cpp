@@ -50,13 +50,6 @@ void Book::setPublishDate(const core::Date &value) {
     publishDate = value;
 }
 
-int Book::getPublishYear() const {
-    return publishYear;
-}
-
-void Book::setPublishYear(const int value) {
-    publishYear = value;
-}
 
 int Book::getQuantity() const {
     return quantity;

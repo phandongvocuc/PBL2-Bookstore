@@ -25,9 +25,6 @@ public:
     [[nodiscard]] const core::Date &getPublishDate() const;
     void setPublishDate(const core::Date &value);
 
-    [[nodiscard]] int getPublishYear() const;
-    void setPublishYear(int value);
-
     [[nodiscard]] int getQuantity() const;
     void setQuantity(int value);
 
@@ -47,11 +44,15 @@ private:
     core::CustomString genre;
     core::CustomString publisher;
     core::Date publishDate;
-    int publishYear{0};
     int quantity{0};
     int originalPrice{0};
     core::CustomString status;
     core::CustomString summary;
+    core::CustomString coverImagePath; // Đường dẫn ảnh bìa
+
+public:
+    [[nodiscard]] const core::CustomString &getCoverImagePath() const { return coverImagePath; }
+    void setCoverImagePath(const core::CustomString &path) { coverImagePath = path; }
 };
 
 }  // namespace model

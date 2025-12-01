@@ -1,9 +1,7 @@
 #include "PieChart.h"
 
-#include <QColor>
 #include <QPainter>
 #include <QPaintEvent>
-
 
 using namespace std;  // project-wide request
 
@@ -19,7 +17,7 @@ void PieChart::setSegments(const core::DynamicArray<QPair<QString, int>> &segmen
     update();
 }
 
-void PieChart::ensureColors(int n) {
+void PieChart::ensureColors(const int n) {
     static core::DynamicArray<QColor> base = []() {
         core::DynamicArray<QColor> colors;
         colors.append(QColor(0x4E, 0x79, 0xA7));
@@ -65,10 +63,9 @@ void PieChart::paintEvent(QPaintEvent *event) {
         startAngle += span;
     }
 
-    // draw legend on right
     const int legendX = pieRect.right() + 10;
     int legendY = int(pieRect.top());
-    const int boxSize = 12;
+    constexpr int boxSize = 12;
     p.setPen(Qt::NoPen);
     for (int i = 0; i < segments_.size(); ++i) {
         p.setBrush(colors_.value(i, QColor(Qt::gray)));
@@ -81,4 +78,4 @@ void PieChart::paintEvent(QPaintEvent *event) {
     }
 }
 
-}  // namespace ui
+}  // namespace pbl2::ui

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <QWidget>
-#include "../core/DynamicArray.h"
+#include <QColor>
 #include <QPair>
 #include <QString>
-#include <QColor>
+#include <QWidget>
+#include "../core/DynamicArray.h"
 
 namespace pbl2::ui {
 
@@ -13,7 +13,6 @@ class PieChart : public QWidget {
 public:
     explicit PieChart(QWidget *parent = nullptr);
 
-    // segments: pair<label, value>
     void setSegments(const core::DynamicArray<QPair<QString, int>> &segments);
 
 protected:

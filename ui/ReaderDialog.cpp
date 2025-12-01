@@ -112,6 +112,7 @@ void ReaderDialog::setReader(const model::Reader &reader, const bool editing) {
     editingMode = editing;
     idEdit->setText(bridge::toQString(reader.getId()));
     idEdit->setReadOnly(editing || forceIdReadOnly);
+    idEdit->setEnabled(!editing && !forceIdReadOnly);
     fullNameEdit->setText(bridge::toQString(reader.getFullName()));
     if (const QString genderText = bridge::toQString(reader.getGender()).trimmed(); !genderText.isEmpty()) {
         genderCombo->setCurrentText(genderText);
@@ -129,7 +130,11 @@ void ReaderDialog::setReader(const model::Reader &reader, const bool editing) {
     } else {
         dobEdit->setDate(QDate::currentDate());
     }
-    createdDateEdit->setDate(QDate::currentDate()); // Luôn đặt là ngày hôm nay
+    if (reader.getCreatedDate().isValid()) {
+        createdDateEdit->setDate(bridge::toQDate(reader.getCreatedDate()));
+    } else {
+        createdDateEdit->setDate(QDate::currentDate());
+    }
     if (reader.getExpiryDate().isValid()) {
         expiryDateEdit->setDate(bridge::toQDate(reader.getExpiryDate()));
     } else {
@@ -138,6 +143,15 @@ void ReaderDialog::setReader(const model::Reader &reader, const bool editing) {
     totalBorrowedSpin->setValue(reader.getTotalBorrowed());
     activeFlag = reader.isActive();
     activeCheck->setChecked(activeFlag);
+
+    if (editing) {
+        idEdit->setReadOnly(true);
+        idEdit->setEnabled(false);
+        fullNameEdit->setReadOnly(true);
+    } else {
+        idEdit->setEnabled(!forceIdReadOnly);
+        fullNameEdit->setReadOnly(false);
+    }
 }
 
 void ReaderDialog::presetId(const QString &id, const bool lockField) {

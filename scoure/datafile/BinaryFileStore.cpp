@@ -22,7 +22,6 @@ struct LegacyBookRecord {
     char genre[64];
     char publisher[128];
     DateRecord publishDate;
-    int32_t publishYear;
     int32_t quantity;
     char status[32];
     char summary[512];
@@ -184,11 +183,12 @@ BookRecord BinaryFileStore::packBook(const model::Book &value) {
     assignText(record.genre, sizeof(record.genre), value.getGenre());
     assignText(record.publisher, sizeof(record.publisher), value.getPublisher());
     record.publishDate = packDate(value.getPublishDate());
-    record.publishYear = value.getPublishYear();
+    // publishYear removed
     record.quantity = value.getQuantity();
     record.originalPrice = value.getOriginalPrice();
     assignText(record.status, sizeof(record.status), value.getStatus());
     assignText(record.summary, sizeof(record.summary), value.getSummary());
+    assignText(record.coverImagePath, sizeof(record.coverImagePath), value.getCoverImagePath());
     return record;
 }
 
@@ -200,11 +200,12 @@ model::Book BinaryFileStore::unpackBook(const BookRecord &record) {
     value.setGenre(CustomString(record.genre));
     value.setPublisher(CustomString(record.publisher));
     value.setPublishDate(unpackDate(record.publishDate));
-    value.setPublishYear(record.publishYear);
+    // publishYear removed
     value.setQuantity(record.quantity);
     value.setOriginalPrice(record.originalPrice);
     value.setStatus(CustomString(record.status));
     value.setSummary(CustomString(record.summary));
+    value.setCoverImagePath(CustomString(record.coverImagePath));
     return value;
 }
 
@@ -395,7 +396,7 @@ DynamicArray<model::Book> BinaryFileStore::readBooks(const CustomString &path) {
         return current;
     }
 
-    // Fallback: legacy format without originalPrice
+    // Fallback: legacy format without originalPrice/coverImagePath
     DynamicArray<LegacyBookRecord> legacyRecords;
     if (!readfile(path, legacyRecords)) {
         return current;  // Could be empty new file
@@ -410,13 +411,16 @@ DynamicArray<model::Book> BinaryFileStore::readBooks(const CustomString &path) {
         value.setGenre(CustomString(record.genre));
         value.setPublisher(CustomString(record.publisher));
         value.setPublishDate(unpackDate(record.publishDate));
-        value.setPublishYear(record.publishYear);
+        // publishYear removed
         value.setQuantity(record.quantity);
         value.setOriginalPrice(0);
         value.setStatus(CustomString(record.status));
         value.setSummary(CustomString(record.summary));
+        value.setCoverImagePath(core::CustomString("")); // Trường mới, mặc định rỗng
         models[i] = value;
     }
+    // Tự động cập nhật file sang định dạng mới
+    writeBooks(models, path);
     return models;
 }
 

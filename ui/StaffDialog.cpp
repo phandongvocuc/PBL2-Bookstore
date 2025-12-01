@@ -126,6 +126,7 @@ void StaffDialog::setStaff(const model::Staff &staff, bool editing) {
     editingMode = editing;
     idEdit->setText(bridge::toQString(staff.getId()));
     idEdit->setReadOnly(editing || forceIdReadOnly);
+    idEdit->setEnabled(!editing && !forceIdReadOnly);
     fullNameEdit->setText(bridge::toQString(staff.getFullName()));
     if (const QString genderText = bridge::toQString(staff.getGender()).trimmed(); !genderText.isEmpty()) {
         genderCombo->setCurrentText(genderText);
@@ -158,6 +159,15 @@ void StaffDialog::setStaff(const model::Staff &staff, bool editing) {
     }
     activeFlag = staff.isActive();
     activeCheck->setChecked(activeFlag);
+
+    if (editing) {
+        idEdit->setReadOnly(true);
+        idEdit->setEnabled(false);
+        fullNameEdit->setReadOnly(true);
+    } else {
+        idEdit->setEnabled(!forceIdReadOnly);
+        fullNameEdit->setReadOnly(false);
+    }
 }
 
 void StaffDialog::presetId(const QString &id, bool lockField) {

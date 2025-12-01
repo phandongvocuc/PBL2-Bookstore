@@ -36,15 +36,18 @@ public:
     {
         if (LoginDialog->objectName().isEmpty())
             LoginDialog->setObjectName("LoginDialog");
-        LoginDialog->resize(637, 723);
+        LoginDialog->resize(600, 702);
+        LoginDialog->setStyleSheet(QString::fromUtf8(""));
         titleLabel = new QLabel(LoginDialog);
         titleLabel->setObjectName("titleLabel");
-        titleLabel->setGeometry(QRect(50, 80, 521, 91));
+        titleLabel->setGeometry(QRect(30, 80, 521, 91));
         QFont font;
-        font.setFamilies({QString::fromUtf8("Sans Serif")});
-        font.setPointSize(24);
-        font.setBold(false);
+        font.setFamilies({QString::fromUtf8("Times New Roman")});
+        font.setPointSize(18);
+        font.setBold(true);
+        font.setItalic(false);
         titleLabel->setFont(font);
+        titleLabel->setStyleSheet(QString::fromUtf8("font: 700 18pt \"Times New Roman\";"));
         titleLabel->setAlignment(Qt::AlignmentFlag::AlignCenter);
         errorLabel = new QLabel(LoginDialog);
         errorLabel->setObjectName("errorLabel");

@@ -1,14 +1,17 @@
 #include "StatsChart.h"
 
+#include <QLinearGradient>
 #include <QPainter>
 #include <QPainterPath>
 #include <QPaintEvent>
 #include <QtMath>
+#include <cmath>
 
 namespace pbl2::ui {
 
 StatsChart::StatsChart(QWidget *parent) : QWidget(parent) {
-    setMinimumHeight(180);
+    setAttribute(Qt::WA_StyledBackground, true);
+    setMinimumHeight(200);
 }
 
 void StatsChart::setMode(const Mode mode) {
@@ -65,19 +68,22 @@ void StatsChart::paintEvent(QPaintEvent *event) {
     drawBackground(painter);
 
     if (categories_.isEmpty() || series_.isEmpty()) {
-        painter.setPen(QPen(palette().mid().color()));
+        painter.setPen(QPen(QColor(0x7E, 0x8A, 0x9A)));
         painter.drawText(rect(), Qt::AlignCenter, QObject::tr("Không có dữ liệu"));
         return;
     }
 
-    constexpr int leftMargin = 60;
-    constexpr int rightMargin = 24;
-    const int topMargin = title_.isEmpty() ? 16 : 40;
-    constexpr int bottomMargin = 40;
+    const int leftMargin = mode_ == Mode::HorizontalBar ? 120 : 64;
+    const int rightMargin = 32;
+    const int topMargin = title_.isEmpty() ? 16 : 42;
+    const int bottomMargin = mode_ == Mode::HorizontalBar ? 26 : 44;
+
     const QRect plotArea = rect().adjusted(leftMargin, topMargin, -rightMargin, -bottomMargin);
     if (plotArea.width() <= 0 || plotArea.height() <= 0) return;
 
-    drawAxes(painter, plotArea);
+    if (mode_ != Mode::HorizontalBar) {
+        drawAxes(painter, plotArea);
+    }
 
     switch (mode_) {
     case Mode::Bar:
@@ -89,6 +95,9 @@ void StatsChart::paintEvent(QPaintEvent *event) {
     case Mode::StackedBar:
         drawStackedBarChart(painter, plotArea);
         break;
+    case Mode::HorizontalBar:
+        drawHorizontalBarChart(painter, plotArea);
+        break;
     }
 
     if (showLegend_) {
@@ -98,8 +107,8 @@ void StatsChart::paintEvent(QPaintEvent *event) {
 }
 
 void StatsChart::drawBackground(QPainter &painter) const {
-    painter.fillRect(rect(), palette().base());
-    painter.setPen(QPen(palette().midlight().color()));
+    painter.fillRect(rect(), QColor(0xF5, 0xFA, 0xFF));
+    painter.setPen(QPen(QColor(0xE5, 0xE7, 0xEB)));
     painter.drawRect(rect().adjusted(0, 0, -1, -1));
 }
 
@@ -109,44 +118,39 @@ void StatsChart::drawTitle(QPainter &painter, const QRect &area) const {
     f.setBold(true);
     f.setPointSize(qMax(10, f.pointSize() + 1));
     painter.setFont(f);
-    painter.setPen(QColor(0x1F, 0x29, 0x37));
+    painter.setPen(QColor(0x0B, 0x2B, 0x52));
 
-    // Add some padding and center the title
     const QRect titleRect = area.adjusted(0, 8, 0, 0);
     painter.drawText(titleRect, Qt::AlignCenter, title_);
 }
 
 void StatsChart::drawAxes(QPainter &painter, const QRect &plotArea) const {
-
-    // Draw main axes
     painter.setPen(QPen(QColor(0x9C, 0xA3, 0xAF), 2));
     painter.drawLine(plotArea.bottomLeft(), plotArea.bottomRight());
     painter.drawLine(plotArea.bottomLeft(), plotArea.topLeft());
 
-    // Draw Y-axis value labels
     const double maxVal = findMaxValue();
     painter.setPen(QColor(0x6B, 0x72, 0x80));
     QFont axisFont = painter.font();
     axisFont.setPointSize(qMax(7, axisFont.pointSize() - 2));
     painter.setFont(axisFont);
 
-    for (int i = 0; i <= 4; ++i) {
-        const double value = (maxVal * i) / 4.0;
-        const double y = plotArea.bottom() - (plotArea.height() * i / 4.0);
+    const int axisMaxInt = qMax(1, static_cast<int>(std::ceil(maxVal)));
+    // Nếu giá trị nhỏ (<=6), hiển thị đủ mốc nguyên 0..axisMaxInt; ngược lại dùng 5 mốc chuẩn.
+    const bool denseTicks = axisMaxInt <= 6;
+    const int tickSteps = denseTicks ? axisMaxInt : 4;
+    for (int i = 0; i <= tickSteps; ++i) {
+        const double value = (axisMaxInt * i) / static_cast<double>(tickSteps);
+        const double y = plotArea.bottom() - (plotArea.height() * i / static_cast<double>(tickSteps));
 
-        // Draw tick mark
         painter.drawLine(QPointF(plotArea.left() - 5, y), QPointF(plotArea.left(), y));
 
-        // Draw value label
-        QString valueText = QString::number(static_cast<int>(value));
-        if (!valueSuffix_.isEmpty()) {
-            valueText += valueSuffix_;
-        }
-        painter.drawText(QRectF(plotArea.left() - 50, y - 10, 45, 20),
-                        Qt::AlignRight | Qt::AlignVCenter, valueText);
+        QString valueText = QString::number(qRound(value));
+        if (!valueSuffix_.isEmpty()) valueText += valueSuffix_;
+        painter.drawText(QRectF(plotArea.left() - 54, y - 10, 48, 20),
+                         Qt::AlignRight | Qt::AlignVCenter, valueText);
     }
 
-    // Draw Y axis label if provided
     QFont yLabelFont = painter.font();
     yLabelFont.setPointSize(13);
     yLabelFont.setBold(true);
@@ -162,13 +166,14 @@ void StatsChart::drawAxes(QPainter &painter, const QRect &plotArea) const {
 
 double StatsChart::findMaxValue() const {
     double maxVal = 0.0;
-    for (const auto &series : series_) {
-        for (double v : series.values) {
+    for (const auto &serie : series_) {
+        for (double v : serie.values) {
             maxVal = qMax(maxVal, v);
         }
     }
-    if (qFuzzyIsNull(maxVal)) maxVal = 1.0;
-    return maxVal * 1.1;  // add headroom
+    if (qFuzzyIsNull(maxVal)) return 4.0;
+    // Luôn có tối thiểu 0..4 trên trục để thấy các mốc 1,2,3,4 ngay cả khi dữ liệu nhỏ.
+    return static_cast<double>(qMax(4, static_cast<int>(std::ceil(maxVal))));
 }
 
 void StatsChart::drawBarChart(QPainter &painter, const QRect &plotArea) const {
@@ -180,136 +185,56 @@ void StatsChart::drawBarChart(QPainter &painter, const QRect &plotArea) const {
     const int seriesCount = series_.size();
     const double barWidth = qMax(8.0, (groupWidth - 12.0) / qMax(1, seriesCount));
 
-    // Draw grid lines for better readability
-    painter.setPen(QPen(QColor(0xF3, 0xF4, 0xF6), 1, Qt::DashLine));
+    painter.setPen(QPen(QColor(0xEC, 0xEE, 0xF1), 1, Qt::DashLine));
     for (int i = 1; i <= 4; ++i) {
         const double y = plotArea.bottom() - (plotArea.height() * i / 4.0);
         painter.drawLine(QPointF(plotArea.left(), y), QPointF(plotArea.right(), y));
     }
 
-    // Draw bars with gradient and shadow effect
-    // Nếu chỉ có 1 series và nhiều thể loại, tô mỗi cột 1 màu để phân biệt
     static core::DynamicArray defaultColors = []() {
         core::DynamicArray<QColor> colors;
-        colors.append(QColor(0xEF5350));
-        colors.append(QColor(0xAB47BC));
-        colors.append(QColor(0x42A5F5));
-        colors.append(QColor(0x26A69A));
-        colors.append(QColor(0xFFB300));
-        colors.append(QColor(0x8D6E63));
-        colors.append(QColor(0x5C6BC0));
-        colors.append(QColor(0x00897B));
-        colors.append(QColor(0x8BC34A));
-        colors.append(QColor(0xFF7043));
-        colors.append(QColor(0x5E35B1));
-        colors.append(QColor(0x00838F));
+        colors.append(QColor(0x20, 0x9C, 0xF0));
+        colors.append(QColor(0x22, 0xC5, 0x67));
+        colors.append(QColor(0xF9, 0xA8, 0x0E));
+        colors.append(QColor(0xFB, 0x72, 0x4C));
+        colors.append(QColor(0x8B, 0x5C, 0xE0));
+        colors.append(QColor(0x14, 0xB8, 0xA6));
+        colors.append(QColor(0xF4, 0x43, 0x36));
         return colors;
     }();
-    // Vẽ từng cột cho từng ngày, mỗi màu là 1 thể loại
+
     for (int cat = 0; cat < categoryCount; ++cat) {
-        double baseX = plotArea.left() + cat * groupWidth;
+        const double baseX = plotArea.left() + cat * groupWidth;
         for (int si = 0; si < seriesCount; ++si) {
             if (cat >= series_[si].values.size()) continue;
-            double value = series_[si].values[cat];
-            double ratio = value / maxVal;
-            double barHeight = ratio * plotArea.height();
-            double x = baseX + si * barWidth + (groupWidth - seriesCount * barWidth) / 2.0;
+            const double value = series_[si].values[cat];
+            const double ratio = value / maxVal;
+            const double barHeight = ratio * plotArea.height();
+            const double x = baseX + si * barWidth + (groupWidth - seriesCount * barWidth) / 2.0;
             QRectF bar(x, plotArea.bottom() - barHeight, barWidth - 2.0, barHeight);
 
             QLinearGradient gradient(bar.topLeft(), bar.bottomLeft());
             QColor baseColor = series_[si].color.isValid() ? series_[si].color : QColor(0x25, 0x63, 0xEB);
-            if (seriesCount == 1) {
-                baseColor = defaultColors[cat % defaultColors.size()];
-            }
+            if (seriesCount == 1) baseColor = defaultColors[cat % defaultColors.size()];
             gradient.setColorAt(0, baseColor.lighter(120));
-            gradient.setColorAt(1, baseColor.darker(110));
+            gradient.setColorAt(1, baseColor.darker(115));
 
             QRectF shadow = bar.translated(2, 2);
-            painter.fillRect(shadow, QColor(0, 0, 0, 30));
+            painter.fillRect(shadow, QColor(0, 0, 0, 28));
             painter.fillRect(bar, QBrush(gradient));
-            painter.setPen(QPen(baseColor.darker(120), 1));
+            painter.setPen(QPen(baseColor.darker(140), 1));
             painter.drawRect(bar);
         }
-        // Nhãn dưới cột là ngày/tháng
-        painter.setPen(QColor(0x37, 0x41, 0x51));
+
+        painter.setPen(QColor(0x2C, 0x3E, 0x59));
         QFont labelFont = painter.font();
         labelFont.setPointSize(qMax(8, labelFont.pointSize() - 1));
         painter.setFont(labelFont);
-        painter.drawText(QRectF(baseX, plotArea.bottom() + 5, groupWidth, 25.0), Qt::AlignCenter, categories_[cat]);
+        painter.drawText(QRectF(baseX, plotArea.bottom() + 5, groupWidth, 25.0),
+                         Qt::AlignCenter, categories_[cat]);
     }
 
-    // Vẽ legend cho từng thể loại ở góc phải
-    int legendX = plotArea.right() + 40;
-    int legendY = plotArea.top() + 10;
-    int legendBox = 18;
-    int legendSpacing = 8;
-    QFont legendFont = painter.font();
-    legendFont.setPointSize(11);
-    painter.setFont(legendFont);
-    painter.setPen(QColor(0x37, 0x41, 0x51));
-
-    if (seriesCount == 1) {
-        painter.drawText(legendX, legendY - legendBox - 8, QStringLiteral("Chú thích màu theo thể loại"));
-        for (int cat = 0; cat < categoryCount; ++cat) {
-            QColor color = defaultColors[cat % defaultColors.size()];
-            QRect colorRect(legendX, legendY + cat * (legendBox + legendSpacing), legendBox, legendBox);
-            painter.fillRect(colorRect, color);
-            painter.setPen(QPen(color.darker(120), 1));
-            painter.drawRect(colorRect);
-            painter.setPen(QColor(0x37, 0x41, 0x51));
-            painter.drawText(legendX + legendBox + 8,
-                             legendY + cat * (legendBox + legendSpacing) + legendBox - 3,
-                             categories_[cat]);
-        }
-    } else {
-        painter.drawText(legendX, legendY - legendBox - 8, QStringLiteral("Chú thích màu theo series"));
-        for (int si = 0; si < seriesCount; ++si) {
-            QColor color = series_[si].color.isValid() ? series_[si].color : QColor(0x25, 0x63, 0xEB);
-            QRect colorRect(legendX, legendY + si * (legendBox + legendSpacing), legendBox, legendBox);
-            painter.fillRect(colorRect, color);
-            painter.setPen(Qt::white);
-            painter.drawRect(colorRect);
-            painter.setPen(QColor(0x37, 0x41, 0x51));
-            painter.drawText(legendX + legendBox + 8,
-                             legendY + si * (legendBox + legendSpacing) + legendBox - 3,
-                             series_[si].name);
-        }
-    }
-
-    // Vẽ chú thích "Ngày/Tháng" bên ngoài trục X
-    painter.setPen(QColor(0x1F, 0x29, 0x37));
-    QFont dateFont = painter.font();
-    dateFont.setPointSize(13);
-    dateFont.setBold(true);
-    painter.setFont(dateFont);
-    if (!xAxisLabel_.isEmpty()) {
-        painter.drawText(QRectF(plotArea.left(), plotArea.bottom() + 35, plotArea.width(), 30),
-                         Qt::AlignCenter, xAxisLabel_);
-    }
-
-    // Draw value labels on top of bars if there's enough space
-    if (barWidth > 20) {
-        painter.setPen(QColor(0x1F, 0x29, 0x37));
-        QFont valueFont = painter.font();
-        valueFont.setPointSize(qMax(7, valueFont.pointSize() - 2));
-        painter.setFont(valueFont);
-
-        for (int cat = 0; cat < categoryCount; ++cat) {
-            const double baseX = plotArea.left() + cat * groupWidth;
-            for (int si = 0; si < seriesCount; ++si) {
-                if (cat >= series_[si].values.size()) continue;
-                if (const double value = series_[si].values[cat]; value > 0) {
-                    const double ratio = value / maxVal;
-                    const double barHeight = ratio * plotArea.height();
-                    const double x = baseX + si * barWidth + (groupWidth - seriesCount * barWidth) / 2.0;
-                    const double y = plotArea.bottom() - barHeight - 5;
-
-                    painter.drawText(QRectF(x, y - 15, barWidth - 2.0, 15),
-                                   Qt::AlignCenter, QString::number(static_cast<int>(value)));
-                }
-            }
-        }
-    }
+    // Không vẽ số trên đỉnh cột để cột chạm trục tối đa rõ ràng hơn
 }
 
 void StatsChart::drawStackedBarChart(QPainter &painter, const QRect &plotArea) const {
@@ -320,8 +245,7 @@ void StatsChart::drawStackedBarChart(QPainter &painter, const QRect &plotArea) c
     const double groupWidth = plotArea.width() / static_cast<double>(categoryCount);
     const double barWidth = qMax(20.0, groupWidth - 20.0);
 
-    // Draw grid lines
-    painter.setPen(QPen(QColor(0xF3, 0xF4, 0xF6), 1, Qt::DashLine));
+    painter.setPen(QPen(QColor(0xEC, 0xEE, 0xF1), 1, Qt::DashLine));
     for (int i = 1; i <= 4; ++i) {
         const double y = plotArea.bottom() - (plotArea.height() * i / 4.0);
         painter.drawLine(QPointF(plotArea.left(), y), QPointF(plotArea.right(), y));
@@ -331,44 +255,38 @@ void StatsChart::drawStackedBarChart(QPainter &painter, const QRect &plotArea) c
         double accumulatedHeight = 0.0;
         const double baseX = plotArea.left() + cat * groupWidth + (groupWidth - barWidth) / 2.0;
 
-        for (const auto & serie : series_) {
+        for (const auto &serie : series_) {
             if (cat >= serie.values.size()) continue;
             const double value = serie.values[cat];
             const double ratio = value / maxVal;
             const double segmentHeight = ratio * plotArea.height();
 
             QRectF segment(baseX,
-                          plotArea.bottom() - accumulatedHeight - segmentHeight,
-                          barWidth,
-                          segmentHeight);
+                           plotArea.bottom() - accumulatedHeight - segmentHeight,
+                           barWidth,
+                           segmentHeight);
 
-            // Create gradient for each segment
             QLinearGradient gradient(segment.topLeft(), segment.bottomLeft());
             QColor baseColor = serie.color.isValid() ? serie.color : palette().highlight().color();
             gradient.setColorAt(0, baseColor.lighter(120));
             gradient.setColorAt(1, baseColor.darker(110));
 
-            // Draw shadow
             QRectF shadow = segment.translated(1, 1);
             painter.fillRect(shadow, QColor(0, 0, 0, 20));
-
-            // Draw segment with gradient
             painter.fillRect(segment, QBrush(gradient));
 
-            // Add border
             painter.setPen(QPen(baseColor.darker(120), 1));
             painter.drawRect(segment);
 
             accumulatedHeight += segmentHeight;
         }
 
-        // Draw category label
-        painter.setPen(QColor(0x37, 0x41, 0x51));
+        painter.setPen(QColor(0x2C, 0x3E, 0x59));
         QFont labelFont = painter.font();
         labelFont.setPointSize(qMax(8, labelFont.pointSize() - 1));
         painter.setFont(labelFont);
         painter.drawText(QRectF(plotArea.left() + cat * groupWidth, plotArea.bottom() + 5, groupWidth, 25),
-                        Qt::AlignCenter, categories_[cat]);
+                         Qt::AlignCenter, categories_[cat]);
     }
 }
 
@@ -377,7 +295,7 @@ void StatsChart::drawLineChart(QPainter &painter, const QRect &plotArea) const {
     const int categoryCount = categories_.size();
     if (categoryCount < 2) return;
 
-    painter.setPen(QPen(palette().midlight().color(), 1, Qt::DashLine));
+    painter.setPen(QPen(QColor(0xEC, 0xEE, 0xF1), 1, Qt::DashLine));
     for (int i = 1; i <= 4; ++i) {
         const double y = plotArea.bottom() - (plotArea.height() * i / 4.0);
         painter.drawLine(QPointF(plotArea.left(), y), QPointF(plotArea.right(), y));
@@ -385,50 +303,115 @@ void StatsChart::drawLineChart(QPainter &painter, const QRect &plotArea) const {
 
     const double stepX = plotArea.width() / static_cast<double>(categoryCount - 1);
 
-    for (const auto &series : series_) {
-        if (series.values.size() < categoryCount) continue;
+    for (const auto &serie : series_) {
+        if (serie.values.size() < categoryCount) continue;
         QPainterPath path;
         for (int i = 0; i < categoryCount; ++i) {
-            const double value = series.values[i];
+            const double value = serie.values[i];
             const double ratio = value / maxVal;
             const QPointF point(plotArea.left() + i * stepX,
                                 plotArea.bottom() - ratio * plotArea.height());
             if (i == 0) path.moveTo(point);
             else path.lineTo(point);
         }
-        QPen pen(series.color.isValid() ? series.color : palette().highlight().color(), 2);
+        QColor base = serie.color.isValid() ? serie.color : QColor(0x25, 0x63, 0xEB);
+        QPen pen(base, 2.4);
         painter.setPen(pen);
         painter.drawPath(path);
+
+        painter.setBrush(base);
+        painter.setPen(Qt::NoPen);
+        for (int i = 0; i < categoryCount; ++i) {
+            const double value = serie.values[i];
+            const double ratio = value / maxVal;
+            const QPointF point(plotArea.left() + i * stepX,
+                                plotArea.bottom() - ratio * plotArea.height());
+            painter.drawEllipse(point, 4.5, 4.5);
+        }
     }
 
-    painter.setPen(palette().mid().color());
+    painter.setPen(QColor(0x2C, 0x3E, 0x59));
+    QFont labelFont = painter.font();
+    labelFont.setPointSize(qMax(8, labelFont.pointSize() - 1));
+    painter.setFont(labelFont);
     for (int i = 0; i < categoryCount; ++i) {
-        painter.drawText(QRectF(plotArea.left() + i * stepX - 20, plotArea.bottom(), 40, 20), Qt::AlignCenter, categories_[i]);
+        painter.drawText(QRectF(plotArea.left() + i * stepX - 20, plotArea.bottom() + 2, 40, 20),
+                         Qt::AlignCenter, categories_[i]);
+    }
+}
+
+void StatsChart::drawHorizontalBarChart(QPainter &painter, const QRect &plotArea) const {
+    const double maxVal = findMaxValue();
+    const int categoryCount = categories_.size();
+    if (categoryCount == 0 || series_.isEmpty()) return;
+
+    const auto &serie = series_[0];
+
+    const double rowHeight = plotArea.height() / static_cast<double>(categoryCount);
+    const double barHeight = qMax(16.0, rowHeight * 0.62);
+
+    painter.setPen(QPen(QColor(0xEC, 0xEE, 0xF1), 1, Qt::DashLine));
+    for (int i = 1; i <= 4; ++i) {
+        const double y = plotArea.bottom() - (plotArea.height() * i / 4.0);
+        painter.drawLine(QPointF(plotArea.left(), y), QPointF(plotArea.right(), y));
+    }
+
+    static core::DynamicArray defaultColors = []() {
+        core::DynamicArray<QColor> colors;
+        colors.append(QColor(0x20, 0x9C, 0xF0));
+        colors.append(QColor(0x22, 0xC5, 0x67));
+        colors.append(QColor(0xF9, 0xA8, 0x0E));
+        colors.append(QColor(0xFB, 0x72, 0x4C));
+        colors.append(QColor(0x8B, 0x5C, 0xE0));
+        colors.append(QColor(0x14, 0xB8, 0xA6));
+        return colors;
+    }();
+
+    for (int i = 0; i < categoryCount; ++i) {
+        const double value = serie.values.value(i, 0.0);
+        const double ratio = value / maxVal;
+        const double width = ratio * plotArea.width();
+        const double y = plotArea.top() + i * rowHeight + (rowHeight - barHeight) / 2.0;
+        QRectF bar(plotArea.left(), y, width, barHeight);
+
+        QColor baseColor = serie.color.isValid() ? serie.color
+                                                 : defaultColors[i % defaultColors.size()];
+        QLinearGradient gradient(bar.topLeft(), bar.topRight());
+        gradient.setColorAt(0, baseColor.lighter(120));
+        gradient.setColorAt(1, baseColor.darker(110));
+        painter.fillRect(bar.translated(1.5, 1.5), QColor(0, 0, 0, 25));
+        painter.fillRect(bar, gradient);
+        painter.setPen(QPen(baseColor.darker(140), 1));
+        painter.drawRect(bar);
+
+        painter.setPen(QColor(0x2C, 0x3E, 0x59));
+        QFont labelFont = painter.font();
+        labelFont.setPointSize(10);
+        painter.setFont(labelFont);
+        painter.drawText(QRectF(plotArea.left() - 110, y - 2, 102, barHeight + 4),
+                         Qt::AlignRight | Qt::AlignVCenter, categories_[i]);
+        painter.drawText(QRectF(bar.right() + 6, y - 2, 60, barHeight + 4),
+                         Qt::AlignLeft | Qt::AlignVCenter,
+                         QString::number(static_cast<int>(value)));
     }
 }
 
 void StatsChart::drawLegend(QPainter &painter, const QRect &plotArea) const {
-    // Luôn vẽ legend, kể cả khi chỉ có 1 series
-
     constexpr int legendHeight = 18;
     constexpr int legendSpacing = 4;
-
-    // Calculate legend position (top-right)
     const int totalHeight = series_.size() * (legendHeight + legendSpacing) - legendSpacing;
     const int x = plotArea.right() - 160;
     int y = plotArea.top() + 10;
 
-    // Draw legend background
     const QRect legendBg(x - 8, y - 4, 150, totalHeight + 8);
-    painter.fillRect(legendBg, QColor(255, 255, 255, 200));
+    painter.fillRect(legendBg, QColor(255, 255, 255, 230));
     painter.setPen(QPen(QColor(0xE5, 0xE7, 0xEB), 1));
     painter.drawRect(legendBg);
 
-    for (const auto & series : series_) {
+    for (const auto &serie : series_) {
         constexpr int boxSize = 12;
-        QColor color = series.color.isValid() ? series.color : palette().highlight().color();
+        QColor color = serie.color.isValid() ? serie.color : palette().highlight().color();
 
-        // Draw color box with gradient
         QRect colorBox(x, y + 2, boxSize, boxSize);
         QLinearGradient boxGradient(colorBox.topLeft(), colorBox.bottomLeft());
         boxGradient.setColorAt(0, color.lighter(120));
@@ -437,13 +420,12 @@ void StatsChart::drawLegend(QPainter &painter, const QRect &plotArea) const {
         painter.setPen(QPen(color.darker(150), 1));
         painter.drawRect(colorBox);
 
-        // Draw text
-        painter.setPen(QColor(0x37, 0x41, 0x51));
+        painter.setPen(QColor(0x2C, 0x3E, 0x59));
         QFont legendFont = painter.font();
         legendFont.setPointSize(qMax(8, legendFont.pointSize() - 1));
         painter.setFont(legendFont);
         painter.drawText(QRect(x + boxSize + 8, y, 100, legendHeight),
-                        Qt::AlignLeft | Qt::AlignVCenter, series.name);
+                         Qt::AlignLeft | Qt::AlignVCenter, serie.name);
 
         y += legendHeight + legendSpacing;
     }

@@ -1,16 +1,15 @@
 #include "StatsWidget.h"
 
-#include <QColor>
 #include <QFont>
+#include <QGraphicsDropShadowEffect>
 #include <QGridLayout>
 #include <QHBoxLayout>
-#include <QGraphicsDropShadowEffect>
 #include <QLocale>
-#include <QFrame>
-#include <QListWidget>
+#include <QPixmap>
 #include <QScrollArea>
-#include <QSizePolicy>
+#include <QVBoxLayout>
 #include <algorithm>
+#include <ranges>
 
 namespace pbl2::ui {
 
@@ -18,183 +17,174 @@ StatsWidget::StatsWidget(QWidget *parent) : QWidget(parent) {
     setupUi();
 }
 
-void StatsWidget::setupUi() {
-    setStyleSheet("background-color: #f8fafc;");
+static void applyShadow(QWidget *widget, const qreal blur = 22.0, const QPointF &offset = QPointF(0, 6)) {
+    if (!widget) return;
+    auto *shadow = new QGraphicsDropShadowEffect(widget);
+    shadow->setBlurRadius(blur);
+    shadow->setOffset(offset);
+    shadow->setColor(QColor(0, 0, 0, 35));
+    widget->setGraphicsEffect(shadow);
+}
 
-    auto applyShadow = [](QWidget *w, const qreal blur = 18.0, const QPointF &offset = QPointF(0, 4)) {
-        auto *shadow = new QGraphicsDropShadowEffect(w);
-        shadow->setBlurRadius(blur);
-        shadow->setColor(QColor(0, 0, 0, 35));
-        shadow->setOffset(offset);
-        w->setGraphicsEffect(shadow);
-    };
+void StatsWidget::setupUi() {
+    setObjectName(QStringLiteral("statsRoot"));
+    setStyleSheet(
+        "QWidget#statsRoot {"
+        "  background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #55b5fa, stop:1 #3f9fe8);"
+        "}"
+        "QLabel { color: #0b1524; }"
+        "QListWidget { border: none; }"
+        "QListWidget::item { border: none; }"
+    );
 
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setSpacing(24);
-    mainLayout->setContentsMargins(10, 8, 10, 8);
+    mainLayout->setContentsMargins(14, 14, 14, 14);
+    mainLayout->setSpacing(14);
 
     auto *titleRow = new QHBoxLayout();
     auto *titleLabel = new QLabel(tr("THỐNG KÊ"), this);
     QFont titleFont = titleLabel->font();
-    titleFont.setPointSize(18);
+    titleFont.setPointSize(22);
     titleFont.setBold(true);
     titleLabel->setFont(titleFont);
-    titleLabel->setStyleSheet("color: #0f172a;");
+    titleLabel->setStyleSheet("color: #ffffff;");
     titleRow->addWidget(titleLabel);
     titleRow->addStretch();
     mainLayout->addLayout(titleRow);
 
     auto *scrollArea = new QScrollArea(this);
-    scrollArea->setWidgetResizable(true);
     scrollArea->setFrameShape(QFrame::NoFrame);
-    scrollArea->setStyleSheet("QScrollArea { background: transparent; border: none; }");
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setStyleSheet("QScrollArea { background: transparent; }");
 
     auto *scrollContent = new QWidget();
     auto *contentLayout = new QVBoxLayout(scrollContent);
-    contentLayout->setSpacing(10);
-    contentLayout->setContentsMargins(6, 6, 6, 6);
+    contentLayout->setSpacing(12);
+    contentLayout->setContentsMargins(4, 4, 4, 10);
 
-    const auto panelStyle = QStringLiteral(
-        "QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px; }");
-
-    // Summary cards row
+    // Summary cards
     auto *cardsRow = new QHBoxLayout();
     cardsRow->setSpacing(12);
 
-    auto *booksCard = createStatsCard(tr("Tổng số sách"), QString());
-    totalBooksValue = booksCard->findChild<QLabel *>("valueLabel");
-    cardsRow->addWidget(booksCard, 5);
+    auto *booksCard = createMetricCard(QStringLiteral(":/icons/book.png"), QColor(0x2b, 0x8b, 0xe6),
+                                       tr("Tổng số sách"), totalBooksValue);
+    cardsRow->addWidget(booksCard);
 
-    auto *readersCard = createStatsCard(tr("Tổng số độc giả"), QString());
-    totalReadersValue = readersCard->findChild<QLabel *>("valueLabel");
-    cardsRow->addWidget(readersCard, 5);
+    auto *loansCard = createMetricCard(QStringLiteral(":/icons/loan.png"), QColor(0x22, 0xc5, 0x67),
+                                       tr("Sách đang được mượn"), totalLoansValue);
+    cardsRow->addWidget(loansCard);
 
-    auto *loansCard = createStatsCard(tr("Tổng số phiếu mượn"), QString());
-    totalLoansValue = loansCard->findChild<QLabel *>("valueLabel");
-    cardsRow->addWidget(loansCard, 5);
+    auto *readersCard = createMetricCard(QStringLiteral(":/icons/reader.png"), QColor(0x64, 0x8d, 0xff),
+                                         tr("Tổng số độc giả"), totalReadersValue);
+    cardsRow->addWidget(readersCard);
 
-    auto *finesCard = createStatsCard(tr("Tổng tiền phạt"), QString());
-    totalFinesValue = finesCard->findChild<QLabel *>("valueLabel");
-    cardsRow->addWidget(finesCard, 5);
+    auto *finesCard = createMetricCard(QStringLiteral(":/icons/report.png"), QColor(0xff, 0xb0, 0x4a),
+                                       tr("Tổng tiền phạt"), totalFinesValue);
+    cardsRow->addWidget(finesCard);
 
     contentLayout->addLayout(cardsRow);
 
-    // First row: category chart + top books
+    const QString panelStyle = QStringLiteral(
+        "QFrame { background: #fdfdfd; border-radius: 18px; }"
+        "QLabel { color: #0f172a; }");
+
+    // Charts row
     auto *chartsRow = new QHBoxLayout();
-    chartsRow->setSpacing(10);
+    chartsRow->setSpacing(12);
 
     auto *categoryPanel = new QFrame(this);
     categoryPanel->setStyleSheet(panelStyle);
-    categoryPanel->setMinimumHeight(210);
     applyShadow(categoryPanel);
     auto *categoryLayout = new QVBoxLayout(categoryPanel);
-    categoryLayout->setSpacing(8);
-
+    categoryLayout->setContentsMargins(16, 14, 16, 14);
+    categoryLayout->setSpacing(10);
     auto *categoryLabel = new QLabel(tr("Lượt mượn theo thể loại"), categoryPanel);
     QFont sectionFont = categoryLabel->font();
-    sectionFont.setPointSize(11);
+    sectionFont.setPointSize(12);
     sectionFont.setBold(true);
     categoryLabel->setFont(sectionFont);
-    categoryLabel->setStyleSheet("color: #1f2937;");
     categoryLayout->addWidget(categoryLabel);
 
     categoryChart = new StatsChart(categoryPanel);
-    categoryChart->setAxisLabels(QString(), QString());
     categoryChart->setShowLegend(false);
     categoryChart->setMode(StatsChart::Mode::Bar);
-    categoryChart->setMinimumHeight(170);
+    categoryChart->setAxisLabels(QString(), QString());
+    categoryChart->setMinimumWidth(700);  // kéo dài trục Ox cho nhiều nhãn
+    categoryChart->setMinimumHeight(220); // kéo trục Ox dài hơn cho nhiều nhãn
     categoryLayout->addWidget(categoryChart);
-    chartsRow->addWidget(categoryPanel, 1);
+    chartsRow->addWidget(categoryPanel, 7);
 
     auto *topBooksPanel = new QFrame(this);
     topBooksPanel->setStyleSheet(panelStyle);
-    topBooksPanel->setMinimumHeight(210);
     applyShadow(topBooksPanel);
-    auto *topBookLayout = new QVBoxLayout(topBooksPanel);
-    topBookLayout->setSpacing(8);
+    auto *topLayout = new QVBoxLayout(topBooksPanel);
+    topLayout->setContentsMargins(16, 14, 16, 14);
+    topLayout->setSpacing(10);
 
-    auto *topBookLabel = new QLabel(tr("Top sách được mượn nhiều nhất"), topBooksPanel);
-    topBookLabel->setFont(sectionFont);
-    topBookLabel->setStyleSheet("color: #1f2937;");
-    topBookLayout->addWidget(topBookLabel);
+    auto *topLabel = new QLabel(tr("Top sách được mượn nhiều nhất"), topBooksPanel);
+    topLabel->setFont(sectionFont);
+    topLayout->addWidget(topLabel);
 
-    topBooksChart = new StatsChart(topBooksPanel);
-    topBooksChart->setAxisLabels(QString(), QString());
-    topBooksChart->setShowLegend(false);
-    topBooksChart->setMode(StatsChart::Mode::Bar);
-    topBooksChart->setMinimumHeight(170);
-    topBookLayout->addWidget(topBooksChart);
-    chartsRow->addWidget(topBooksPanel, 1);
+    topBooksList = new QListWidget(topBooksPanel);
+    topBooksList->setSpacing(8);
+    topBooksList->setFrameShape(QFrame::NoFrame);
+    topBooksList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    topBooksList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    topLayout->addWidget(topBooksList);
 
+    chartsRow->addWidget(topBooksPanel, 5);
     contentLayout->addLayout(chartsRow);
 
-    // Second row: monthly chart + fines summary
+    // Bottom row
     auto *bottomRow = new QHBoxLayout();
-    bottomRow->setSpacing(10);
+    bottomRow->setSpacing(12);
 
     auto *monthlyPanel = new QFrame(this);
     monthlyPanel->setStyleSheet(panelStyle);
-    monthlyPanel->setMinimumHeight(200);
     applyShadow(monthlyPanel);
     auto *monthlyLayout = new QVBoxLayout(monthlyPanel);
-    monthlyLayout->setSpacing(8);
+    monthlyLayout->setContentsMargins(16, 14, 16, 14);
+    monthlyLayout->setSpacing(10);
 
-    auto *monthlyLabel = new QLabel(tr("Lượt mượn theo tháng"), monthlyPanel);
+    auto *monthlyLabel = new QLabel(tr("Lượt mượn theo thời gian"), monthlyPanel);
     monthlyLabel->setFont(sectionFont);
-    monthlyLabel->setStyleSheet("color: #1f2937;");
     monthlyLayout->addWidget(monthlyLabel);
 
     monthlyChart = new StatsChart(monthlyPanel);
-    monthlyChart->setAxisLabels(QString(), QString());
+    monthlyChart->setMode(StatsChart::Mode::Line);
     monthlyChart->setShowLegend(false);
-    monthlyChart->setMode(StatsChart::Mode::Bar);
-    monthlyChart->setMinimumHeight(160);
+    monthlyChart->setAxisLabels(QString(), QString());
+    monthlyChart->setMinimumHeight(300);
     monthlyLayout->addWidget(monthlyChart);
-    bottomRow->addWidget(monthlyPanel, 1);
+    bottomRow->addWidget(monthlyPanel, 7);
 
     auto *finePanel = new QFrame(this);
     finePanel->setStyleSheet(panelStyle);
-    finePanel->setMinimumHeight(200);
     applyShadow(finePanel);
     auto *fineLayout = new QVBoxLayout(finePanel);
+    fineLayout->setContentsMargins(16, 14, 16, 14);
     fineLayout->setSpacing(8);
 
     auto *fineTitle = new QLabel(tr("Thống kê phạt"), finePanel);
     fineTitle->setFont(sectionFont);
-    fineTitle->setStyleSheet("color: #1f2937;");
     fineLayout->addWidget(fineTitle);
 
-    fineSummaryLabel = new QLabel(tr("Tổng tiền phạt tháng này: 0 VND"), finePanel);
-    overdueBooksLabel = new QLabel(tr("Sách trễ hạn: 0 quyển"), finePanel);
-    overdueReadersLabel = new QLabel(tr("Số người đang trễ: 0 người"), finePanel);
-    const QString subStyle = "color: #111827; font-size: 9pt;";
-    fineSummaryLabel->setStyleSheet(subStyle);
+    fineHeadlineLabel = new QLabel(tr("Tạm tính: 0 VND"), finePanel);
+    overdueBooksLabel = new QLabel(tr("Sách trễ hạn: 0"), finePanel);
+    const QString subStyle = QStringLiteral("color: #111827; font-size: 10pt;");
+    fineHeadlineLabel->setStyleSheet(subStyle);
     overdueBooksLabel->setStyleSheet(subStyle);
-    overdueReadersLabel->setStyleSheet(subStyle);
-    fineLayout->addWidget(fineSummaryLabel);
+
+    fineLayout->addWidget(fineHeadlineLabel);
     fineLayout->addWidget(overdueBooksLabel);
-    fineLayout->addWidget(overdueReadersLabel);
+    fineLayout->addSpacing(6);
 
-    fineLayout->addSpacing(8);
-
-    auto *finesGrid = new QGridLayout();
-    finesGrid->setHorizontalSpacing(12);
-    finesGrid->setVerticalSpacing(4);
-
-    auto makeFineRow = [&](int row, const QString &name, const QString &value) {
-        auto *nameLabel = new QLabel(QStringLiteral("* %1").arg(name), finePanel);
-        auto *valueLabel = new QLabel(value, finePanel);
-        nameLabel->setStyleSheet("color: #1f2937; font-size: 10pt;");
-        valueLabel->setStyleSheet("color: #1f2937; font-size: 10pt;");
-        finesGrid->addWidget(nameLabel, row, 0, Qt::AlignLeft);
-        finesGrid->addWidget(valueLabel, row, 1, Qt::AlignRight);
-    };
-
-
-    fineLayout->addLayout(finesGrid);
+    auto *note = new QLabel(tr("Số liệu được lọc theo khoảng thời gian chọn ở trên."), finePanel);
+    note->setStyleSheet("color: #6b7280; font-size: 9pt;");
+    fineLayout->addWidget(note);
     fineLayout->addStretch();
 
-    bottomRow->addWidget(finePanel, 1);
+    bottomRow->addWidget(finePanel, 5);
     contentLayout->addLayout(bottomRow);
 
     scrollArea->setWidget(scrollContent);
@@ -202,52 +192,94 @@ void StatsWidget::setupUi() {
     setLayout(mainLayout);
 }
 
-QFrame *StatsWidget::createStatsCard(const QString &title, const QString &icon) {
+QFrame *StatsWidget::createMetricCard(const QString &iconPath, const QColor &accent,
+                                      const QString &title, QLabel *&valueLabel) {
     auto *card = new QFrame(this);
     card->setStyleSheet(
-        "QFrame { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 6px; }"
-        "QLabel { background: transparent; border: none; }");
-    card->setMinimumSize(210, 145);
+        "QFrame { background: #fdfdfd; border-radius: 16px; }"
+        "QLabel { background: transparent; }");
+    card->setMinimumHeight(120);
     card->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    auto *shadow = new QGraphicsDropShadowEffect(card);
-    shadow->setBlurRadius(16);
-    shadow->setOffset(0, 3);
-    shadow->setColor(QColor(0, 0, 0, 30));
-    card->setGraphicsEffect(shadow);
+    applyShadow(card, 20.0, QPointF(0, 5));
 
-    auto *layout = new QVBoxLayout(card);
-    layout->setSpacing(5);
-    layout->setAlignment(Qt::AlignCenter);
+    auto *layout = new QHBoxLayout(card);
+    layout->setContentsMargins(14, 12, 14, 12);
+    layout->setSpacing(12);
 
-    if (!icon.isEmpty()) {
-        auto *iconLabel = new QLabel(icon, card);
-        QFont iconFont = iconLabel->font();
-        iconFont.setPointSize(20);
-        iconLabel->setFont(iconFont);
-        iconLabel->setAlignment(Qt::AlignCenter);
-        layout->addWidget(iconLabel);
+    auto *iconWrap = new QLabel(card);
+    iconWrap->setFixedSize(52, 52);
+    iconWrap->setAlignment(Qt::AlignCenter);
+    iconWrap->setStyleSheet(QStringLiteral("background:%1; border-radius:26px;").arg(accent.name()));
+    if (!iconPath.isEmpty()) {
+        QPixmap pix(iconPath);
+        iconWrap->setPixmap(pix.scaled(28, 28, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     }
+    layout->addWidget(iconWrap);
 
-    auto *valueLabel = new QLabel("0", card);
-    valueLabel->setObjectName("valueLabel");
+    auto *textCol = new QVBoxLayout();
+    textCol->setSpacing(2);
+
+    valueLabel = new QLabel(QStringLiteral("0"), card);
     QFont valueFont = valueLabel->font();
-    valueFont.setPointSize(22);
+    valueFont.setPointSize(24);
     valueFont.setBold(true);
     valueLabel->setFont(valueFont);
-    valueLabel->setAlignment(Qt::AlignCenter);
-    valueLabel->setStyleSheet("color: #111827;");
-    layout->addWidget(valueLabel);
+    valueLabel->setStyleSheet("color: #0b1524;");
+    textCol->addWidget(valueLabel);
 
     auto *titleLabel = new QLabel(title, card);
     QFont titleFont = titleLabel->font();
-    titleFont.setPointSize(10);
+    titleFont.setPointSize(11);
     titleFont.setBold(true);
     titleLabel->setFont(titleFont);
-    titleLabel->setAlignment(Qt::AlignCenter);
     titleLabel->setStyleSheet("color: #4b5563;");
-    layout->addWidget(titleLabel);
+    textCol->addWidget(titleLabel);
 
+    layout->addLayout(textCol);
+    layout->addStretch();
     return card;
+}
+
+QWidget *StatsWidget::buildTopBookRow(const QString &title, const int count, const int maxCount, const int colorIndex) const {
+    auto *rowWidget = new QWidget(topBooksList);
+    auto *rowLayout = new QHBoxLayout(rowWidget);
+    rowLayout->setContentsMargins(0, 0, 0, 0);
+    rowLayout->setSpacing(10);
+
+    auto *titleLabel = new QLabel(title, rowWidget);
+    titleLabel->setStyleSheet("color: #0b1524; font-weight: 600;");
+    rowLayout->addWidget(titleLabel, 2);
+
+    auto *bar = new QProgressBar(rowWidget);
+    bar->setRange(0, qMax(1, maxCount));
+    bar->setValue(count);
+    bar->setTextVisible(false);
+    bar->setFixedHeight(12);
+    static const QVector<QColor> colors = {
+        QColor(0x1d, 0x4e, 0xd8),
+        QColor(0x2d, 0xa5, 0x6a),
+        QColor(0xf2, 0x9d, 0x2e),
+        QColor(0xf5, 0x4b, 0x4b),
+        QColor(0x8b, 0x5c, 0xe0)
+    };
+    const QColor accent = colors[colorIndex % colors.size()];
+    bar->setStyleSheet(QStringLiteral(
+        "QProgressBar {"
+        "  background: #e5e7eb;"
+        "  border: none;"
+        "  border-radius: 6px;"
+        "}"
+        "QProgressBar::chunk {"
+        "  border-radius: 6px;"
+        "  background: %1;"
+        "}").arg(accent.name()));
+    rowLayout->addWidget(bar, 4);
+
+    auto *countLabel = new QLabel(QString::number(count), rowWidget);
+    countLabel->setStyleSheet("color: #0b1524; font-weight: bold;");
+    rowLayout->addWidget(countLabel);
+
+    return rowWidget;
 }
 
 void StatsWidget::updateStats(const int totalBooks, const int totalReaders, const int totalLoans, const int overdueLoans, const qint64 totalFines) const {
@@ -255,16 +287,15 @@ void StatsWidget::updateStats(const int totalBooks, const int totalReaders, cons
     if (totalBooksValue) totalBooksValue->setText(locale.toString(totalBooks));
     if (totalReadersValue) totalReadersValue->setText(locale.toString(totalReaders));
     if (totalLoansValue) totalLoansValue->setText(locale.toString(totalLoans));
+    if (totalFinesValue) totalFinesValue->setText(locale.toString(totalFines));
 
     const QString fineText = locale.toString(totalFines) + QStringLiteral(" VND");
-    if (fineSummaryLabel) fineSummaryLabel->setText(tr("Tổng tiền phạt: %1").arg(fineText));
-    if (totalFinesValue) totalFinesValue->setText(fineText);
-    if (overdueBooksLabel) overdueBooksLabel->setText(tr("Sách trễ hạn: %1 quyển").arg(locale.toString(overdueLoans)));
-    if (overdueReadersLabel) overdueReadersLabel->setText(tr("Số người đang trễ: %1 người").arg(locale.toString(qMax(0, overdueLoans / 2 + 1))));
+    if (fineHeadlineLabel) fineHeadlineLabel->setText(tr("Tạm tính: %1").arg(fineText));
+    if (overdueBooksLabel) overdueBooksLabel->setText(tr("Sách trễ hạn: %1").arg(locale.toString(overdueLoans)));
 }
 
 void StatsWidget::updateTopBooksChart(const core::Map<QString, int> &bookBorrowCounts) const {
-    if (!topBooksChart) return;
+    if (!topBooksList) return;
 
     QList<QPair<QString, int>> sortedBooks;
     for (auto it = bookBorrowCounts.constBegin(); it != bookBorrowCounts.constEnd(); ++it) {
@@ -274,24 +305,21 @@ void StatsWidget::updateTopBooksChart(const core::Map<QString, int> &bookBorrowC
         return a.second > b.second;
     });
 
-    QStringList categories;
-    core::DynamicArray<double> values;
-    const int count = qMin(6, sortedBooks.size());
-    for (int i = 0; i < count; ++i) {
-        categories.append(sortedBooks[i].first);
-        values.append(sortedBooks[i].second);
+    const int displayCount = qMin(5, sortedBooks.size());
+    int maxCount = 0;
+    for (int i = 0; i < displayCount; ++i) {
+        maxCount = qMax(maxCount, sortedBooks[i].second);
     }
 
-    StatsChart::Series series;
-    series.name = tr("Lượt mượn");
-    series.values = values;
-    series.color = QColor(0x3b, 0x82, 0xf6);
-
-    core::DynamicArray<StatsChart::Series> seriesVec;
-    seriesVec.append(series);
-    topBooksChart->setCategories(categories);
-    topBooksChart->setSeries(seriesVec);
-    topBooksChart->setMode(StatsChart::Mode::Bar);
+    topBooksList->clear();
+    for (int i = 0; i < displayCount; ++i) {
+        const auto &entry = sortedBooks[i];
+        auto *item = new QListWidgetItem(topBooksList);
+        QWidget *row = buildTopBookRow(entry.first, entry.second, maxCount, i);
+        item->setSizeHint(QSize(item->sizeHint().width(), 32));
+        topBooksList->addItem(item);
+        topBooksList->setItemWidget(item, row);
+    }
 }
 
 void StatsWidget::updateCategoryChart(const core::Map<QString, int> &categoryBorrowCounts) const {
@@ -302,26 +330,39 @@ void StatsWidget::updateCategoryChart(const core::Map<QString, int> &categoryBor
         items.append(qMakePair(it.key(), it.value()));
     }
     std::ranges::sort(items, [](const QPair<QString, int> &a, const QPair<QString, int> &b) {
+        if (a.second == b.second) return a.first.toLower() < b.first.toLower();
         return a.second > b.second;
     });
 
+    // Giới hạn 8 cột để tránh dồn label, gom phần còn lại vào mục "Khác (+N)".
     QStringList categories;
     core::DynamicArray<double> values;
-    for (const auto &[fst, snd] : items) {
-        categories.append(fst);
-        values.append(snd);
+    const int limit = 8;
+    int othersTotal = 0;
+    for (int i = 0; i < items.size(); ++i) {
+        if (i < limit) {
+            categories.append(items[i].first);
+            values.append(items[i].second);
+        } else {
+            othersTotal += items[i].second;
+        }
+    }
+    if (items.size() > limit) {
+        categories.append(tr("Khác (+%1)").arg(items.size() - limit));
+        values.append(othersTotal);
     }
 
     StatsChart::Series series;
     series.name = tr("Lượt mượn");
     series.values = values;
-    series.color = QColor(0x3b, 0x82, 0xf6);
+    series.color = QColor(0x20, 0x9c, 0xf0);
 
     core::DynamicArray<StatsChart::Series> seriesVec;
     seriesVec.append(series);
     categoryChart->setCategories(categories);
     categoryChart->setSeries(seriesVec);
     categoryChart->setMode(StatsChart::Mode::Bar);
+    categoryChart->setShowLegend(false);
 }
 
 void StatsWidget::updateMonthlyChart(const core::DynamicArray<int> &monthlyBorrowCounts) const {
@@ -338,44 +379,14 @@ void StatsWidget::updateMonthlyChart(const core::DynamicArray<int> &monthlyBorro
     StatsChart::Series series;
     series.name = tr("Lượt mượn");
     series.values = values;
-    series.color = QColor(0x3b, 0x82, 0xf6);
+    series.color = QColor(0x1d, 0x4e, 0xd8);
 
     core::DynamicArray<StatsChart::Series> seriesVec;
     seriesVec.append(series);
     monthlyChart->setCategories(categories);
     monthlyChart->setSeries(seriesVec);
-    monthlyChart->setMode(StatsChart::Mode::Bar);
-}
-
-void StatsWidget::updatePieChart(int cardFees, int fines) const {
-    if (!revenuePieChart) return;
-
-    core::DynamicArray<QPair<QString, int>> segments;
-    segments.append(qMakePair(tr("Làm thẻ"), cardFees));
-    segments.append(qMakePair(tr("Tiền phạt"), fines));
-
-    revenuePieChart->setSegments(segments);
-}
-
-void StatsWidget::updateLoansList(const core::DynamicArray<QPair<QString, QString>> &loans) const {
-    if (!recentLoansList) return;
-
-    recentLoansList->clear();
-    for (const auto &[fst, snd] : loans) {
-        auto *item = new QListWidgetItem(fst, recentLoansList);
-        item->setData(Qt::UserRole, snd);
-        recentLoansList->addItem(item);
-    }
-}
-
-void StatsWidget::updateActiveReadersList(const core::DynamicArray<QString> &readers) const {
-    if (!activeReadersList) return;
-
-    activeReadersList->clear();
-    for (const auto &reader : readers) {
-        auto *item = new QListWidgetItem(reader, activeReadersList);
-        activeReadersList->addItem(item);
-    }
+    monthlyChart->setMode(StatsChart::Mode::Line);
+    monthlyChart->setShowLegend(false);
 }
 
 }  // namespace pbl2::ui

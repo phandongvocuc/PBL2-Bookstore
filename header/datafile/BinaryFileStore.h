@@ -40,11 +40,11 @@ struct BookRecord {
     char genre[64];
     char publisher[128];
     DateRecord publishDate;
-    int32_t publishYear;
     int32_t quantity;
     int32_t originalPrice;
     char status[32];
     char summary[512];
+    char coverImagePath[256]; // Đường dẫn ảnh bìa
 };
 
 struct ReaderRecord {

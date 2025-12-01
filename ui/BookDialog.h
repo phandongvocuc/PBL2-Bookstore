@@ -37,13 +37,15 @@ private:
     QComboBox *genreCombo{nullptr};
     QLineEdit *publisherEdit{nullptr};
     QDateEdit *publishDateEdit{nullptr};
-    QSpinBox *publishYearSpin{nullptr};
     QSpinBox *quantitySpin{nullptr};
     QSpinBox *originalPriceSpin{nullptr};
     QComboBox *statusCombo{nullptr};
     QPlainTextEdit *summaryEdit{nullptr};
     QDialogButtonBox *buttonBox{nullptr};
     QLabel *errorLabel{nullptr};
+    QLabel *coverLabel{nullptr}; // Hiển thị ảnh bìa
+    QPushButton *chooseCoverButton{nullptr}; // Nút chọn ảnh
+    core::CustomString coverImagePath; // Đường dẫn ảnh bìa
     bool editingMode{false};
     bool forceIdReadOnly{false};
 };

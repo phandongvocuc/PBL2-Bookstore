@@ -84,7 +84,7 @@ private:
     void refreshConfigInputs() const;
 
     void applyBookFilter();
-    void fillBooksList(const core::DynamicArray<model::Book> &books) const;
+    void fillBooksList(const core::DynamicArray<model::Book> &books);
     void applyReaderFilter();
     void fillReadersList(const core::DynamicArray<model::Reader> &readers) const;
     void applyStaffFilter();
@@ -92,6 +92,9 @@ private:
     void applyLoanFilter();
     void fillLoansList(const core::DynamicArray<model::Loan> &loans);
     void fillAccountsList(const core::DynamicArray<model::Account> &accounts);
+    void showBookDetails(const model::Book &book);
+    void showReaderDetails(const model::Reader &reader) const;
+    void showStaffDetails(const model::Staff &staff) const;
 
     void handleAddBook();
     void handleEditBook();
@@ -150,11 +153,6 @@ private:
     QLabel *userInfoLabel{nullptr};
     QPushButton *navToggleButton{nullptr};
 
-    QLabel *totalBooksValue{nullptr};
-    QLabel *totalReadersValue{nullptr};
-    QLabel *totalLoansValue{nullptr};
-    QLabel *overdueLoansValue{nullptr};
-    QLabel *totalFinesValue{nullptr};
     QLabel *summaryBorrowedValue{nullptr};
     QLabel *summaryReturnedValue{nullptr};
     QLabel *summaryOverdueValue{nullptr};
@@ -163,7 +161,6 @@ private:
     QLabel *statsLabel{nullptr};
     
     StatsWidget *statsWidget{nullptr};
-    void updateStatsDashboardWidget();
 
     core::CustomString dataDirectory;
     service::BookService bookService;
@@ -219,21 +216,15 @@ private:
     QComboBox *genreFilterCombo{nullptr};
     QString statsSelectedGenre;
     QTableWidget *loanStatsTable{nullptr};
-    QLabel *overdueCount{nullptr};
-    QLabel *monthlyFinesValue{nullptr};
-    QListWidget *activeReadersList{nullptr};
-    QListWidget *topBooksList{nullptr};
-    StatsChart *topBooksChart{nullptr};
-    StatsChart *revenueChart{nullptr};
-    StatsChart *genreChart{nullptr};
     QPushButton *applyFilterButton{nullptr};
     
     QDate statsStartDate;
     QDate statsEndDate;
 
-    void applyStatsFilter();
     void updateStatsCards();
     void updateStatsCharts();
+    void updateStatsDashboardWidget();
+    void applyStatsFilter();
 
     bool adminRole{false};
     bool staffRole{false};

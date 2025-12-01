@@ -18,6 +18,16 @@
 #include <QDir>
 #include <QResizeEvent>
 #include <QTableWidgetItem>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPixmap>
+#include <QDialog>
+#include <QFormLayout>
+#include <QDialogButtonBox>
+#include <QDebug>
+#include <QRegularExpression>
+#include <QSet>
 #include "core/IdGenerator.h"
 #include "../core/DynamicArray.h"
 #include "QtBridge.h"
@@ -137,19 +147,41 @@ public:
     const bool selected = option.state & QStyle::State_Selected;
     // Reduce outer margins slightly to make cards more compact
     const QRect outer = option.rect.adjusted(4, 2, -4, -2);
-    const QColor background = selected ? QColor(0xDB, 0xEA, 0xFE) : QColor(0xFF, 0xFF, 0xFF);
-    QColor border = selected ? QColor(0x93, 0xC5, 0xFD) : QColor(0xD8, 0xE3, 0xF2);
+    const QColor background = selected ? QColor(0xE6, 0xE9, 0xEB) : QColor(0xE2, 0xE2, 0xE2);
+    QColor border = selected ? QColor(0x95, 0xA5, 0xB0) : QColor(0xD0, 0xD5, 0xDA);
 
         painter->setPen(border);
         painter->setBrush(background);
     painter->drawRoundedRect(outer, 6, 6);
 
     // Reduce inner padding so text area is larger relative to the card
-    const QRect inner = outer.adjusted(10, 10, -10, -10);
-    const QString header = index.data(kCardRoleHeader).toString();
-    const QString meta = index.data(kCardRoleMeta).toString();
-    const QString detail = index.data(kCardRoleDetail).toString();
-    const QString extraDetail = index.data(kCardRoleSecondaryDetail).toString();
+    QRect inner = outer.adjusted(12, 12, -12, -12);
+    const QIcon icon = qvariant_cast<QIcon>(index.data(Qt::DecorationRole));
+    const bool hasIcon = !icon.isNull();
+    int textLeft = inner.left();
+    // Cover area
+    const int coverWidth = 130;
+    const int coverHeight = inner.height() - 24;
+    const int coverTop = inner.top() + (inner.height() - coverHeight) / 2;
+    QRect coverRect(inner.left(), coverTop, coverWidth, coverHeight);
+    if (hasIcon) {
+        QPixmap pm = icon.pixmap(QSize(coverWidth, coverHeight));
+        pm = pm.scaled(coverRect.size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+        painter->drawPixmap(coverRect, pm, pm.rect());
+    } else {
+        painter->fillRect(coverRect, QColor(0x3A, 0x32, 0x32));
+    }
+    painter->setPen(QPen(QColor(0x70, 0x78, 0x80), 2));
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRect(coverRect.adjusted(1, 1, -1, -1));
+    // Shift text area to the right of the cover.
+    const int gap = 18;
+    inner.setLeft(inner.left() + coverWidth + gap);
+    textLeft = inner.left();
+    const QString header = index.data(kCardRoleHeader).toString();              // Tiêu đề
+    const QString meta = index.data(kCardRoleMeta).toString();                  // Mã
+    const QString detail = index.data(kCardRoleDetail).toString();             // Tác giả
+    const QString extraDetail = index.data(kCardRoleSecondaryDetail).toString(); // SL còn (hiển thị qua pill)
         const QString badgeText = index.data(kCardRoleBadgeText).toString();
         auto badgeColor = index.data(kCardRoleBadgeColor).value<QColor>();
         if (!badgeColor.isValid()) {
@@ -161,82 +193,69 @@ public:
             pillColor = option.palette.alternateBase().color();
         }
 
-        // Make fonts slightly smaller for a denser layout
+        // Fonts: mã nhỏ, tiêu đề lớn, tác giả trung bình
+        QFont codeFont = option.font;
+        codeFont.setPointSizeF((option.font.pointSizeF() > 0 ? option.font.pointSizeF() : option.font.pointSize()) + 1.0);
+
         QFont titleFont = option.font;
-        if (titleFont.pointSizeF() > 0) {
-            titleFont.setPointSizeF(max(9.0, titleFont.pointSizeF() - 1.0));
-        } else if (titleFont.pointSize() > 0) {
-            titleFont.setPointSize(max(9, titleFont.pointSize() - 1));
-        } else {
-            titleFont.setPointSize(9);
-        }
+        titleFont.setPointSizeF((option.font.pointSizeF() > 0 ? option.font.pointSizeF() : option.font.pointSize()) + 2.5);
         titleFont.setBold(true);
 
-        QFont bodyFont = option.font;
-        QFont secondaryFont = bodyFont;
-        if (secondaryFont.pointSizeF() > 0) {
-            secondaryFont.setPointSizeF(max(8.0, secondaryFont.pointSizeF() - 1.5));
-        } else if (secondaryFont.pointSize() > 0) {
-            secondaryFont.setPointSize(max(8, secondaryFont.pointSize() - 1));
-        }
+        QFont authorFont = option.font;
+        authorFont.setPointSizeF((option.font.pointSizeF() > 0 ? option.font.pointSizeF() : option.font.pointSize()) + 1.0);
 
-        QFont badgeFont = secondaryFont;
+        QFont badgeFont = option.font;
+        badgeFont.setPointSizeF(authorFont.pointSizeF());
         badgeFont.setBold(true);
 
-        QFontMetrics titleMetrics(titleFont);
-        QFontMetrics bodyMetrics(bodyFont);
-        QFontMetrics secondaryMetrics(secondaryFont);
-        QFontMetrics badgeMetrics(badgeFont);
-    // Reduce badge/pill padding so they take less horizontal/vertical space
-    const int badgeWidth = badgeMetrics.horizontalAdvance(badgeText) + 12;
-    const int badgeHeight = badgeMetrics.height() + 6;
-        QRect badgeRect(inner.right() - badgeWidth, inner.top(), badgeWidth, badgeHeight);
+        QFont pillFont = option.font;
+        pillFont.setPointSizeF(option.font.pointSizeF() > 0 ? option.font.pointSizeF() : option.font.pointSize());
 
-        constexpr auto primaryText = QColor(0x0F, 0x17, 0x2A);
-    auto secondaryText = QColor(0x4B, 0x55, 0x6B);
+        QFontMetrics codeMetrics(codeFont);
+        QFontMetrics titleMetrics(titleFont);
+        QFontMetrics authorMetrics(authorFont);
+        QFontMetrics badgeMetrics(badgeFont);
+        QFontMetrics pillMetrics(pillFont);
+    // Badge (trạng thái) đặt góc phải trên
+    const int badgeWidth = badgeMetrics.horizontalAdvance(badgeText) + 18;
+    const int badgeHeight = badgeMetrics.height() + 10;
+        const int badgeTop = inner.top();
+        QRect badgeRect(inner.right() - badgeWidth, badgeTop, badgeWidth, badgeHeight);
+
+        constexpr auto primaryText = QColor(0x22, 0x2C, 0x3A);
+    auto secondaryText = QColor(0x43, 0x4D, 0x5A);
     if (selected) {
         secondaryText = QColor(0x1E, 0x40, 0x8A);
     }
 
-    // Add a small top padding so text doesn't touch the rounded corner.
-    int y = inner.top() + 6;
+    // Text block: mã, tiêu đề, tác giả
+    const int titleW = max(inner.width() - badgeWidth - 12, 120);
+    int y = inner.top() + 4;
+
+    painter->setFont(codeFont);
+    painter->setPen(secondaryText);
+    painter->drawText(QRect(textLeft, y, titleW, codeMetrics.height()), Qt::AlignLeft | Qt::AlignVCenter, meta);
+    y += codeMetrics.height() + 6;
 
     painter->setFont(titleFont);
     painter->setPen(primaryText);
-    const int titleW = max(inner.width() - badgeWidth - 12, 80);
-    const QRect titleRect(inner.left(), y, titleW, titleMetrics.height());
-    // Elide long titles so they don't overflow the card boundaries.
-    const QString elidedTitle = titleMetrics.elidedText(header, Qt::ElideRight, titleRect.width());
-    painter->drawText(titleRect, Qt::AlignLeft | Qt::AlignTop, elidedTitle);
+    painter->drawText(QRect(textLeft, y, titleW, titleMetrics.height()), Qt::AlignLeft | Qt::AlignVCenter, header);
     y += titleMetrics.height() + 6;
 
-        // Compose up to 3 lines of body content (meta, detail, extraDetail)
-    QStringList parts;
-    if (!meta.isEmpty()) parts << meta;
-    if (!detail.isEmpty()) parts << detail;
-    if (!extraDetail.isEmpty()) parts << extraDetail;
-    const QString combinedBody = parts.join('\n');
-    painter->setFont(bodyFont);
-    painter->setPen(secondaryText);
-    // Reserve space for up to 4 wrapped body lines
-    constexpr int bodyLines = 4;
-    const int bodyAreaHeight = bodyMetrics.height() * bodyLines;
-
-    const int pillWidthReserve = pillText.isEmpty() ? 0 : secondaryMetrics.horizontalAdvance(pillText) + 16;
-    const QRect bodyRect(inner.left(), y, max(inner.width() - pillWidthReserve - 8, 120), bodyAreaHeight);
-    // Align to top so wrapped text starts at the top of the body area and
-    // doesn't get vertically centered (which could appear clipped).
-    painter->drawText(bodyRect, Qt::TextWordWrap | Qt::AlignLeft | Qt::AlignTop, combinedBody);
-    y += bodyAreaHeight + 4;
+    painter->setFont(authorFont);
+    painter->setPen(primaryText);
+    painter->drawText(QRect(textLeft, y, titleW, authorMetrics.height()), Qt::AlignLeft | Qt::AlignVCenter, detail);
 
         if (!pillText.isEmpty()) {
-            painter->setFont(secondaryFont);
-            const int pillWidth = secondaryMetrics.horizontalAdvance(pillText) + 12;
-            const int pillHeight = secondaryMetrics.height() + 6;
-            QRect pillRect(inner.right() - pillWidth, inner.bottom() - pillHeight, pillWidth, pillHeight);
+            painter->setFont(pillFont);
+            const int pillWidth = pillMetrics.horizontalAdvance(pillText) + 20;
+            const int pillHeight = pillMetrics.height() + 12;
+            const int pillTop = inner.bottom() - pillHeight;
+            QRect pillRect(inner.right() - pillWidth, pillTop, pillWidth, pillHeight);
 
-            QColor pillBg = selected ? background.darker(120) : pillColor;
-            auto pillFg = QColor(0x0F, 0x17, 0x2A);
+            QColor pillBg = QColor(0xC7, 0xC2, 0xC2);
+            if (selected) pillBg = pillBg.darker(110);
+            QColor pillFg = QColor(0xFF, 0xFF, 0xFF);
             painter->setPen(Qt::NoPen);
             painter->setBrush(pillBg);
             painter->drawRoundedRect(pillRect, 6, 6);
@@ -312,6 +331,138 @@ public:
             }
         }
         return {option.rect.width(), max(height, 112)};
+    }
+};
+
+// Generic text-only delegate for non-book lists
+class SimpleCardDelegate final : public QStyledItemDelegate {
+public:
+    using QStyledItemDelegate::QStyledItemDelegate;
+
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
+        if (!painter || !index.isValid()) {
+            QStyledItemDelegate::paint(painter, option, index);
+            return;
+        }
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing, true);
+
+        const bool selected = option.state & QStyle::State_Selected;
+        const QRect outer = option.rect.adjusted(4, 2, -4, -2);
+        const QColor background = selected ? QColor(0xE6, 0xE9, 0xEB) : QColor(0xF1, 0xF5, 0xF9);
+        QColor border = selected ? QColor(0x95, 0xA5, 0xB0) : QColor(0xD0, 0xD5, 0xDA);
+
+        painter->setPen(border);
+        painter->setBrush(background);
+        painter->drawRoundedRect(outer, 6, 6);
+
+        QRect inner = outer.adjusted(12, 12, -12, -12);
+        const QString header = index.data(kCardRoleHeader).toString();
+        const QString meta = index.data(kCardRoleMeta).toString();
+        const QString detail = index.data(kCardRoleDetail).toString();
+        const QString extraDetail = index.data(kCardRoleSecondaryDetail).toString();
+        const QString badgeText = index.data(kCardRoleBadgeText).toString();
+        QColor badgeColor = index.data(kCardRoleBadgeColor).value<QColor>();
+        if (!badgeColor.isValid()) badgeColor = statusBadgeColor(badgeText);
+        const QString pillText = index.data(kCardRolePillText).toString();
+
+        QFont headerFont = option.font;
+        headerFont.setPointSizeF((option.font.pointSizeF() > 0 ? option.font.pointSizeF() : option.font.pointSize()) + 1.5);
+        headerFont.setBold(true);
+        QFont metaFont = option.font;
+        metaFont.setPointSizeF(headerFont.pointSizeF() - 1.0);
+        QFont detailFont = option.font;
+        detailFont.setPointSizeF(option.font.pointSizeF() > 0 ? option.font.pointSizeF() : option.font.pointSize());
+        QFont badgeFont = detailFont;
+        badgeFont.setBold(true);
+
+        const QFontMetrics headerMetrics(headerFont);
+        const QFontMetrics metaMetrics(metaFont);
+        const QFontMetrics detailMetrics(detailFont);
+        const QFontMetrics badgeMetrics(badgeFont);
+
+        const int badgeWidth = badgeMetrics.horizontalAdvance(badgeText) + 18;
+        const int badgeHeight = badgeMetrics.height() + 10;
+        const QRect badgeRect(inner.right() - badgeWidth, inner.top(), badgeWidth, badgeHeight);
+
+        const int textWidth = inner.width() - badgeWidth - 12;
+        int y = inner.top();
+
+        painter->setFont(metaFont);
+        painter->setPen(QColor(0x43, 0x4D, 0x5A));
+        painter->drawText(QRect(inner.left(), y, textWidth, metaMetrics.height()), Qt::AlignLeft | Qt::AlignVCenter, meta);
+        y += metaMetrics.height() + 6;
+
+        painter->setFont(headerFont);
+        painter->setPen(QColor(0x22, 0x2C, 0x3A));
+        painter->drawText(QRect(inner.left(), y, textWidth, headerMetrics.height()), Qt::AlignLeft | Qt::AlignVCenter, header);
+        y += headerMetrics.height() + 6;
+
+        painter->setFont(detailFont);
+        painter->setPen(QColor(0x22, 0x2C, 0x3A));
+        if (!detail.isEmpty()) {
+            painter->drawText(QRect(inner.left(), y, textWidth, detailMetrics.height()), Qt::AlignLeft | Qt::AlignVCenter, detail);
+            y += detailMetrics.height() + 4;
+        }
+        if (!extraDetail.isEmpty()) {
+            painter->drawText(QRect(inner.left(), y, textWidth, detailMetrics.height()), Qt::AlignLeft | Qt::AlignVCenter, extraDetail);
+            y += detailMetrics.height() + 4;
+        }
+
+        // Badge
+        QColor badgeBg = badgeColor.isValid() ? badgeColor : option.palette.highlight().color();
+        QColor badgeFg = Qt::white;
+        if (badgeBg.lightness() > 200) badgeFg = QColor(0x22, 0x2C, 0x3A);
+        painter->setFont(badgeFont);
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(badgeBg);
+        painter->drawRoundedRect(badgeRect, 6, 6);
+        painter->setPen(badgeFg);
+        painter->drawText(badgeRect, Qt::AlignCenter, badgeText);
+
+        // Pill
+        if (!pillText.isEmpty()) {
+            const int pillWidth = detailMetrics.horizontalAdvance(pillText) + 18;
+            const int pillHeight = detailMetrics.height() + 10;
+            QRect pillRect(inner.right() - pillWidth, inner.bottom() - pillHeight, pillWidth, pillHeight);
+            QColor pillBg = QColor(0xD1, 0xD5, 0xDB);
+            QColor pillFg = QColor(0x22, 0x2C, 0x3A);
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(pillBg);
+            painter->drawRoundedRect(pillRect, 6, 6);
+            painter->setPen(pillFg);
+            painter->drawText(pillRect, Qt::AlignCenter, pillText);
+        }
+
+        painter->restore();
+    }
+
+    [[nodiscard]] QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override {
+        Q_UNUSED(index);
+        const int h = option.fontMetrics.height();
+        const int baseHeight = max(120, h * 5 + 24);
+
+        // In IconMode, QListView sometimes provides a zero/very small width in
+        // sizeHint; compute a sane card width based on viewport so the cards
+        // remain visible in a grid (similar to CardListDelegate above).
+        if (option.widget) {
+            if (auto *view = qobject_cast<const QListView *>(option.widget)) {
+                if (view->viewMode() == QListView::IconMode) {
+                    const int vw = view->viewport() ? view->viewport()->width() : view->width();
+                    constexpr int columns = 2;
+                    int spacing = 8;
+                    if (auto *lw = qobject_cast<const QListWidget *>(view)) {
+                        spacing = lw->spacing();
+                    }
+                    const int totalGaps = (columns + 1) * spacing;
+                    int preferred = (vw - totalGaps) / columns;
+                    preferred = clamp(preferred, 220, 420);
+                    return {preferred, max(baseHeight, 180)};
+                }
+            }
+        }
+
+        return {max(option.rect.width(), 240), baseHeight};
     }
 };
 
@@ -495,9 +646,7 @@ void configureCardListWidget(QListWidget *list) {
         "  background: transparent;"
         "}");
 
-    if (!dynamic_cast<CardListDelegate *>(list->itemDelegate())) {
-        list->setItemDelegate(new CardListDelegate(list));
-    }
+    // Delegate will be set per-tab after configuration.
 }
 
 QString normalizedStatus(const QString &text) {
@@ -506,6 +655,15 @@ QString normalizedStatus(const QString &text) {
 
 QString normalizedStatus(const core::CustomString &text) {
     return normalizedStatus(toQString(text));
+}
+
+bool containsAllTokens(const QString &haystackLower, const QString &termLower) {
+    if (termLower.isEmpty()) return true;
+    const auto tokens = termLower.split(QRegularExpression(QStringLiteral("\\s+")), Qt::SkipEmptyParts);
+    for (const auto &tok : tokens) {
+        if (!haystackLower.contains(tok)) return false;
+    }
+    return true;
 }
 
 QString bookStatusText(const core::CustomString &code) {
@@ -852,6 +1010,7 @@ QMessageBox::StandardButton MainWindow::askEventQuestion(const QString &title, c
 }
 void MainWindow::configureBooksTab() {
     configureCardListWidget(booksList);
+    if (booksList) booksList->setItemDelegate(new CardListDelegate(booksList));
     // Allow books to display as a grid of cards (IconMode) so items appear
     // in multiple columns. configureCardListWidget already sets IconMode
     // we explicitly ensure wrapping/flow here for clarity.
@@ -898,16 +1057,42 @@ void MainWindow::configureBooksTab() {
     if (ui->booksActionsGroup) {
         ui->booksActionsGroup->setVisible(adminRole);
     }
+
+    if (booksList) {
+        disconnect(booksList, &QListWidget::itemDoubleClicked, this, nullptr);
+        connect(booksList, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem *item) {
+            if (!item) return;
+            const QString id = item->data(kCardRoleId).toString();
+            auto it = std::find_if(booksCache.begin(), booksCache.end(), [&](const model::Book &b) {
+                return toQString(b.getId()) == id;
+            });
+            if (it != booksCache.end()) {
+                showBookDetails(*it);
+            }
+        });
+    }
 }
 
 void MainWindow::configureReadersTab() {
     configureCardListWidget(readersList);
+    if (readersList) readersList->setItemDelegate(new SimpleCardDelegate(readersList));
     // Use grid/card layout for readers: allow wrapping and IconMode so cards
     // form columns similar to Books/Reports.
     if (readersList) {
         readersList->setFlow(QListView::LeftToRight);
         readersList->setWrapping(true);
         readersList->setViewMode(QListView::IconMode);
+        disconnect(readersList, &QListWidget::itemDoubleClicked, this, nullptr);
+        connect(readersList, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem *item) {
+            if (!item) return;
+            const QString id = item->data(kCardRoleId).toString();
+            auto it = std::find_if(readersCache.begin(), readersCache.end(), [&](const model::Reader &r) {
+                return toQString(r.getId()) == id;
+            });
+            if (it != readersCache.end()) {
+                showReaderDetails(*it);
+            }
+        });
     }
 
     if (readerSearchEdit) {
@@ -948,6 +1133,7 @@ void MainWindow::configureReadersTab() {
 
 void MainWindow::configureLoansTab() {
     configureCardListWidget(loansList);
+    if (loansList) loansList->setItemDelegate(new SimpleCardDelegate(loansList));
 
     if (loanStatusFilter) {
         loanStatusFilter->clear();
@@ -1005,6 +1191,7 @@ void MainWindow::configureLoansTab() {
 
 void MainWindow::configureReportsTab() {
     configureCardListWidget(reportsList);
+    if (reportsList) reportsList->setItemDelegate(new SimpleCardDelegate(reportsList));
     // Use grid/card layout for reports: allow wrapping and IconMode so cards
     // form columns. CardListDelegate sizeHint adapts to IconMode to allow
     // multi-column display.
@@ -1068,6 +1255,7 @@ void MainWindow::configureReportsTab() {
 
 void MainWindow::configureAccountsTab() {
     configureCardListWidget(accountsList);
+    if (accountsList) accountsList->setItemDelegate(new SimpleCardDelegate(accountsList));
 
     if (accountsList) {
         accountsList->setFlow(QListView::LeftToRight);
@@ -1097,9 +1285,8 @@ void MainWindow::configureAccountsTab() {
 }
 
 void MainWindow::configureStatsTab() {
-    // Find widgets directly in statsTab
     const QWidget *searchWidget = ui->statsTab;
-    
+
     timePeriodCombo = searchWidget->findChild<QComboBox *>(QStringLiteral("timePeriodCombo"));
     const auto customStartDateEdit = searchWidget->findChild<QDateEdit *>(QStringLiteral("customStartDateEdit"));
     const auto customEndDateEdit = searchWidget->findChild<QDateEdit *>(QStringLiteral("customEndDateEdit"));
@@ -1114,7 +1301,6 @@ void MainWindow::configureStatsTab() {
         timePeriodCombo->addItem(tr("Tháng này"));
         timePeriodCombo->addItem(tr("Tháng trước"));
         timePeriodCombo->addItem(tr("Tùy chọn..."));
-        // Mac dinh chon "Thang nay" de bieu do luon co du lieu hon
         timePeriodCombo->setCurrentIndex(2);
         if (customStartDateEdit && customEndDateEdit) {
             connect(timePeriodCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [=](const int idx) {
@@ -1124,124 +1310,17 @@ void MainWindow::configureStatsTab() {
             });
         }
     }
-    loanStatsTable = searchWidget->findChild<QTableWidget *>(QStringLiteral("loanStatsTable"));
     applyFilterButton = searchWidget->findChild<QPushButton *>(QStringLiteral("applyFilterButton"));
-    
-    // Initialize date range to "Tuan nay"
-    const QDate today = QDate::currentDate();
-    statsStartDate = today.addDays(-(today.dayOfWeek() - 1));
-    statsEndDate = today;
-    
-    // Get card labels
-    totalBooksValue = searchWidget->findChild<QLabel *>(QStringLiteral("totalBooksValue"));
-    totalReadersValue = searchWidget->findChild<QLabel *>(QStringLiteral("totalReadersValue"));
-    totalLoansValue = searchWidget->findChild<QLabel *>(QStringLiteral("totalLoansValue"));
-    totalFinesValue = searchWidget->findChild<QLabel *>(QStringLiteral("totalFinesValue"));
-    overdueCount = searchWidget->findChild<QLabel *>(QStringLiteral("overdueCount"));
-    monthlyFinesValue = searchWidget->findChild<QLabel *>(QStringLiteral("monthlyFinesValue"));
-    
-    // Get charts
-    topBooksChart = searchWidget->findChild<StatsChart *>(QStringLiteral("topBooksChart"));
-    revenueChart = searchWidget->findChild<StatsChart *>(QStringLiteral("revenueChart"));
-    genreChart = searchWidget->findChild<StatsChart *>(QStringLiteral("genreChart"));
-    activeReadersList = searchWidget->findChild<QListWidget *>(QStringLiteral("activeReadersList"));
-    topBooksList = searchWidget->findChild<QListWidget *>(QStringLiteral("topBooksList"));
-    
-    // Setup top books list with custom delegate for right-aligned numbers
-    if (topBooksList) {
-        class BooksDelegate : public QStyledItemDelegate {
-        public:
-            void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
-                QStyleOptionViewItem opt = option;
-                initStyleOption(&opt, index);
-                
-                painter->save();
-                if (opt.state & QStyle::State_Selected) {
-                    painter->fillRect(opt.rect, opt.palette.highlight());
-                }
-
-                const QString text = index.data(Qt::DisplayRole).toString();
-                const QString count = index.data(Qt::UserRole + 1).toString();
-                
-                const QRect textRect = opt.rect.adjusted(5, 2, -50, -2);
-                const QRect countRect = opt.rect.adjusted(opt.rect.width() - 55, 2, -5, -2);
-                
-                QFont font = painter->font();
-                font.setPointSize(10);
-                painter->setFont(font);
-                
-                painter->setPen(opt.palette.text().color());
-                painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, text);
-                painter->setPen(QColor(0x6b, 0x72, 0x80));
-                painter->drawText(countRect, Qt::AlignRight | Qt::AlignVCenter, count);
-                
-                painter->restore();
-            }
-        };
-        topBooksList->setItemDelegate(new BooksDelegate());
-    }
-    
-    // Setup active readers list with delegate
-    if (activeReadersList) {
-        class ReadersDelegate : public QStyledItemDelegate {
-        public:
-            void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
-                QStyleOptionViewItem opt = option;
-                initStyleOption(&opt, index);
-                
-                painter->save();
-                if (opt.state & QStyle::State_Selected) {
-                    painter->fillRect(opt.rect, opt.palette.highlight());
-                }
-
-                const QString text = index.data(Qt::DisplayRole).toString();
-                const QString count = index.data(Qt::UserRole + 1).toString();
-                
-                // Vẽ text (có thể nhiều dòng)
-                const QRect textRect = opt.rect.adjusted(5, 2, -50, -2);
-                const QRect countRect = opt.rect.adjusted(opt.rect.width() - 55, 2, -5, -2);
-                
-                QFont font = painter->font();
-                font.setPointSize(10);
-                painter->setFont(font);
-                
-                painter->setPen(opt.palette.text().color());
-                painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, text);
-                painter->setPen(QColor(0x6b, 0x72, 0x80));
-                painter->drawText(countRect, Qt::AlignRight | Qt::AlignVCenter, count);
-                
-                painter->restore();
-            }
-        };
-        activeReadersList->setItemDelegate(new ReadersDelegate());
-    }
-    
-    // Setup table
-    if (loanStatsTable) {
-        loanStatsTable->setColumnWidth(0, 80);   // Ma phieu
-        loanStatsTable->setColumnWidth(1, 200);  // Ten sach
-        loanStatsTable->setColumnWidth(2, 150);  // Doc gia
-        loanStatsTable->setColumnWidth(3, 100);  // Ngay muon
-        loanStatsTable->setColumnWidth(4, 100);  // Ngay tra
-        loanStatsTable->setColumnWidth(5, 80);   // Tien
-        loanStatsTable->setColumnWidth(6, 120);  // Trang thai
-    }
-    
-    // Setup charts
-    if (topBooksChart) {
-        topBooksChart->setMode(StatsChart::Mode::Bar);
-        topBooksChart->setTitle(QString());
-    }
-    
-    // Connect filter button
     if (applyFilterButton) {
         connect(applyFilterButton, &QPushButton::clicked, this, &MainWindow::applyStatsFilter);
     }
 
-    // Place the StatsWidget directly under the filter group inside statsTabLayout
+    const QDate today = QDate::currentDate();
+    statsStartDate = QDate(today.year(), today.month(), 1);
+    statsEndDate = today;
+
     if (!statsWidget && ui->statsTab) {
         statsWidget = new StatsWidget(ui->statsTab);
-
         auto *contentLayout = qobject_cast<QVBoxLayout *>(ui->statsTab->findChild<QVBoxLayout *>(QStringLiteral("statsTabLayout")));
         if (!contentLayout && ui->statsTabLayout) {
             contentLayout = ui->statsTabLayout;
@@ -1307,6 +1386,14 @@ void MainWindow::reloadData() {
     const int books = booksCache.size();
     const int readers = readersCache.size();
     const int loans = loansCache.size();
+    // Lightweight diagnostics to confirm data is loaded from the expected path
+    qInfo().noquote() << "[DataDiag] dataDir =" << toQString(dataDirectory)
+                      << "| books:" << books
+                      << "readers:" << readers
+                      << "loans:" << loans
+                      << "reports:" << reportsCache.size()
+                      << "staff:" << staffsCache.size()
+                      << "accounts:" << accountsCache.size();
 
     if (statsLabel) {
         statsLabel->setText(tr("Sách: %1 | Bạn đọc: %2 | Phiếu mượn: %3 | Giới hạn sách/bạn đọc: %4 | Tiền phạt/ngày: %5 VND")
@@ -1324,7 +1411,7 @@ void MainWindow::populateBooks() {
     applyBookFilter();
 }
 
-void MainWindow::fillBooksList(const core::DynamicArray<model::Book> &books) const {
+void MainWindow::fillBooksList(const core::DynamicArray<model::Book> &books) {
     if (!booksList) return;
 
     const QListWidgetItem *currentItem = booksList->currentItem();
@@ -1348,51 +1435,37 @@ void MainWindow::fillBooksList(const core::DynamicArray<model::Book> &books) con
         const QString id = toQString(book.getId());
         const QString title = toQString(book.getTitle());
         const QString author = toQString(book.getAuthor());
-        const QString genre = toQString(book.getGenre());
         const QString publisher = toQString(book.getPublisher());
-        const int originalPrice = book.getOriginalPrice();
-        const QString priceText = originalPrice > 0 ? formatCurrency(originalPrice) : tr("Chưa đặt giá");
-        const QDate publishDate = toQDate(book.getPublishDate());
-        const QString dateText = publishDate.isValid() ? publishDate.toString(Qt::ISODate) : tr("Không rõ");
-        const QString status = bookStatusText(book.getStatus());
-        const QString statusCode = toQString(model::canonicalBookStatus(book.getStatus()));
-
-        const QString headerLine = tr("%1 - %2").arg(id, title);
-        const QString metaLine = tr("Tác giả: %1 | Thể loại: %2").arg(author, genre);
-        const QString detailLine = tr("Nhà XB: %1 | Phát hành: %2 | Năm: %3")
-                                     .arg(publisher.isEmpty() ? tr("Không rõ") : publisher, dateText)
-                                     .arg(book.getPublishYear());
+        const int quantity = book.getQuantity();
+        const QString coverPath = bridge::toQString(book.getCoverImagePath());
+        const core::CustomString statusKey = model::canonicalBookStatus(book.getStatus());
+        const QString statusText = bookStatusText(statusKey);
 
         auto *item = new QListWidgetItem();
         item->setData(Qt::UserRole, id);
         item->setData(kCardRoleId, id);
-        item->setData(kCardRoleHeader, headerLine);
-        item->setData(kCardRoleMeta, metaLine);
-        item->setData(kCardRoleDetail, detailLine);
-        item->setData(kCardRoleSecondaryDetail, tr("Giá gốc: %1 | Tình trạng: %2").arg(priceText, status));
-        item->setData(kCardRoleBadgeText, status);
-        item->setData(kCardRoleBadgeColor, statusBadgeColor(statusCode));
-        item->setData(kCardRolePillText, tr("Số lượng: %1").arg(book.getQuantity()));
-        item->setData(kCardRolePillColor, QVariant());
-        item->setToolTip(QStringList{headerLine,
-                                     metaLine,
-                                     detailLine,
-                                     tr("Giá gốc: %1").arg(priceText),
-                                     tr("Tình trạng: %1").arg(status),
-                                     tr("Số lượng: %1").arg(book.getQuantity())}.join('\n'));
-        item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-
+        item->setData(kCardRoleHeader, tr("Tiêu đề: %1").arg(title.isEmpty() ? tr("...") : title));
+        // Sử dụng meta làm mã sách, detail là tác giả để paint delegate bố trí theo thiết kế mẫu
+        item->setData(kCardRoleMeta, tr("Mã: %1").arg(id));
+        item->setData(kCardRoleDetail, author.isEmpty() ? tr("Tác giả: ...") : tr("Tác giả: %1").arg(author));
+        item->setData(kCardRoleSecondaryDetail, tr("Số lượng còn: %1").arg(quantity));
+        item->setData(kCardRoleBadgeText, statusText);
+        item->setData(kCardRoleBadgeColor, statusBadgeColor(statusText));
+        item->setData(kCardRolePillText, tr("SL: %1").arg(quantity));
+        // Đặt icon là ảnh bìa nếu có
+        if (!coverPath.isEmpty()) {
+            QPixmap pix(coverPath);
+            item->setIcon(QIcon(pix.scaled(80, 110, Qt::KeepAspectRatio, Qt::SmoothTransformation)));
+        }
+        item->setTextAlignment(Qt::AlignCenter);
         QSize hint = item->sizeHint();
         hint.setHeight(max(hint.height(), minimumHeight));
         item->setSizeHint(hint);
-
         booksList->addItem(item);
-
         if (restoreRow == -1 && !selectedId.isEmpty() && selectedId == id) {
             restoreRow = row;
         }
     }
-
     booksList->setUpdatesEnabled(true);
     if (restoreRow >= 0) {
         booksList->setCurrentRow(restoreRow);
@@ -1401,6 +1474,153 @@ void MainWindow::fillBooksList(const core::DynamicArray<model::Book> &books) con
         // Do not auto-select the first item after refresh — preserve no-selection state
         booksList->clearSelection();
     }
+}
+
+void MainWindow::showBookDetails(const model::Book &book) {
+    QDialog dlg(this);
+    dlg.setWindowTitle(tr("Chi tiết sách"));
+    dlg.setModal(true);
+    dlg.setMinimumWidth(560);
+
+    auto *root = new QVBoxLayout(&dlg);
+    root->setContentsMargins(16, 16, 16, 16);
+    root->setSpacing(12);
+
+    auto *topRow = new QHBoxLayout;
+    topRow->setSpacing(16);
+
+    auto *coverLabel = new QLabel(&dlg);
+    coverLabel->setFixedSize(150, 210);
+    coverLabel->setAlignment(Qt::AlignCenter);
+    coverLabel->setStyleSheet(QStringLiteral("background: #3a3232; border: 2px solid #707880;"));
+    const QString coverPath = bridge::toQString(book.getCoverImagePath());
+    if (!coverPath.isEmpty()) {
+        QPixmap pm(coverPath);
+        if (!pm.isNull()) {
+            coverLabel->setPixmap(pm.scaled(coverLabel->size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
+        }
+    }
+    topRow->addWidget(coverLabel, 0, Qt::AlignTop);
+
+    auto *form = new QFormLayout;
+    form->setLabelAlignment(Qt::AlignLeft);
+    form->setFormAlignment(Qt::AlignLeft | Qt::AlignTop);
+    form->setHorizontalSpacing(16);
+    form->setVerticalSpacing(10);
+    const auto setRow = [&](const QString &label, const QString &value) {
+        auto *v = new QLabel(value, &dlg);
+        v->setWordWrap(true);
+        form->addRow(label, v);
+    };
+
+    setRow(tr("Mã sách"), toQString(book.getId()));
+    setRow(tr("Tiêu đề"), toQString(book.getTitle().isEmpty() ? core::CustomStringLiteral("...") : book.getTitle()));
+    setRow(tr("Tác giả"), toQString(book.getAuthor().isEmpty() ? core::CustomStringLiteral("...") : book.getAuthor()));
+    setRow(tr("Thể loại"), toQString(book.getGenre()));
+    setRow(tr("NXB"), toQString(book.getPublisher()));
+    setRow(tr("Tình trạng"), bookStatusText(book.getStatus()));
+    setRow(tr("Số lượng"), QString::number(book.getQuantity()));
+    setRow(tr("Giá gốc"), formatCurrency(book.getOriginalPrice()));
+
+    topRow->addLayout(form, 1);
+    root->addLayout(topRow);
+
+    if (!book.getSummary().trimmed().isEmpty()) {
+        auto *summaryLabel = new QLabel(tr("Tóm tắt:"), &dlg);
+        summaryLabel->setStyleSheet(QStringLiteral("font-weight: 600;"));
+        auto *summaryValue = new QLabel(toQString(book.getSummary()), &dlg);
+        summaryValue->setWordWrap(true);
+        root->addWidget(summaryLabel);
+        root->addWidget(summaryValue);
+    }
+
+    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok, &dlg);
+    connect(buttons, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    root->addWidget(buttons);
+
+    dlg.exec();
+}
+
+void MainWindow::showReaderDetails(const model::Reader &reader) const {
+    QDialog dlg(const_cast<MainWindow *>(this));
+    dlg.setWindowTitle(tr("Chi tiết bạn đọc"));
+    dlg.setModal(true);
+    dlg.setMinimumWidth(520);
+
+    auto *root = new QVBoxLayout(&dlg);
+    root->setContentsMargins(16, 16, 16, 16);
+    root->setSpacing(10);
+
+    auto *form = new QFormLayout;
+    form->setLabelAlignment(Qt::AlignLeft);
+    form->setHorizontalSpacing(14);
+    form->setVerticalSpacing(8);
+    const auto addRow = [&](const QString &label, const QString &value) {
+        auto *v = new QLabel(value, &dlg);
+        v->setWordWrap(true);
+        form->addRow(label, v);
+    };
+
+    addRow(tr("Mã bạn đọc"), toQString(reader.getId()));
+    addRow(tr("Họ tên"), toQString(reader.getFullName()));
+    addRow(tr("Giới tính"), toQString(reader.getGender()));
+    addRow(tr("Địa chỉ"), toQString(reader.getAddress()));
+    addRow(tr("SĐT"), toQString(reader.getPhone()));
+    addRow(tr("Email"), toQString(reader.getEmail()));
+    addRow(tr("CCCD"), toQString(reader.getIdentityCard()));
+    addRow(tr("Ghi chú"), toQString(reader.getNotes()));
+    if (reader.getDob().isValid()) addRow(tr("Ngày sinh"), toQDate(reader.getDob()).toString(Qt::ISODate));
+    if (reader.getCreatedDate().isValid()) addRow(tr("Ngày đăng ký"), toQDate(reader.getCreatedDate()).toString(Qt::ISODate));
+    if (reader.getExpiryDate().isValid()) addRow(tr("Ngày hết hạn"), toQDate(reader.getExpiryDate()).toString(Qt::ISODate));
+    addRow(tr("Số lần mượn"), QString::number(reader.getTotalBorrowed()));
+    addRow(tr("Trạng thái"), reader.isActive() ? tr("Đang hoạt động") : tr("Tạm khóa"));
+
+    root->addLayout(form);
+    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok, &dlg);
+    connect(buttons, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    root->addWidget(buttons);
+
+    dlg.exec();
+}
+
+void MainWindow::showStaffDetails(const model::Staff &staff) const {
+    QDialog dlg(const_cast<MainWindow *>(this));
+    dlg.setWindowTitle(tr("Chi tiết nhân viên"));
+    dlg.setModal(true);
+    dlg.setMinimumWidth(520);
+
+    auto *root = new QVBoxLayout(&dlg);
+    root->setContentsMargins(16, 16, 16, 16);
+    root->setSpacing(10);
+
+    auto *form = new QFormLayout;
+    form->setLabelAlignment(Qt::AlignLeft);
+    form->setHorizontalSpacing(14);
+    form->setVerticalSpacing(8);
+    const auto addRow = [&](const QString &label, const QString &value) {
+        auto *v = new QLabel(value, &dlg);
+        v->setWordWrap(true);
+        form->addRow(label, v);
+    };
+
+    addRow(tr("Mã nhân viên"), toQString(staff.getId()));
+    addRow(tr("Họ tên"), toQString(staff.getFullName()));
+    addRow(tr("Giới tính"), toQString(staff.getGender()));
+    addRow(tr("Địa chỉ"), toQString(staff.getAddress()));
+    addRow(tr("SĐT"), toQString(staff.getPhone()));
+    addRow(tr("Email"), toQString(staff.getEmail()));
+    addRow(tr("Chức vụ"), toQString(staff.getPosition()));
+    addRow(tr("Ghi chú"), toQString(staff.getNotes()));
+    if (staff.getDob().isValid()) addRow(tr("Ngày sinh"), toQDate(staff.getDob()).toString(Qt::ISODate));
+    if (staff.getHireDate().isValid()) addRow(tr("Ngày vào làm"), toQDate(staff.getHireDate()).toString(Qt::ISODate));
+    addRow(tr("Trạng thái"), staff.isActive() ? tr("Đang làm việc") : tr("Đã nghỉ việc"));
+
+    root->addLayout(form);
+    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok, &dlg);
+    connect(buttons, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    root->addWidget(buttons);
+
+    dlg.exec();
 }
 
 void MainWindow::applyBookFilter() {
@@ -1419,7 +1639,7 @@ void MainWindow::applyBookFilter() {
                 QString::number(book.getOriginalPrice()),
                 bookStatus
             }.join(' ').toLower();
-            if (!haystack.contains(term)) continue;
+            if (!containsAllTokens(haystack, term)) continue;
         }
         if (statusFilter != QStringLiteral("ALL") && bookStatus != statusFilter) {
             continue;
@@ -1465,12 +1685,11 @@ void MainWindow::fillReadersList(const core::DynamicArray<model::Reader> &reader
         const QString statusText = active ? tr("Đang hoạt động") : tr("Tạm khóa");
         const QString statusCode = active ? QStringLiteral("ACTIVE") : QStringLiteral("INACTIVE");
 
-        const QString headerLine = tr("%1 - %2").arg(id, name);
-        const QString metaLine = tr("SĐT: %1 | Email: %2").arg(phone.isEmpty() ? tr("Không rõ") : phone, email.isEmpty() ? tr("Không rõ") : email);
-        const QString detailLine = tr("Địa chỉ: %1 | Giới tính: %2").arg(address.isEmpty() ? tr("Không rõ") : address, gender.isEmpty() ? tr("Không rõ") : gender);
-        const QString secondaryLine = tr("Đăng ký: %1 | Hết hạn: %2 | Mượn: %3 lần")
-                                           .arg(created, expiry)
-                                           .arg(totalBorrowed);
+        const QString headerLine = name.isEmpty() ? id : name;
+        const QString metaLine = tr("Mã: %1").arg(id);
+        const QString detailLine = tr("SĐT: %1 | Email: %2").arg(phone.isEmpty() ? tr("?") : phone,
+                                                                  email.isEmpty() ? tr("?") : email);
+        const QString secondaryLine = tr("CCCD: %1").arg(identityCard.isEmpty() ? tr("?") : identityCard);
         auto *item = new QListWidgetItem();
         item->setData(Qt::UserRole, id);
         item->setData(kCardRoleId, id);
@@ -1480,13 +1699,8 @@ void MainWindow::fillReadersList(const core::DynamicArray<model::Reader> &reader
         item->setData(kCardRoleSecondaryDetail, secondaryLine);
         item->setData(kCardRoleBadgeText, statusText);
         item->setData(kCardRoleBadgeColor, statusBadgeColor(statusCode));
-        item->setData(kCardRolePillText, identityCard.isEmpty() ? QString() : tr("CCCD %1").arg(identityCard));
+        item->setData(kCardRolePillText, tr("Mượn: %1").arg(totalBorrowed));
         item->setData(kCardRolePillColor, QVariant());
-        QStringList tooltipLines{headerLine, metaLine, detailLine, secondaryLine, tr("Trạng thái: %1").arg(statusText)};
-        if (!notes.trimmed().isEmpty()) {
-            tooltipLines.append(tr("Ghi chú: %1").arg(notes));
-        }
-        item->setToolTip(tooltipLines.join('\n'));
         item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
         QSize hint = item->sizeHint();
@@ -1507,6 +1721,7 @@ void MainWindow::fillReadersList(const core::DynamicArray<model::Reader> &reader
     } else {
         readersList->clearSelection();
     }
+
 }
 
 void MainWindow::applyReaderFilter() {
@@ -1534,7 +1749,7 @@ void MainWindow::applyReaderFilter() {
                 statusText,
                 statusCode
             }.join(' ').toLower();
-            if (!haystack.contains(term)) continue;
+            if (!containsAllTokens(haystack, term)) continue;
         }
         if (statusFilter == QStringLiteral("ACTIVE") && !reader.isActive()) {
             continue;
@@ -1665,6 +1880,22 @@ void MainWindow::applyLoanFilter() {
     filtered.reserve(loansCache.size());
     const QString term = loanSearchEdit ? loanSearchEdit->text().trimmed().toLower() : QString();
     const QString statusFilter = loanStatusFilter ? loanStatusFilter->currentData().toString() : QStringLiteral("ALL");
+    const auto readerNameById = [&](const QString &id) -> QString {
+        for (const auto &r : readersCache) {
+            if (toQString(r.getId()).compare(id, Qt::CaseInsensitive) == 0) {
+                return toQString(r.getFullName());
+            }
+        }
+        return {};
+    };
+    const auto bookTitleById = [&](const QString &id) -> QString {
+        for (const auto &b : booksCache) {
+            if (toQString(b.getId()).compare(id, Qt::CaseInsensitive) == 0) {
+                return toQString(b.getTitle());
+            }
+        }
+        return {};
+    };
     for (const auto &loan : loansCache) {
         const QString loanId = toQString(loan.getLoanId());
         const QString readerId = toQString(loan.getReaderId());
@@ -1672,12 +1903,22 @@ void MainWindow::applyLoanFilter() {
         const QString staffUsername = toQString(loan.getStaffUsername());
         const QString statusCode = normalizedStatus(toQString(loan.getStatus()));
         const QString statusText = loanStatusText(toQString(loan.getStatus()));
+        const QString readerName = readerNameById(readerId);
+        const QString bookTitle = bookTitleById(bookId);
 
         if (!term.isEmpty()) {
-            const QString haystack = QStringList{loanId, readerId, bookId, staffUsername, statusCode, statusText}
+            const QString haystack = QStringList{
+                                         loanId,
+                                         readerId,
+                                         readerName,
+                                         bookId,
+                                         bookTitle,
+                                         staffUsername,
+                                         statusCode,
+                                         statusText}
                                          .join(' ')
                                          .toLower();
-            if (!haystack.contains(term)) continue;
+            if (!containsAllTokens(haystack, term)) continue;
         }
         if (statusFilter != QStringLiteral("ALL") && statusCode != statusFilter) {
             continue;
@@ -1862,14 +2103,38 @@ void MainWindow::applyReportFilter() {
     const QDate from = hasFrom ? reportFromFilter->date() : QDate();
     const QDate to = hasTo ? reportToFilter->date() : QDate();
 
+    const auto staffNameByUsername = [&](const QString &username) -> QString {
+        for (const auto &s : staffsCache) {
+            if (toQString(s.getId()).compare(username, Qt::CaseInsensitive) == 0 ||
+                toQString(s.getEmail()).compare(username, Qt::CaseInsensitive) == 0) {
+                return toQString(s.getFullName());
+            }
+        }
+        return {};
+    };
+
     for (const auto &req : reportsCache) {
         const QString staffUsername = toQString(req.getStaffUsername());
+        const QString statusCode = normalizedStatus(toQString(req.getStatus()));
+        const QString statusText = reportStatusText(toQString(req.getStatus()));
+        const QString notes = toQString(req.getNotes());
+        const QString staffName = staffNameByUsername(staffUsername);
+        const QString haystack = QStringList{
+                                     toQString(req.getRequestId()),
+                                     staffUsername,
+                                     staffName,
+                                     statusCode,
+                                     statusText,
+                                     notes,
+                                 }
+                                     .join(' ')
+                                     .toLower();
         const bool fromValid = req.getFromDate().isValid();
         const bool toValid = req.getToDate().isValid();
         const QDate reqFrom = fromValid ? toQDate(req.getFromDate()) : QDate();
         const QDate reqTo = toValid ? toQDate(req.getToDate()) : QDate();
 
-        if (!staffTerm.isEmpty() && !staffUsername.trimmed().toLower().contains(staffTerm)) continue;
+        if (!staffTerm.isEmpty() && !containsAllTokens(haystack, staffTerm)) continue;
         if (hasFrom && (!fromValid || reqFrom < from)) continue;
         if (hasTo && (!toValid || reqTo > to)) continue;
         filtered.push_back(req);
@@ -1931,286 +2196,39 @@ void MainWindow::refreshSimpleStats() {
 }
 
 void MainWindow::updateStatsCards() {
-    const QLocale locale;
+    if (!statsWidget) return;
+
     const QDate today = QDate::currentDate();
     const auto monthStart = QDate(today.year(), today.month(), 1);
 
     const int totalBooks = booksCache.size();
     const int totalReaders = readersCache.size();
-    
-    // Filter loans by date range
+
     int totalLoans = 0;
     int overdueLoans = 0;
     qint64 totalFines = 0;
-    qint64 monthlyFines = 0;
 
     for (const auto &loan : loansCache) {
         const QDate borrowDate = loan.getBorrowDate().isValid() ? toQDate(loan.getBorrowDate()) : QDate();
-        
-        // Skip loans outside the selected date range
-        if (!borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) {
-            continue;
-        }
-        
-        totalLoans++;
-        
-        const bool hasReturn = loan.getReturnDate().isValid();
+        if (!borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) continue;
 
-        if (const QDate dueDate = loan.getDueDate().isValid() ? toQDate(loan.getDueDate()) : QDate(); dueDate.isValid() && !hasReturn && today > dueDate) {
+        totalLoans++;
+
+        const bool hasReturn = loan.getReturnDate().isValid();
+        const QDate dueDate = loan.getDueDate().isValid() ? toQDate(loan.getDueDate()) : QDate();
+        if (dueDate.isValid() && !hasReturn && today > dueDate) {
             overdueLoans++;
         }
 
-        const int fine = max(0, loan.getFine());
-        totalFines += fine;
-        
-        if (borrowDate.isValid() && borrowDate >= monthStart) {
-            monthlyFines += fine;
-        }
+        totalFines += max(0, loan.getFine());
     }
 
-    // Format với dấu phẩy cho số thường, X,XXX.000đ cho tiền
-    const QLocale viLocale(QLocale::Vietnamese);
-    
-    if (totalBooksValue) {
-        totalBooksValue->setText(viLocale.toString(totalBooks));
-    }
-    if (totalReadersValue) {
-        totalReadersValue->setText(viLocale.toString(totalReaders));
-    }
-    if (totalLoansValue) {
-        totalLoansValue->setText(viLocale.toString(totalLoans));
-    }
-    if (totalFinesValue) {
-        QString finesText = viLocale.toString(totalFines);
-        if (totalFines > 0) {
-            finesText += QStringLiteral("");
-        }
-        finesText += QString::fromUtf8("đ");
-        totalFinesValue->setText(finesText);
-    }
-    if (overdueCount) {
-        overdueCount->setText(QString::number(overdueLoans) + QStringLiteral(" Sách đang trễ"));
-    }
-    if (monthlyFinesValue) {
-        QString monthlyText = viLocale.toString(monthlyFines);
-        if (monthlyFines > 0) {
-            monthlyText += QStringLiteral("");
-        }
-        monthlyText += QString::fromUtf8("đ");
-        monthlyFinesValue->setText(monthlyText);
-    }
+    statsWidget->updateStats(totalBooks, totalReaders, totalLoans, overdueLoans, totalFines);
 }
 
 void MainWindow::updateStatsCharts() {
-    // Shared list so both charts stay consistent on genre labels/order
-    const QStringList allGenres = {
-        QStringLiteral("Truyện tranh"),
-        QStringLiteral("Khoa học"),
-        QStringLiteral("Kỹ năng mềm"),
-        QStringLiteral("Kỹ năng sống"),
-        QStringLiteral("Văn học"),
-        QStringLiteral("Lịch sử"),
-        QStringLiteral("Khoa học viễn tưởng"),
-        QStringLiteral("Khác"),
-        QStringLiteral("Kinh tế"),
-        QStringLiteral("Tiểu thuyết"),
-        QStringLiteral("Công nghệ"),
-        QStringLiteral("Tâm lý"),
-        QStringLiteral("Ngôn tình")
-    };
-
-    // Genre distribution
-    if (genreChart) {
-        // Ensure all known genres appear on the X axis with 0 counts when absent
-        core::Map<QString, int> genreCounts;
-        for (const auto &g : allGenres) {
-            genreCounts[g] = 0;
-        }
-
-        for (const auto &loan : loansCache) {
-            if (const QDate borrowDate = loan.getBorrowDate().isValid() ? toQDate(loan.getBorrowDate()) : QDate(); !borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) continue;
-
-            QString bookGenre;
-            const QString bookId = toQString(loan.getBookId());
-            for (const auto &book : booksCache) {
-                if (toQString(book.getId()) == bookId) {
-                    bookGenre = toQString(book.getGenre());
-                    break;
-                }
-            }
-            if (bookGenre.isEmpty()) bookGenre = QStringLiteral("Khác");
-
-            if (!statsSelectedGenre.isEmpty() &&
-                statsSelectedGenre != QStringLiteral("Tất cả") &&
-                statsSelectedGenre != QStringLiteral("Tat ca") &&
-                bookGenre != statsSelectedGenre) {
-                continue;
-            }
-
-            if (genreCounts.value(bookGenre, -1) == -1) {
-                genreCounts[bookGenre] = 0;
-            }
-            genreCounts[bookGenre]++;
-        }
-
-        StatsChart::Series series;
-        series.name = tr("Số lượt mượn");
-        for (const auto &g : allGenres) {
-            series.values.append(genreCounts.value(g, 0));
-        }
-
-        core::DynamicArray<StatsChart::Series> genreSeries;
-        genreSeries.append(series);
-        genreChart->setCategories(allGenres);
-        genreChart->setSeries(genreSeries);
-        genreChart->setTitle(tr("Thống kê theo thể loại"));
-        genreChart->setAxisLabels(tr("Thể loại"), tr("Số lượt mượn"));
-    }
-
-    // Top borrowed genres (chart + side list)
-    if (topBooksChart) {
-        core::Map<QString, int> genreBorrowCounts;
-        // Initialize to 0 so all genres show up on the chart
-        for (const auto &g : allGenres) {
-            genreBorrowCounts[g] = 0;
-        }
-
-        for (const auto &loan : loansCache) {
-            if (const QDate borrowDate = loan.getBorrowDate().isValid() ? toQDate(loan.getBorrowDate()) : QDate(); !borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) continue;
-
-            const QString bookId = toQString(loan.getBookId());
-            QString bookGenre;
-            for (const auto &book : booksCache) {
-                if (toQString(book.getId()) == bookId) {
-                    bookGenre = toQString(book.getGenre());
-                    break;
-                }
-            }
-            if (bookGenre.isEmpty()) bookGenre = QStringLiteral("Khác");
-
-            if (!statsSelectedGenre.isEmpty() &&
-                statsSelectedGenre != QStringLiteral("Tất cả") &&
-                statsSelectedGenre != QStringLiteral("Tat ca") &&
-                bookGenre != statsSelectedGenre) {
-                continue;
-            }
-
-            if (genreBorrowCounts.value(bookGenre, -1) == -1) {
-                genreBorrowCounts[bookGenre] = 0;
-            }
-            genreBorrowCounts[bookGenre]++;
-        }
-
-        StatsChart::Series series;
-        series.name = QStringLiteral("Số lượt mượn");
-        series.color = QColor(0x1d, 0x4e, 0xd8);
-        for (const auto &g : allGenres) {
-            series.values.append(genreBorrowCounts.value(g, 0));
-        }
-
-        core::DynamicArray<StatsChart::Series> topBookSeries;
-        topBookSeries.append(series);
-        topBooksChart->setCategories(allGenres);
-        topBooksChart->setSeries(topBookSeries);
-        topBooksChart->setTitle(tr("Thể loại mượn nhiều nhất"));
-        topBooksChart->setAxisLabels(tr("Thể loại"), tr("Số lượt mượn"));
-
-        // Populate the list with the most-borrowed genres for quick reference
-        QList<QPair<QString, int>> items;
-        for (auto it = genreBorrowCounts.constBegin(); it != genreBorrowCounts.constEnd(); ++it) {
-            items.append(qMakePair(it.key(), it.value()));
-        }
-        ranges::sort(items, [](const auto &a, const auto &b) { return a.second > b.second; });
-
-        if (topBooksList) {
-            topBooksList->clear();
-            const int limit = min(5, static_cast<int>(items.size()));
-            for (int i = 0; i < limit; ++i) {
-                if (items[i].second <= 0) continue;
-                auto *item = new QListWidgetItem(items[i].first);
-                item->setData(Qt::UserRole + 1, QString::number(items[i].second));
-                topBooksList->addItem(item);
-            }
-        }
-    }
-
-    // Revenue split chart
-    if (revenueChart) {
-        qint64 totalFines = 0;
-        for (const auto &loan : loansCache) {
-            if (const QDate borrowDate = loan.getBorrowDate().isValid() ? toQDate(loan.getBorrowDate()) : QDate(); !borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) continue;
-            totalFines += max(0, loan.getFine());
-        }
-
-        const int cardFees = static_cast<int>(totalFines * 0.7 / 1000);  // Convert to thousands
-        const int fines = static_cast<int>(totalFines * 0.3 / 1000);
-
-        QStringList categories;
-        categories << QStringLiteral("Làm thẻ") << QStringLiteral("Tiền phạt");
-
-        StatsChart::Series series;
-        series.name = QStringLiteral("Doanh thu (nghìn đồng)");
-        series.values.clear();
-        series.values.append(static_cast<double>(cardFees));
-        series.values.append(static_cast<double>(fines));
-        series.color = QColor(59, 130, 246);
-
-        core::DynamicArray<StatsChart::Series> revenueSeries;
-        revenueSeries.append(series);
-        revenueChart->setCategories(categories);
-        revenueChart->setSeries(revenueSeries);
-        revenueChart->setValueSuffix(QStringLiteral("k"));
-    }
-
-    // Active readers list
-    if (activeReadersList) {
-        activeReadersList->clear();
-
-        core::Map<QString, int> readerBorrowCounts;
-        QSet<QString> overdueReaders;
-
-        const QDate today = QDate::currentDate();
-        for (const auto &loan : loansCache) {
-            if (const QDate borrowDate = loan.getBorrowDate().isValid() ? toQDate(loan.getBorrowDate()) : QDate(); !borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) continue;
-
-            const QString readerId = toQString(loan.getReaderId());
-            readerBorrowCounts[readerId]++;
-
-            const QString status = normalizedStatus(toQString(loan.getStatus()));
-            const QDate due = loan.getDueDate().isValid() ? toQDate(loan.getDueDate()) : QDate();
-            const bool overdue = (status == QStringLiteral("OVERDUE")) ||
-                                 (status == QStringLiteral("BORROWED") && due.isValid() && due < today);
-            if (overdue) overdueReaders.insert(readerId);
-        }
-
-        QList<QPair<QString, int>> ranked;
-        ranked.reserve(readersCache.size());
-        for (const auto &reader : readersCache) {
-            if (!reader.isActive()) continue;
-            const QString readerId = toQString(reader.getId());
-            ranked.append(qMakePair(readerId, readerBorrowCounts.value(readerId, 0)));
-        }
-        ranges::sort(ranked, [](const auto &a, const auto &b) { return a.second > b.second; });
-
-        for (const auto &[fst, snd] : ranked) {
-            const auto readerOpt = ranges::find_if(as_const(readersCache), [&](const model::Reader &r) {
-                return toQString(r.getId()) == fst;
-            });
-            if (readerOpt == readersCache.end()) continue;
-
-            const QString readerName = toQString(readerOpt->getFullName());
-            const bool hasOverdue = overdueReaders.contains(fst);
-            const QString icon = hasOverdue ? QString::fromUtf8("⚠") : QString::fromUtf8("●");
-            QString displayText = icon + QStringLiteral(" ") + readerName;
-            if (hasOverdue) {
-                displayText += QStringLiteral("\n   Trễ hạn");
-            }
-
-            auto *item = new QListWidgetItem(displayText);
-            item->setData(Qt::UserRole + 1, QString::number(snd));
-            activeReadersList->addItem(item);
-        }
-    }
+    // Charts are now rendered inside StatsWidget; reuse dashboard updater.
+    updateStatsDashboardWidget();
 }
 
 void MainWindow::updateStatsDashboardWidget() {
@@ -2244,6 +2262,17 @@ void MainWindow::updateStatsDashboardWidget() {
 
     // Borrow counts by category (genre) within the current filter range
     core::Map<QString, int> categoryCounts;
+    QSet<QString> knownGenres;
+    // Khởi tạo tất cả thể loại từ kho sách (đếm 0) để luôn hiển thị tên thể loại
+    for (const auto &book : booksCache) {
+        QString genre = toQString(book.getGenre()).trimmed();
+        if (genre.isEmpty()) continue;
+        const QString keyLower = genre.toLower();
+        if (knownGenres.contains(keyLower)) continue;
+        knownGenres.insert(keyLower);
+        categoryCounts[genre] = 0;
+    }
+
     for (const auto &loan : loansCache) {
         // Skip loans outside the selected date range or without a valid borrow date
         if (const QDate borrowDate = loan.getBorrowDate().isValid() ? toQDate(loan.getBorrowDate()) : QDate(); !borrowDate.isValid() || borrowDate < statsStartDate || borrowDate > statsEndDate) {
@@ -2260,6 +2289,11 @@ void MainWindow::updateStatsDashboardWidget() {
         }
         if (bookGenre.isEmpty()) {
             bookGenre = tr("Khác");
+        }
+        const QString keyLower = bookGenre.toLower();
+        if (!knownGenres.contains(keyLower)) {
+            knownGenres.insert(keyLower);
+            categoryCounts[bookGenre] = 0;
         }
 
         const int current = categoryCounts.value(bookGenre, 0);
@@ -2358,7 +2392,6 @@ void MainWindow::applyStatsFilter() {
     // Refresh all stats with new date range
     updateStatsCards();
     updateStatsCharts();
-    updateStatsDashboardWidget();
 }
 
 void MainWindow::refreshAccounts() {
@@ -2436,6 +2469,7 @@ void MainWindow::handleAddBook() {
 
 void MainWindow::configureStaffsTab() {
     configureCardListWidget(staffsList);
+    if (staffsList) staffsList->setItemDelegate(new SimpleCardDelegate(staffsList));
 
     if (staffSearchEdit) {
         connect(staffSearchEdit, &QLineEdit::textChanged, this, &MainWindow::applyStaffFilter);
@@ -2475,6 +2509,18 @@ void MainWindow::configureStaffsTab() {
         staffsList->setFlow(QListView::LeftToRight);
         staffsList->setWrapping(true);
         staffsList->setViewMode(QListView::IconMode);
+
+        disconnect(staffsList, &QListWidget::itemDoubleClicked, this, nullptr);
+        connect(staffsList, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem *item) {
+            if (!item) return;
+            const QString id = item->data(kCardRoleId).toString();
+            auto it = std::find_if(staffsCache.begin(), staffsCache.end(), [&](const model::Staff &s) {
+                return toQString(s.getId()) == id;
+            });
+            if (it != staffsCache.end()) {
+                showStaffDetails(*it);
+            }
+        });
     }
 }
 
@@ -2512,11 +2558,12 @@ void MainWindow::fillStaffsList(const core::DynamicArray<model::Staff> &staffs) 
         const QString statusText = active ? tr("Đang làm việc") : tr("Đã nghỉ việc");
         const QString statusCode = active ? QStringLiteral("ACTIVE") : QStringLiteral("INACTIVE");
 
-        const QString headerLine = tr("%1 - %2").arg(id, name);
-        const QString metaLine = tr("Vị trí: %1 | SĐT: %2").arg(position.isEmpty() ? tr("Không rõ") : position, phone.isEmpty() ? tr("Không rõ") : phone);
-        const QString detailLine = tr("Email: %1 | Giới tính: %2").arg(email.isEmpty() ? tr("Không rõ") : email, gender.isEmpty() ? tr("Không rõ") : gender);
-        const QString secondaryLine = tr("Sinh: %1 | Vào làm: %2 | Địa chỉ: %3")
-                                       .arg(dob, hireDate, address.isEmpty() ? tr("Không rõ") : address);
+        const QString headerLine = name.isEmpty() ? id : name;
+        const QString metaLine = tr("Mã: %1").arg(id);
+        const QString detailLine = tr("Chức vụ: %1 | SĐT: %2")
+                                        .arg(position.isEmpty() ? tr("?") : position,
+                                             phone.isEmpty() ? tr("?") : phone);
+        const QString secondaryLine = tr("Email: %1").arg(email.isEmpty() ? tr("?") : email);
 
         auto *item = new QListWidgetItem();
         item->setData(Qt::UserRole, id);
@@ -2530,11 +2577,6 @@ void MainWindow::fillStaffsList(const core::DynamicArray<model::Staff> &staffs) 
         item->setData(kCardRolePillText, position.isEmpty() ? QString() : position);
         item->setData(kCardRolePillColor, QVariant());
 
-        QStringList tooltipLines{headerLine, metaLine, detailLine, secondaryLine, tr("Trạng thái: %1").arg(statusText)};
-        if (!notes.trimmed().isEmpty()) {
-            tooltipLines.append(tr("Ghi chú: %1").arg(notes));
-        }
-        item->setToolTip(tooltipLines.join('\n'));
         item->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
         QSize hint = item->sizeHint();
@@ -2577,7 +2619,7 @@ void MainWindow::applyStaffFilter() {
                          staff.getDob().isValid() ? toQDate(staff.getDob()).toString(Qt::ISODate) : QString()}
                      .join(' ')
                      .toLower();
-            if (!haystack.contains(term)) continue;
+            if (!containsAllTokens(haystack, term)) continue;
         }
         if (statusFilter == QStringLiteral("ACTIVE") && !staff.isActive()) {
             continue;

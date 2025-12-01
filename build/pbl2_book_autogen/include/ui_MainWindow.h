@@ -31,7 +31,6 @@
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
-#include "StatsChart.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -50,10 +49,8 @@ public:
     QPushButton *logoutButton;
     QTabWidget *tabs;
     QWidget *homeTab;
-    QVBoxLayout *homeTabLayout;
     QLabel *homeTitleLabel;
     QLabel *homeHintLabel;
-    QSpacerItem *homeSpacer;
     QWidget *booksTab;
     QVBoxLayout *booksTabLayout;
     QGroupBox *booksFilterGroup;
@@ -172,7 +169,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName("MainWindow");
-        MainWindow->resize(1302, 1022);
+        MainWindow->resize(1333, 929);
         MainWindow->setMinimumSize(QSize(800, 600));
         refreshAction = new QAction(MainWindow);
         refreshAction->setObjectName("refreshAction");
@@ -216,26 +213,26 @@ public:
         navigationList->setSizePolicy(sizePolicy1);
         navigationList->setMinimumSize(QSize(220, 0));
         navigationList->setMaximumSize(QSize(400, 16777215));
-        navigationList->setFrameShape(QFrame::NoFrame);
-        navigationList->setFrameShadow(QFrame::Plain);
+        navigationList->setFrameShape(QFrame::Shape::NoFrame);
+        navigationList->setFrameShadow(QFrame::Shadow::Plain);
         navigationList->setLineWidth(0);
-        navigationList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        navigationList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        navigationList->setMovement(QListView::Static);
-        navigationList->setFlow(QListView::TopToBottom);
+        navigationList->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+        navigationList->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+        navigationList->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
+        navigationList->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+        navigationList->setIconSize(QSize(22, 22));
+        navigationList->setTextElideMode(Qt::TextElideMode::ElideNone);
+        navigationList->setVerticalScrollMode(QAbstractItemView::ScrollMode::ScrollPerPixel);
+        navigationList->setHorizontalScrollMode(QAbstractItemView::ScrollMode::ScrollPerPixel);
+        navigationList->setMovement(QListView::Movement::Static);
+        navigationList->setFlow(QListView::Flow::TopToBottom);
         navigationList->setProperty("isWrapping", QVariant(false));
-        navigationList->setResizeMode(QListView::Adjust);
-        navigationList->setLayoutMode(QListView::Batched);
+        navigationList->setResizeMode(QListView::ResizeMode::Adjust);
+        navigationList->setLayoutMode(QListView::LayoutMode::Batched);
         navigationList->setSpacing(8);
         navigationList->setBatchSize(1000);
-        navigationList->setIconSize(QSize(22, 22));
-        navigationList->setTextElideMode(Qt::ElideNone);
-        navigationList->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-        navigationList->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-        navigationList->setItemAlignment(Qt::AlignVCenter);
-        navigationList->setSelectionMode(QAbstractItemView::SingleSelection);
-        navigationList->setSelectionBehavior(QAbstractItemView::SelectRows);
         navigationList->setWordWrap(true);
+        navigationList->setItemAlignment(Qt::AlignmentFlag::AlignVCenter);
 
         navigationLayout->addWidget(navigationList);
 
@@ -270,29 +267,18 @@ public:
 "    background-repeat: no-repeat;\n"
 "    background-position: center;\n"
 "}"));
-        homeTabLayout = new QVBoxLayout(homeTab);
-        homeTabLayout->setSpacing(12);
-        homeTabLayout->setObjectName("homeTabLayout");
-        homeTabLayout->setContentsMargins(18, 18, 18, 18);
         homeTitleLabel = new QLabel(homeTab);
         homeTitleLabel->setObjectName("homeTitleLabel");
+        homeTitleLabel->setGeometry(QRect(150, 30, 571, 131));
         QFont font1;
-        font1.setPointSize(16);
-        font1.setBold(true);
+        font1.setFamilies({QString::fromUtf8("Academy Engraved LET")});
+        font1.setPointSize(18);
+        font1.setBold(false);
         homeTitleLabel->setFont(font1);
-
-        homeTabLayout->addWidget(homeTitleLabel);
-
         homeHintLabel = new QLabel(homeTab);
         homeHintLabel->setObjectName("homeHintLabel");
+        homeHintLabel->setGeometry(QRect(34, 483, 931, 181));
         homeHintLabel->setWordWrap(true);
-
-        homeTabLayout->addWidget(homeHintLabel);
-
-        homeSpacer = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
-
-        homeTabLayout->addItem(homeSpacer);
-
         tabs->addTab(homeTab, QString());
         booksTab = new QWidget();
         booksTab->setObjectName("booksTab");
@@ -880,7 +866,7 @@ public:
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName("menubar");
-        menubar->setGeometry(QRect(0, 0, 1313, 37));
+        menubar->setGeometry(QRect(0, 0, 1333, 37));
         menuSystem = new QMenu(menubar);
         menuSystem->setObjectName("menuSystem");
         MainWindow->setMenuBar(menubar);
@@ -908,7 +894,7 @@ public:
         navigationTitle->setText(QCoreApplication::translate("MainWindow", "\304\220i\341\273\201u h\306\260\341\273\233ng", nullptr));
         refreshButton->setText(QCoreApplication::translate("MainWindow", "T\341\272\243i l\341\272\241i", nullptr));
         logoutButton->setText(QCoreApplication::translate("MainWindow", "\304\220\304\203ng xu\341\272\245t", nullptr));
-        homeTitleLabel->setText(QCoreApplication::translate("MainWindow", "Ch\303\240o m\341\273\253ng tr\341\273\237 l\341\272\241i h\341\273\207 th\341\273\221ng qu\341\272\243n l\303\275 th\306\260 vi\341\273\207n", nullptr));
+        homeTitleLabel->setText(QCoreApplication::translate("MainWindow", "H\341\273\206 TH\341\273\220NG QU\341\272\242N L\303\235 CHO THU\303\212 S\303\201CH V\303\200 TRUY\341\273\206N", nullptr));
         homeHintLabel->setText(QCoreApplication::translate("MainWindow", "S\341\273\255 d\341\273\245ng c\303\241c tab b\303\252n d\306\260\341\273\233i ho\341\272\267c menu b\303\252n tr\303\241i \304\221\341\273\203 di chuy\341\273\203n gi\341\273\257a c\303\241c khu v\341\273\261c. T\341\272\245t c\341\272\243 th\303\264ng tin m\341\273\233i nh\341\272\245t v\341\273\201 s\303\241ch, b\341\272\241n \304\221\341\273\215c v\303\240 phi\341\272\277u m\306\260\341\273\243n s\341\272\275 \304\221\306\260\341\273\243c c\341\272\255p nh\341\272\255t sau m\341\273\227i l\341\272\247n t\341\272\243i l\341\272\241i.", nullptr));
         tabs->setTabText(tabs->indexOf(homeTab), QCoreApplication::translate("MainWindow", "Trang ch\341\273\247", nullptr));
         booksFilterGroup->setTitle(QCoreApplication::translate("MainWindow", "B\341\273\231 l\341\273\215c", nullptr));

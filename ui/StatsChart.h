@@ -1,17 +1,17 @@
 #pragma once
 
+#include <QColor>
 #include <QWidget>
 #include <QStringList>
-#include <QColor>
 #include "../core/DynamicArray.h"
 
 namespace pbl2::ui {
 
 class StatsChart final : public QWidget {
     Q_OBJECT
-    
+
 public:
-    enum class Mode { Bar, Line, StackedBar };
+    enum class Mode { Bar, Line, StackedBar, HorizontalBar };
 
     struct Series {
         QString name;
@@ -48,6 +48,7 @@ private:
     void drawBarChart(QPainter &painter, const QRect &plotArea) const;
     void drawStackedBarChart(QPainter &painter, const QRect &plotArea) const;
     void drawLineChart(QPainter &painter, const QRect &plotArea) const;
+    void drawHorizontalBarChart(QPainter &painter, const QRect &plotArea) const;
     void drawLegend(QPainter &painter, const QRect &plotArea) const;
     [[nodiscard]] double findMaxValue() const;
 };
