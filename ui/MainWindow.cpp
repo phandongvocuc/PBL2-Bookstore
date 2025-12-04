@@ -20,6 +20,7 @@
 #include <QTableWidgetItem>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QGridLayout>
 #include <QLabel>
 #include <QPixmap>
 #include <QDialog>
@@ -28,6 +29,7 @@
 #include <QDebug>
 #include <QRegularExpression>
 #include <QSet>
+#include <QHeaderView>
 #include "core/IdGenerator.h"
 #include "../core/DynamicArray.h"
 #include "QtBridge.h"
@@ -163,17 +165,26 @@ public:
     const int coverWidth = 130;
     const int coverHeight = inner.height() - 24;
     const int coverTop = inner.top() + (inner.height() - coverHeight) / 2;
-    QRect coverRect(inner.left(), coverTop, coverWidth, coverHeight);
+    QRect coverFrame(inner.left(), coverTop, coverWidth, coverHeight);
+    QRect coverRect = coverFrame.adjusted(6, 6, -6, -6);
+    // Draw a subtle frame so the cover stands out.
+    painter->setPen(QPen(QColor(0x70, 0x78, 0x80), 2));
+    painter->setBrush(QColor(0xF7, 0xF7, 0xF7));
+    painter->drawRoundedRect(coverFrame, 6, 6);
     if (hasIcon) {
-        QPixmap pm = icon.pixmap(QSize(coverWidth, coverHeight));
-        pm = pm.scaled(coverRect.size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
-        painter->drawPixmap(coverRect, pm, pm.rect());
+        QPixmap pm = icon.pixmap(coverRect.size());
+        pm = pm.scaled(coverRect.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        // Center the scaled pixmap inside the rect to avoid cropping.
+        const QSize pmSize = pm.size();
+        QRect target(coverRect.topLeft(), pmSize);
+        target.moveCenter(coverRect.center());
+        painter->drawPixmap(target, pm);
     } else {
         painter->fillRect(coverRect, QColor(0x3A, 0x32, 0x32));
     }
-    painter->setPen(QPen(QColor(0x70, 0x78, 0x80), 2));
+    painter->setPen(QPen(QColor(0x70, 0x78, 0x80), 1));
     painter->setBrush(Qt::NoBrush);
-    painter->drawRect(coverRect.adjusted(1, 1, -1, -1));
+    painter->drawRoundedRect(coverRect, 4, 4);
     // Shift text area to the right of the cover.
     const int gap = 18;
     inner.setLeft(inner.left() + coverWidth + gap);
@@ -1163,15 +1174,22 @@ void MainWindow::configureLoansTab() {
     }
     if (ui->extendLoanButton) {
         ui->extendLoanButton->setVisible(staffRole);
+        ui->extendLoanButton->setToolTip(tr("Chỉ gia hạn khi phiếu đang mượn hoặc quá hạn."));
         connect(ui->extendLoanButton, &QPushButton::clicked, [this]() { handleExtendLoan(); });
     }
     if (ui->lostLoanButton) {
         ui->lostLoanButton->setVisible(staffRole);
+        ui->lostLoanButton->setToolTip(tr("Chỉ báo mất khi phiếu đang mượn hoặc quá hạn."));
         connect(ui->lostLoanButton, &QPushButton::clicked, [this]() { handleMarkLost(); });
     }
     if (ui->damageLoanButton) {
         ui->damageLoanButton->setVisible(staffRole);
+        ui->damageLoanButton->setToolTip(tr("Chỉ báo hư khi phiếu đang mượn hoặc quá hạn."));
         connect(ui->damageLoanButton, &QPushButton::clicked, [this]() { handleMarkDamaged(); });
+    }
+    if (loansList) {
+        connect(loansList, &QListWidget::currentRowChanged, this, &MainWindow::updateLoanActionButtons);
+        connect(loansList, &QListWidget::itemActivated, this, &MainWindow::handleViewLoanReceipt);
     }
     if (ui->deleteLoanButton) {
         ui->deleteLoanButton->setVisible(staffRole);
@@ -1873,6 +1891,8 @@ void MainWindow::fillLoansList(const core::DynamicArray<model::Loan> &loans) {
     } else {
         loansList->clearSelection();
     }
+
+    updateLoanActionButtons();
 }
 
 void MainWindow::applyLoanFilter() {
@@ -1926,6 +1946,14 @@ void MainWindow::applyLoanFilter() {
         filtered.push_back(loan);
     }
     fillLoansList(filtered);
+    updateLoanActionButtons();
+}
+
+void MainWindow::updateLoanActionButtons() {
+    const bool enable = staffRole;
+    if (ui->lostLoanButton) ui->lostLoanButton->setEnabled(enable);
+    if (ui->damageLoanButton) ui->damageLoanButton->setEnabled(enable);
+    if (ui->extendLoanButton) ui->extendLoanButton->setEnabled(enable);
 }
 
 void MainWindow::populateReports() {
@@ -3161,14 +3189,20 @@ void MainWindow::handleExtendLoan() {
         return;
     }
     bool ok = false;
-    const int days = QInputDialog::getInt(this, tr("Gia hạn phiếu"), tr("Số ngày bổ sung"), 3, 1, 60, 1, &ok);
-    if (!ok) return;
     const auto loanKey = toCustomString(loanId);
     const auto loanOpt = loanService.findById(loanKey);
     if (!loanOpt.has_value()) {
         showWarningDialog(tr("Không tìm thấy"), tr("Không tìm thấy phiếu mượn."));
         return;
     }
+    const QString statusCode = normalizedStatus(loanOpt->getStatus());
+    if (statusCode != QStringLiteral("BORROWED") && statusCode != QStringLiteral("OVERDUE")) {
+        showInfoDialog(tr("Thông báo"), tr("Phiếu này đã đóng, không thể gia hạn."));
+        return;
+    }
+
+    const int days = QInputDialog::getInt(this, tr("Gia hạn phiếu"), tr("Số ngày bổ sung"), 3, 1, 60, 1, &ok);
+    if (!ok) return;
     model::Loan updatedLoan = *loanOpt;
     const QDate adjustedDueDate = toQDate(updatedLoan.getDueDate()).addDays(days);
     updatedLoan.setDueDate(toCoreDate(adjustedDueDate));
@@ -3284,8 +3318,8 @@ void MainWindow::handleLossOrDamage(const QString &status) {
         return;
     }
     const QString previousStatus = normalizedStatus(loanOpt->getStatus());
-    if (previousStatus == QStringLiteral("RETURNED")) {
-        showInfoDialog(tr("Thông báo"), tr("Phiếu này đã đóng, không thể báo mất/hỏng."));
+    if (previousStatus != QStringLiteral("BORROWED") && previousStatus != QStringLiteral("OVERDUE")) {
+        showInfoDialog(tr("Thông báo"), tr("Phiếu này đã được đóng hoặc báo mất/hư."));
         return;
     }
     const bool alreadyDamaged = previousStatus == QStringLiteral("DAMAGED");
@@ -3302,19 +3336,36 @@ void MainWindow::handleLossOrDamage(const QString &status) {
         reason = tr("Không có ghi chú bổ sung");
     }
 
-    int defaultFee = currentConfig.getFinePerDay() * 10;
-    if (defaultFee <= 0) defaultFee = 100000;
-    int fee = QInputDialog::getInt(this,
-                                   status == QStringLiteral("LOST") ? tr("Tiền đền bù") : tr("Tiền sửa chữa"),
+    const QDate today = QDate::currentDate();
+    int fee = 0;
+    if (status == QStringLiteral("LOST")) {
+        // Tiền đền bù mất sách = giá gốc * 2 + tiền trễ (nếu có)
+        const auto dueDate = toQDate(loanOpt->getDueDate());
+        const qint64 overdueSpan = dueDate.daysTo(today);
+        const int lateDays = overdueSpan > 0 ? static_cast<int>(overdueSpan) : 0;
+        const int lateFee = lateDays * currentConfig.getFinePerDay();
+
+        int bookPrice = 0;
+        const auto bookOpt = bookService.findById(loanOpt->getBookId());
+        if (bookOpt.has_value()) {
+            bookPrice = max(0, bookOpt->getOriginalPrice());
+        }
+        fee = bookPrice * 2 + lateFee;
+        ok = true;
+    } else {
+        int defaultFee = currentConfig.getFinePerDay() * 10;
+        if (defaultFee <= 0) defaultFee = 100000;
+        fee = QInputDialog::getInt(this,
+                                   tr("Tiền sửa chữa"),
                                    tr("Nhập số tiền VND"),
                                    defaultFee,
                                    0,
                                    10000000,
                                    1000,
                                    &ok);
+    }
     if (!ok) return;
 
-    const QDate today = QDate::currentDate();
     const auto statusKey = toCustomString(status);
     if (!loanService.updateStatus(loanKey, statusKey, toCoreDate(today))) {
         showWarningDialog(tr("Không thành công"), tr("Không thể cập nhật trạng thái phiếu."));
@@ -3360,6 +3411,148 @@ void MainWindow::handleLossOrDamage(const QString &status) {
             list_widget_item->setFlags(list_widget_item->flags() & ~Qt::ItemIsEnabled);
         }
     }
+    updateLoanActionButtons();
+}
+
+void MainWindow::handleViewLoanReceipt() {
+    if (!loansList) return;
+    const QListWidgetItem *item = loansList->currentItem();
+    if (!item) return;
+
+    QString loanId = item->data(kCardRoleId).toString();
+    if (loanId.isEmpty()) {
+        loanId = item->data(Qt::UserRole).toString();
+    }
+    if (loanId.isEmpty()) return;
+
+    const auto loanOpt = loanService.findById(toCustomString(loanId));
+    if (!loanOpt.has_value()) {
+        showWarningDialog(tr("Không tìm thấy"), tr("Không thể xác định phiếu mượn đã chọn"));
+        return;
+    }
+    const auto loan = *loanOpt;
+
+    auto findReader = [&](const core::CustomString &id) -> core::Optional<model::Reader> {
+        const QString target = toQString(id);
+        for (const auto &r : readersCache) {
+            if (toQString(r.getId()).compare(target, Qt::CaseInsensitive) == 0) return core::Optional<model::Reader>(r);
+        }
+        return readerService.findById(id);
+    };
+    auto findBook = [&](const core::CustomString &id) -> core::Optional<model::Book> {
+        const QString target = toQString(id);
+        for (const auto &b : booksCache) {
+            if (toQString(b.getId()).compare(target, Qt::CaseInsensitive) == 0) return core::Optional<model::Book>(b);
+        }
+        return bookService.findById(id);
+    };
+
+    const auto readerOpt = findReader(loan.getReaderId());
+    const auto bookOpt = findBook(loan.getBookId());
+
+    const QString readerName = readerOpt.has_value() ? toQString(readerOpt->getFullName()) : tr("Không rõ");
+    const QString readerId = toQString(loan.getReaderId());
+    const QString readerContact = readerOpt.has_value() ? toQString(readerOpt->getPhone()) : tr("?");
+    const QString statusText = loanStatusText(toQString(loan.getStatus()));
+    const QString borrowDate = loan.getBorrowDate().isValid() ? toQDate(loan.getBorrowDate()).toString(QStringLiteral("dd/MM/yyyy"))
+                                                              : tr("Không rõ");
+    const QString dueDate = loan.getDueDate().isValid() ? toQDate(loan.getDueDate()).toString(QStringLiteral("dd/MM/yyyy"))
+                                                        : tr("Không rõ");
+    const QString returnDate = loan.getReturnDate().isValid() ? toQDate(loan.getReturnDate()).toString(QStringLiteral("dd/MM/yyyy"))
+                                                              : tr("Chưa trả");
+    const QString staffUsername = toQString(loan.getStaffUsername()).isEmpty() ? tr("Không rõ")
+                                                                               : toQString(loan.getStaffUsername());
+    const QString bookId = toQString(loan.getBookId());
+    const QString bookTitle = bookOpt.has_value() ? toQString(bookOpt->getTitle()) : tr("Không rõ");
+    const QString bookPublisher = bookOpt.has_value() ? toQString(bookOpt->getPublisher()) : tr("Không rõ");
+    const QString noteText = tr("Trạng thái: %1 | Hạn trả: %2 | Ngày trả: %3")
+                                 .arg(statusText, dueDate, returnDate);
+
+    QDialog dlg(this);
+    dlg.setWindowTitle(tr("Phiếu mượn %1").arg(loanId));
+    dlg.setModal(true);
+    dlg.setMinimumWidth(720);
+
+    auto *root = new QVBoxLayout(&dlg);
+    root->setContentsMargins(18, 18, 18, 18);
+    root->setSpacing(12);
+
+    auto *title = new QLabel(tr("PHIẾU MƯỢN SÁCH"), &dlg);
+    title->setAlignment(Qt::AlignCenter);
+    title->setStyleSheet(QStringLiteral("font-weight: 700; font-size: 18px; letter-spacing: 1px; color: #1d3b8b;"));
+    root->addWidget(title);
+
+    auto *infoGrid = new QGridLayout;
+    infoGrid->setHorizontalSpacing(12);
+    infoGrid->setVerticalSpacing(8);
+    const auto addField = [&](int row, int col, const QString &label, const QString &value) {
+        auto *lbl = new QLabel(label, &dlg);
+        lbl->setStyleSheet(QStringLiteral("color: #1d3b8b; font-weight: 600;"));
+        auto *val = new QLabel(value, &dlg);
+        val->setStyleSheet(QStringLiteral("font-weight: 600; color: #0f172a; border-bottom: 1px dashed #1d3b8b; padding-bottom: 4px;"));
+        val->setWordWrap(true);
+        infoGrid->addWidget(lbl, row, col * 2);
+        infoGrid->addWidget(val, row, col * 2 + 1);
+    };
+
+    addField(0, 0, tr("Số phiếu:"), loanId);
+    addField(0, 1, tr("Ngày mượn:"), borrowDate);
+    addField(1, 0, tr("Bạn đọc:"), readerName);
+    addField(1, 1, tr("Mã bạn đọc:"), readerId);
+    addField(2, 0, tr("SĐT:"), readerContact);
+    addField(2, 1, tr("Nhân viên lập:"), staffUsername);
+    addField(3, 0, tr("Hạn trả:"), dueDate);
+    addField(3, 1, tr("Trạng thái:"), statusText);
+    addField(4, 0, tr("Tiền phạt:"), formatCurrency(loan.getFine()));
+    addField(4, 1, tr("Ngày trả:"), returnDate);
+
+    root->addLayout(infoGrid);
+
+    auto *divider = new QFrame(&dlg);
+    divider->setFrameShape(QFrame::HLine);
+    divider->setFrameShadow(QFrame::Sunken);
+    divider->setStyleSheet(QStringLiteral("color: #8ea0d5;"));
+    root->addWidget(divider);
+
+    auto *table = new QTableWidget(1, 5, &dlg);
+    table->setHorizontalHeaderLabels({tr("STT"), tr("Mã sách"), tr("Tên sách"), tr("NXB"), tr("Ghi chú")});
+    table->verticalHeader()->setVisible(false);
+    table->horizontalHeader()->setStretchLastSection(true);
+    table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table->setSelectionMode(QAbstractItemView::NoSelection);
+    table->setAlternatingRowColors(true);
+    table->setFixedHeight(120);
+    table->setStyleSheet(
+        "QTableWidget {"
+        " border: 1px solid #8ea0d5;"
+        " gridline-color: #8ea0d5;"
+        " alternate-background-color: #e7f7e7;"
+        " selection-background-color: #dbeafe;"
+        "}"
+        "QHeaderView::section {"
+        " background: #e7ecff;"
+        " color: #1d3b8b;"
+        " font-weight: 700;"
+        " border: 1px solid #8ea0d5;"
+        " padding: 6px;"
+        "}"
+        "QTableWidget::item { padding: 6px; }");
+
+    table->setItem(0, 0, new QTableWidgetItem(QStringLiteral("1")));
+    table->setItem(0, 1, new QTableWidgetItem(bookId));
+    table->setItem(0, 2, new QTableWidgetItem(bookTitle));
+    table->setItem(0, 3, new QTableWidgetItem(bookPublisher));
+    table->setItem(0, 4, new QTableWidgetItem(noteText));
+    table->resizeRowsToContents();
+
+    root->addWidget(table);
+
+    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok, &dlg);
+    connect(buttons, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+    root->addWidget(buttons);
+
+    dlg.exec();
 }
 
 void MainWindow::handleSubmitReport() {
@@ -3370,6 +3563,7 @@ void MainWindow::handleSubmitReport() {
         bookIds.append(book.getId());
     }
     ReportRequestDialog dialog(toQString(currentAccount.getUsername()), bookIds, this);
+    dialog.setLoansData(loansCache);
     if (dialog.exec() != QDialog::Accepted) return;
     if (!reportService.submitRequest(dialog.reportRequest())) {
         showWarningDialog(tr("Không thành công"), tr("Không thể gửi báo cáo."));

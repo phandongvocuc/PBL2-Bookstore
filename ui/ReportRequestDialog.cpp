@@ -8,7 +8,10 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMap>
 #include <QPlainTextEdit>
+#include <QSet>
+#include <QSignalBlocker>
 #include <QSpinBox>
 #include <QVBoxLayout>
 
@@ -76,11 +79,13 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
         fromDateEdit->setCalendarPopup(true);
         fromDateEdit->setDisplayFormat(QStringLiteral("dd/MM/yyyy"));
         fromDateEdit->setDate(QDate::currentDate().addDays(-7));
+        connect(fromDateEdit, &QDateEdit::dateChanged, this, [this]() { refreshAutoFields(); });
 
         toDateEdit = new QDateEdit(this);
         toDateEdit->setCalendarPopup(true);
         toDateEdit->setDisplayFormat(QStringLiteral("dd/MM/yyyy"));
         toDateEdit->setDate(QDate::currentDate());
+        connect(toDateEdit, &QDateEdit::dateChanged, this, [this]() { refreshAutoFields(); });
 
         handledSpin = new QSpinBox(this);
         handledSpin->setRange(0, 100000);
@@ -96,6 +101,10 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
         affectedBooksEdit = new QPlainTextEdit(this);
         affectedBooksEdit->setPlaceholderText(tr("Nhập sách mất/hỏng dạng <Mã sách>:<Số lượng>, ví dụ: BK001:1; BK010:2"));
         affectedBooksEdit->setMinimumHeight(80);
+        connect(affectedBooksEdit, &QPlainTextEdit::textChanged, this, [this]() {
+            userEditedAffected = true;
+            refreshAffectedCountPreview();
+        });
 
         notesEdit = new QPlainTextEdit(this);
         notesEdit->setPlaceholderText(tr("Mô tả các vụ việc mất/hỏng sách, yêu cầu xóa sách..."));
@@ -124,7 +133,6 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
         buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
         connect(buttonBox, &QDialogButtonBox::accepted, this, &ReportRequestDialog::accept);
         connect(buttonBox, &QDialogButtonBox::rejected, this, &ReportRequestDialog::reject);
-        connect(affectedBooksEdit, &QPlainTextEdit::textChanged, this, &ReportRequestDialog::refreshAffectedCountPreview);
 
         auto *layout = new QVBoxLayout(this);
         layout->setContentsMargins(16, 16, 16, 16);
@@ -285,6 +293,73 @@ QLabel[error="true"] { color: #dc2626; font-size: 10.5pt; padding: 6px; }
         req.setStatus(core::CustomStringLiteral("PENDING"));
         req.setCreatedAt(core::DateTime::nowUtc());
         return req;
+    }
+
+    void ReportRequestDialog::setLoansData(core::DynamicArray<model::Loan> data) {
+        loansData = std::move(data);
+        userEditedAffected = false;
+        refreshAutoFields();
+    }
+
+    void ReportRequestDialog::refreshAutoFields() {
+        if (!fromDateEdit || !toDateEdit || loansData.isEmpty()) return;
+
+        const QDate from = fromDateEdit->date();
+        const QDate to = toDateEdit->date();
+        const QDate today = QDate::currentDate();
+
+        auto normalize = [](const core::CustomString &text) {
+            return bridge::toQString(text).trimmed().toUpper();
+        };
+
+        int handledCount = 0;
+        QSet<QString> overdueReaders;
+        QMap<QString, int> lostByBook;
+
+        for (const auto &loan : loansData) {
+            const QDate borrowDate = loan.getBorrowDate().isValid() ? bridge::toQDate(loan.getBorrowDate()) : QDate();
+            if (!borrowDate.isValid() || borrowDate < from || borrowDate > to) continue;
+
+            const QString status = normalize(loan.getStatus());
+            const bool isBorrowed = status == QStringLiteral("BORROWED");
+            const bool isLostOrDamaged = status == QStringLiteral("LOST") || status == QStringLiteral("DAMAGED");
+            if (!isBorrowed && !isLostOrDamaged) continue;
+
+            if (isBorrowed) {
+                ++handledCount;
+            }
+
+            if (isLostOrDamaged) {
+                const QString bookId = bridge::toQString(loan.getBookId()).trimmed().toUpper();
+                if (!bookId.isEmpty()) {
+                    lostByBook[bookId] += 1;
+                }
+            }
+
+            const QDate dueDate = loan.getDueDate().isValid() ? bridge::toQDate(loan.getDueDate()) : QDate();
+            const bool hasReturn = loan.getReturnDate().isValid();
+            if (isBorrowed && !hasReturn && dueDate.isValid() && today > dueDate) {
+                const QString readerId = bridge::toQString(loan.getReaderId()).trimmed().toUpper();
+                if (!readerId.isEmpty()) overdueReaders.insert(readerId);
+            }
+        }
+
+        if (handledSpin) handledSpin->setValue(handledCount);
+        if (overdueSpin) overdueSpin->setValue(overdueReaders.size());
+
+        // Only auto-fill the sách mất/hỏng field if user hasn't edited it manually.
+        if (!userEditedAffected && affectedBooksEdit) {
+            QStringList entries;
+            int totalLost = 0;
+            for (auto it = lostByBook.cbegin(); it != lostByBook.cend(); ++it) {
+                entries.append(QStringLiteral("%1:%2").arg(it.key(), QString::number(it.value())));
+                totalLost += it.value();
+            }
+            const QSignalBlocker blocker(affectedBooksEdit);
+            affectedBooksEdit->setPlainText(entries.join("; "));
+            if (lostSpin) lostSpin->setValue(totalLost);
+            // Do not set userEditedAffected here; allow further auto-updates unless user types.
+        }
     }
 
     void ReportRequestDialog::accept() {

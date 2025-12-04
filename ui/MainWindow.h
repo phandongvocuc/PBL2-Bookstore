@@ -91,6 +91,7 @@ private:
     void fillStaffsList(const core::DynamicArray<model::Staff> &staffs) const;
     void applyLoanFilter();
     void fillLoansList(const core::DynamicArray<model::Loan> &loans);
+    void updateLoanActionButtons();
     void fillAccountsList(const core::DynamicArray<model::Account> &accounts);
     void showBookDetails(const model::Book &book);
     void showReaderDetails(const model::Reader &reader) const;
@@ -116,6 +117,7 @@ private:
     void handleMarkLost();
     void handleMarkDamaged();
     void handleDeleteLoan();
+    void handleViewLoanReceipt();
     void handleLossOrDamage(const QString &status);
 
     void handleSubmitReport();

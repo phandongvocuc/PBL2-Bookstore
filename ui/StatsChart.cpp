@@ -1,5 +1,6 @@
 #include "StatsChart.h"
 
+#include <QLineF>
 #include <QLinearGradient>
 #include <QPainter>
 #include <QPainterPath>
@@ -76,7 +77,7 @@ void StatsChart::paintEvent(QPaintEvent *event) {
     const int leftMargin = mode_ == Mode::HorizontalBar ? 120 : 64;
     const int rightMargin = 32;
     const int topMargin = title_.isEmpty() ? 16 : 42;
-    const int bottomMargin = mode_ == Mode::HorizontalBar ? 26 : 44;
+    const int bottomMargin = mode_ == Mode::HorizontalBar ? 26 : 60;
 
     const QRect plotArea = rect().adjusted(leftMargin, topMargin, -rightMargin, -bottomMargin);
     if (plotArea.width() <= 0 || plotArea.height() <= 0) return;
@@ -126,8 +127,27 @@ void StatsChart::drawTitle(QPainter &painter, const QRect &area) const {
 
 void StatsChart::drawAxes(QPainter &painter, const QRect &plotArea) const {
     painter.setPen(QPen(QColor(0x9C, 0xA3, 0xAF), 2));
-    painter.drawLine(plotArea.bottomLeft(), plotArea.bottomRight());
-    painter.drawLine(plotArea.bottomLeft(), plotArea.topLeft());
+    constexpr int axisExtension = 12;
+    const QPointF origin = plotArea.bottomLeft();
+    const QPointF xAxisEnd = QPointF(plotArea.right() + axisExtension, plotArea.bottom());
+    const QPointF yAxisEnd = QPointF(plotArea.left(), plotArea.top() - axisExtension);
+    painter.drawLine(origin, xAxisEnd);
+    painter.drawLine(origin, yAxisEnd);
+
+    const auto drawArrow = [&](const QPointF &from, const QPointF &to) {
+        constexpr double arrowSize = 8.0;
+        const double arrowAngle = qDegreesToRadians(30.0);
+        QLineF line(from, to);
+        const double angle = std::atan2(line.dy(), line.dx());
+        const QPointF p1 = to - QPointF(std::cos(angle - arrowAngle) * arrowSize,
+                                        std::sin(angle - arrowAngle) * arrowSize);
+        const QPointF p2 = to - QPointF(std::cos(angle + arrowAngle) * arrowSize,
+                                        std::sin(angle + arrowAngle) * arrowSize);
+        painter.drawLine(to, p1);
+        painter.drawLine(to, p2);
+    };
+    drawArrow(origin, xAxisEnd);
+    drawArrow(origin, yAxisEnd);
 
     const double maxVal = findMaxValue();
     painter.setPen(QColor(0x6B, 0x72, 0x80));
@@ -156,12 +176,24 @@ void StatsChart::drawAxes(QPainter &painter, const QRect &plotArea) const {
     yLabelFont.setBold(true);
     painter.setFont(yLabelFont);
     painter.save();
+    painter.setPen(QColor(0x2C, 0x3E, 0x59));
     painter.translate(plotArea.left() - 60, plotArea.top() + plotArea.height() / 2);
     painter.rotate(-90);
     if (!yAxisLabel_.isEmpty()) {
         painter.drawText(QRect(-60, -40, 120, 80), Qt::AlignCenter, yAxisLabel_);
     }
     painter.restore();
+
+    if (!xAxisLabel_.isEmpty()) {
+        QFont xLabelFont = painter.font();
+        xLabelFont.setPointSize(12);
+        xLabelFont.setBold(true);
+        painter.setFont(xLabelFont);
+        painter.setPen(QColor(0x2C, 0x3E, 0x59));
+        const int xLabelTop = plotArea.bottom() + 34;
+        painter.drawText(QRect(plotArea.left(), xLabelTop, plotArea.width(), 20),
+                         Qt::AlignCenter, xAxisLabel_);
+    }
 }
 
 double StatsChart::findMaxValue() const {
@@ -171,9 +203,9 @@ double StatsChart::findMaxValue() const {
             maxVal = qMax(maxVal, v);
         }
     }
-    if (qFuzzyIsNull(maxVal)) return 4.0;
-    // Luôn có tối thiểu 0..4 trên trục để thấy các mốc 1,2,3,4 ngay cả khi dữ liệu nhỏ.
-    return static_cast<double>(qMax(4, static_cast<int>(std::ceil(maxVal))));
+    if (qFuzzyIsNull(maxVal)) return 5.0;
+    // Luôn có tối thiểu 0..5 trên trục để thấy các mốc 1..5 ngay cả khi dữ liệu nhỏ.
+    return static_cast<double>(qMax(5, static_cast<int>(std::ceil(maxVal))));
 }
 
 void StatsChart::drawBarChart(QPainter &painter, const QRect &plotArea) const {
@@ -327,6 +359,15 @@ void StatsChart::drawLineChart(QPainter &painter, const QRect &plotArea) const {
             const QPointF point(plotArea.left() + i * stepX,
                                 plotArea.bottom() - ratio * plotArea.height());
             painter.drawEllipse(point, 4.5, 4.5);
+
+            QString valueText = QString::number(qRound(value));
+            if (!valueSuffix_.isEmpty()) valueText += valueSuffix_;
+            QFont valueFont = painter.font();
+            valueFont.setPointSize(qMax(8, valueFont.pointSize() - 1));
+            painter.setFont(valueFont);
+            painter.setPen(base.darker(140));
+            painter.drawText(QRectF(point.x() - 14, point.y() - 18, 28, 14),
+                             Qt::AlignCenter, valueText);
         }
     }
 

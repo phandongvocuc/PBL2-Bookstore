@@ -108,7 +108,7 @@ void StatsWidget::setupUi() {
     categoryChart = new StatsChart(categoryPanel);
     categoryChart->setShowLegend(false);
     categoryChart->setMode(StatsChart::Mode::Bar);
-    categoryChart->setAxisLabels(QString(), QString());
+    categoryChart->setAxisLabels(tr("Thể loại"), tr("Sách"));
     categoryChart->setMinimumWidth(700);  // kéo dài trục Ox cho nhiều nhãn
     categoryChart->setMinimumHeight(220); // kéo trục Ox dài hơn cho nhiều nhãn
     categoryLayout->addWidget(categoryChart);
@@ -153,7 +153,7 @@ void StatsWidget::setupUi() {
     monthlyChart = new StatsChart(monthlyPanel);
     monthlyChart->setMode(StatsChart::Mode::Line);
     monthlyChart->setShowLegend(false);
-    monthlyChart->setAxisLabels(QString(), QString());
+    monthlyChart->setAxisLabels(tr("Tháng"), tr("Sách"));
     monthlyChart->setMinimumHeight(300);
     monthlyLayout->addWidget(monthlyChart);
     bottomRow->addWidget(monthlyPanel, 7);

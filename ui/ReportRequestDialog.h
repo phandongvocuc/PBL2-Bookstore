@@ -5,6 +5,7 @@
 
 #include "../core/CustomString.h"
 #include "../core/DynamicArray.h"
+#include "model/Loan.h"
 #include "model/ReportRequest.h"
 
 class QDateEdit;
@@ -25,6 +26,7 @@ public:
                                  QWidget *parent = nullptr);
 
     [[nodiscard]] model::ReportRequest reportRequest() const;
+    void setLoansData(core::DynamicArray<model::Loan> data);
 
 protected:
     void accept() override;
@@ -39,11 +41,14 @@ private:
     [[nodiscard]] core::DynamicArray<QString> splitTokens(const QString &normalized) const;
     [[nodiscard]] bool isKnownBookId(const QString &idUpper) const;
     void refreshAffectedCountPreview() const;
+    void refreshAutoFields();
     [[nodiscard]] bool validateInputs() const;
     void showError(const QString &message) const;
 
     QString staffUsername;
     core::DynamicArray<core::CustomString> knownBookIds;
+    core::DynamicArray<model::Loan> loansData;
+    bool userEditedAffected{false};
     QLineEdit *requestIdEdit{nullptr};
     QDateEdit *fromDateEdit{nullptr};
     QDateEdit *toDateEdit{nullptr};
